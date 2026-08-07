@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOMOLOGY - Crave & Chemistry POS System</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        momo: {
+                            50: '#fffdf5',
+                            100: '#fef7e6',
+                            500: '#e67e22',
+                            600: '#d35400',
+                            700: '#b94200',
+                            dark: '#2c3e50',
+                            navy: '#1e2b37',
+                            accent: '#27ae60'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --primary: #e67e22;
+            --primary-dark: #d35400;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            user-select: none;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            background-color: #1e2b37;
+            overflow-x: hidden;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+
+        .sidebar a {
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 14px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            color: #ffffff;
+            background-color: rgba(230, 126, 34, 0.15);
+            border-left-color: #e67e22;
+        }
+
+        .order-card {
+            background: #ffffff;
+            border-left: 5px solid #27ae60;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-tag {
+            font-weight: 700;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .tab-btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            background: #e2e8f0;
+            color: #475569;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: #e67e22;
+            color: white;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .menu-section-title {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(211, 84, 0, 0.2);
+        }
+
+        .menu-item-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .menu-item-card:hover {
+            border-color: #f97316;
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.1);
+        }
+
+        .ctrl-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .ctrl-btn:active {
+            transform: scale(0.92);
+        }
+        .ctrl-btn:hover {
+            background: #d35400;
+        }
+
+        .multi-order-tab {
+            padding: 6px 14px;
+            background: #e2e8f0;
+            color: #334155;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .multi-order-tab.active {
+            background: #2c3e50;
+            color: #ffffff;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printFrame, #printFrame * {
+                visibility: visible;
+            }
+            #printFrame {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[10000] hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center">
+            <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="font-extrabold text-slate-800 text-base" id="confirm-title">অনুমতি নিশ্চিতকরণ</h3>
+                <p class="text-xs text-slate-500 mt-1" id="confirm-msg">আপনি কি নিশ্চিতভাবে এই কাজটি সম্পন্ন করতে চান?</p>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button id="confirm-btn-cancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded-xl text-xs transition">বাতিল</button>
+                <button id="confirm-btn-yes" class="flex-1 bg-momo-600 hover:bg-momo-700 text-white font-bold py-2 rounded-xl text-xs transition">হ্যাঁ, ঠিক আছে</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Lock Overlay -->
+    <div id="pin-overlay" style="display:none;" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
+        <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
+            <div class="w-16 h-16 bg-momo-500/20 text-momo-500 rounded-full flex items-center justify-center mx-auto text-2xl border border-momo-500/30">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-momo-500">MOMOLOGY SECURITY</h2>
+                <p class="text-xs text-slate-400 mt-1">অ্যাডমিন পিন কোড দিন (Default: 2025)</p>
+            </div>
+            <input type="password" id="admin-pin-input" placeholder="****" maxlength="4" class="text-center text-2xl tracking-[0.5em] w-36 py-2 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-momo-500 text-white font-mono">
+            <div>
+                <button onclick="unlockSystem()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-key"></i> UNLOCK SYSTEM
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar Drawer -->
+    <div id="mySidebar" class="sidebar">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-momo-500 flex items-center justify-center text-white font-bold text-sm">M</div>
+                <span class="font-extrabold text-momo-500 text-lg tracking-wide">MOMOLOGY</span>
+            </div>
+            <button onclick="closeNav()" class="text-slate-400 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="p-4 border-b border-slate-800 bg-slate-900/50">
+            <div class="text-xs text-slate-400 font-medium">বর্তমান মোড:</div>
+            <div class="flex items-center justify-between mt-1">
+                <b id="current-mode-display" class="text-emerald-400 font-bold text-sm">Admin Mode</b>
+                <button onclick="switchUserMode()" class="bg-momo-600 hover:bg-momo-700 text-white text-[10px] font-semibold px-2.5 py-1 rounded-md transition">
+                    Switch Mode
+                </button>
+            </div>
+        </div>
+
+        <nav class="mt-2 space-y-1">
+            <a href="#" onclick="showPage('active-dashboard'); closeNav()" class="sidebar-link">
+                <i class="fa-solid fa-fire text-amber-500"></i> <span>🔥 Active Kitchen KDS</span>
+            </a>
+            <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active">
+                <i class="fa-solid fa-cash-register text-momo-500"></i> <span>📝 New Order POS</span>
+            </a>
+            <a href="#" onclick="showPage('menu-manage-page'); closeNav()" class="sidebar-link">
+                <i class="fa-solid fa-utensils text-amber-400"></i> <span>⚙️ Menu Manager</span>
+            </a>
+            <a href="#" onclick="showPage('history-page'); closeNav()" class="sidebar-link">
+                <i class="fa-solid fa-receipt text-blue-400"></i> <span>📜 Order History</span>
+            </a>
+            <a href="#" onclick="showPage('report-page'); closeNav()" class="sidebar-link">
+                <i class="fa-solid fa-chart-pie text-emerald-400"></i> <span>📊 Reports & Analytics</span>
+            </a>
+            <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link">
+                <i class="fa-solid fa-wallet text-rose-400"></i> <span>💸 Expenses Tracker</span>
+            </a>
+            <a href="#" onclick="showPage('staff-list-page'); closeNav()" class="sidebar-link">
+                <i class="fa-solid fa-users-gear text-purple-400"></i> <span>👥 Staff Management</span>
+            </a>
+            <a href="#" onclick="lockSystem(); closeNav()" class="sidebar-link text-slate-400 hover:text-rose-400">
+                <i class="fa-solid fa-lock"></i> <span>🔒 Lock System</span>
+            </a>
+            <a href="#" onclick="promptPinAndRun(changeAdminPin); closeNav()" class="sidebar-link text-slate-400 hover:text-amber-400">
+                <i class="fa-solid fa-key"></i> <span>🔑 Change Admin PIN</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Top Header Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openNav()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-full bg-momo-500 text-white flex items-center justify-center font-black text-sm border-2 border-amber-300 shadow-sm">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-extrabold text-momo-600 leading-none text-base tracking-tight">MOMOLOGY</h1>
+                        <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">Crave & Chemistry</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600">
+                    <i class="fa-regular fa-clock text-momo-500"></i>
+                    <span id="live-clock">--:--:--</span>
+                </div>
+                <button onclick="showPage('active-dashboard')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-fire"></i> KDS (<span id="active-count-badge">0</span>)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-3 py-4 flex-1 w-full">
+
+        <!-- Top Navigation Pills -->
+        <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+            <button onclick="showPage('order-page', this)" class="tab-btn active text-xs sm:text-sm">
+                <i class="fa-solid fa-cart-shopping mr-1"></i> অর্ডার (POS)
+            </button>
+            <button onclick="showPage('active-dashboard', this)" class="tab-btn text-xs sm:text-sm">
+                <i class="fa-solid fa-fire mr-1"></i> রানিং অর্ডার (KDS)
+            </button>
+            <button onclick="showPage('menu-manage-page', this)" class="tab-btn text-xs sm:text-sm">
+                <i class="fa-solid fa-utensils mr-1"></i> মেনু কাস্টমাইজ
+            </button>
+            <button onclick="showPage('history-page', this)" class="tab-btn text-xs sm:text-sm">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> হিস্টোরি
+            </button>
+            <button onclick="showPage('report-page', this)" class="tab-btn text-xs sm:text-sm">
+                <i class="fa-solid fa-chart-line mr-1"></i> রিপোর্ট
+            </button>
+            <button onclick="showPage('expense-page', this)" class="tab-btn text-xs sm:text-sm">
+                <i class="fa-solid fa-receipt mr-1"></i> খরচ
+            </button>
+        </div>
+
+        <!-- PAGE 1: Active Kitchen KDS Dashboard -->
+        <div id="active-dashboard" class="page">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm mb-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-momo-600"></i> Kitchen Display System (KDS)
+                    </h2>
+                    <p class="text-xs text-slate-500">চলমান অর্ডারের লাইভ রান্নার টাইমার ও স্ট্যাটাস</p>
+                </div>
+                <button onclick="renderActiveDashboard()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg transition">
+                    <i class="fa-solid fa-rotate"></i> রিফ্রেশ
+                </button>
+            </div>
+
+            <div id="active-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamic active orders cards populated via JS -->
+            </div>
+        </div>
+
+        <!-- PAGE 2: POS Order Page -->
+        <div id="order-page" class="page active space-y-4">
+            
+            <!-- Multi-tab Tabs Bar & Search -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div id="active-order-tabs" class="flex items-center gap-2 overflow-x-auto py-1">
+                        <!-- Tabs generated dynamically -->
+                    </div>
+                    <button onclick="addNewTab()" class="bg-momo-500 hover:bg-momo-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-plus"></i> নতুন ট্যাব
+                    </button>
+                </div>
+
+                <!-- Search Input & Category Pills -->
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন (যেমন: Ramen, Momo, Burger)..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-momo-500 transition">
+                    </div>
+                    <button onclick="resetCurrentOrder()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs font-bold px-4 py-2 rounded-xl transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> রিসেট
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Menu & Cart Grid Split -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                
+                <!-- Left Column: Menu Items List (7 cols) -->
+                <div class="lg:col-span-7 space-y-3">
+                    <div id="menu-container" class="max-h-[600px] overflow-y-auto pr-1">
+                        <!-- Dynamic Menu Catalog -->
+                    </div>
+                </div>
+
+                <!-- Right Column: Cart & Billing Summary (5 cols) -->
+                <div class="lg:col-span-5 space-y-3">
+                    
+                    <!-- Cart Selected Items List Card -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <span class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-bag-shopping text-momo-500"></i> অর্ডারকৃত আইটেম
+                            </span>
+                            <div class="flex gap-1">
+                                <button onclick="bulkSetType('Dine-in')" class="text-[11px] font-bold px-2 py-1 rounded bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition">
+                                    🍽️ All Dine
+                                </button>
+                                <button onclick="bulkSetType('Parcel')" class="text-[11px] font-bold px-2 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 transition">
+                                    📦 All Parcel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="cart-rows" class="max-h-48 overflow-y-auto divide-y divide-slate-100 min-h-[60px]">
+                            <!-- Cart Rows populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Customer & Table Info Input Card -->
+                    <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-lg space-y-3">
+                        
+                        <!-- Table & Prep Time -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 mb-1">টেবিল / টোকেন নং:</label>
+                                <input type="text" id="table-no" placeholder="Ex: T-05" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-momo-500 text-center font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-300 mb-1">⏱️ রান্নার সময়:</label>
+                                <select id="prep-time" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-momo-500 font-bold">
+                                    <option value="5">৫ মিনিট</option>
+                                    <option value="10">১০ মিনিট</option>
+                                    <option value="15" selected>১৫ মিনিট</option>
+                                    <option value="20">২০ মিনিট</option>
+                                    <option value="30">৩০ মিনিট</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Customer Loyalty Check -->
+                        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span id="customer-status" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300">New Customer</span>
+                                <span id="loyalty-info" class="font-bold text-emerald-400 text-xs">Points: 0</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="customer-phone" oninput="checkLoyalty()" placeholder="মোবাইল (017...)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
+                                <input type="text" id="customer-name" placeholder="গ্রাহকের নাম" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Bill Breakdown Calculations -->
+                        <div class="space-y-1.5 text-xs border-t border-slate-800 pt-2">
+                            <div class="flex justify-between text-slate-300">
+                                <span>সাব-টোটাল:</span>
+                                <span class="font-bold"><span id="subtotal">0</span> ৳</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span>ডিসকাউন্ট (-):</span>
+                                <input type="number" id="discount" value="0" oninput="refreshOrderUI()" class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-right font-bold text-rose-400">
+                            </div>
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span>কন্টেইনার (+):</span>
+                                <input type="number" id="container" value="0" oninput="refreshOrderUI()" class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-right font-bold text-amber-400">
+                            </div>
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span>ডেলিভারি (+):</span>
+                                <input type="number" id="delivery" value="0" oninput="refreshOrderUI()" class="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-right font-bold text-blue-400">
+                            </div>
+                        </div>
+
+                        <!-- Total Bill Card -->
+                        <div class="bg-momo-600 rounded-xl p-3 text-center text-white shadow-md">
+                            <div class="text-[10px] font-semibold text-amber-100 uppercase tracking-widest">সর্বমোট দেয় বিল</div>
+                            <div class="text-2xl font-black font-mono"><span id="total">0</span> TK</div>
+                        </div>
+
+                        <!-- Quick Cash & Change -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-xs">
+                                <label class="font-bold text-slate-300">কাস্টমার দিলেন:</label>
+                                <input type="number" id="cash" placeholder="0" oninput="calcChange()" class="w-28 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-right text-sm font-bold text-emerald-400">
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button onclick="setCash(100)" class="flex-1 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold">100</button>
+                                <button onclick="setCash(500)" class="flex-1 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold">500</button>
+                                <button onclick="setCash(1000)" class="flex-1 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold">1000</button>
+                                <button onclick="setCash(2000)" class="flex-1 py-1 rounded bg-slate-800 hover:bg-slate-700 text-xs font-semibold">2000</button>
+                            </div>
+                            <div class="flex justify-between items-center text-xs font-bold text-slate-200 border-t border-slate-800 pt-1">
+                                <span>ফেরত টাকা:</span>
+                                <span class="text-amber-400 font-mono text-sm"><span id="change">0</span> TK</span>
+                            </div>
+                        </div>
+
+                        <!-- Confirm & Print Button -->
+                        <button onclick="saveOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-print"></i> CONFIRM & PRINT (2 COPIES)
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- PAGE 3: Menu Manager Customization Page -->
+        <div id="menu-manage-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-utensils text-momo-600"></i> মেনু কাস্টমাইজেশন ও ক্যাটালগ
+                    </h2>
+                    <p class="text-xs text-slate-500">নতুন খাবার যোগ করুন, দাম পরিবর্তন করুন অথবা নির্দিষ্ট আইটেম মুছে ফেলুন</p>
+                </div>
+                <button onclick="resetMenuToDefault()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left text-momo-600"></i> মূল মেনুতে রিসেট
+                </button>
+            </div>
+
+            <!-- Add New Item Form -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">➕ নতুন খাবার যোগ করুন</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">ক্যাটাগরি:</label>
+                        <input type="text" id="new-item-category" list="category-options" placeholder="যেমন: 🥟 STEAM MOMO (5 Pcs)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-momo-500">
+                        <datalist id="category-options"></datalist>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">খাবারের নাম:</label>
+                        <input type="text" id="new-item-name" placeholder="যেমন: Special Cheese Blast" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-momo-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">মূল্য (৳):</label>
+                        <input type="number" id="new-item-price" placeholder="৳০" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-momo-500 font-bold">
+                    </div>
+                </div>
+                <button onclick="addNewMenuItem()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-5 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md">
+                    <i class="fa-solid fa-plus"></i> মেনুতে যোগ করুন
+                </button>
+            </div>
+
+            <!-- Existing Catalog Table View -->
+            <div id="menu-manager-catalog" class="space-y-4">
+                <!-- Dynamically generated menu edit items -->
+            </div>
+        </div>
+
+        <!-- PAGE 4: Order History Page -->
+        <div id="history-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-800"><i class="fa-solid fa-receipt text-momo-500"></i> বিক্রয়ের ইতিহাস (Order Log)</h2>
+                    <p class="text-xs text-slate-500">আজকের সর্বমোট বিক্রি: <span id="today-total-display" class="font-bold text-emerald-600">0</span> TK</p>
+                </div>
+                <button onclick="clearHistory()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-trash-can"></i> সম্পূর্ণ হিস্টোরি মুছুন
+                </button>
+            </div>
+
+            <div id="history-list" class="space-y-3 max-h-[550px] overflow-y-auto pr-1">
+                <!-- Dynamic History Items -->
+            </div>
+        </div>
+
+        <!-- PAGE 5: Reports & Analytics Page -->
+        <div id="report-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <h2 class="text-base font-extrabold text-slate-800 mb-1"><i class="fa-solid fa-chart-column text-emerald-600"></i> ব্যবসায়িক পারফরম্যান্স অ্যানালিটিক্স</h2>
+                <p class="text-xs text-slate-500">দৈনিক ও সাপ্তাহিক বিক্রি এবং খরচের তুলনামূলক চিত্র</p>
+            </div>
+
+            <!-- Stats KPI Cards Summary -->
+            <div id="stats-summary" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Summary KPI cards -->
+            </div>
+
+            <!-- Chart Box -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
+                <h3 class="text-xs font-bold text-slate-700 mb-3">গত ৭ দিনের বিক্রি বনাম খরচ</h3>
+                <div class="h-64 relative">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Custom Date Filter Search -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-slate-800"><i class="fa-solid fa-calendar-day text-momo-500"></i> নির্দিষ্ট তারিখের হিসাব খুঁজুন</h4>
+                <div class="flex gap-2">
+                    <input type="date" id="search-date" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    <button onclick="showCustomReport()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+                        সার্চ করুন
+                    </button>
+                </div>
+                <div id="custom-report-result"></div>
+            </div>
+        </div>
+
+        <!-- PAGE 6: Expense Entry Page -->
+        <div id="expense-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-4">
+                <h3 class="text-base font-extrabold text-slate-800"><i class="fa-solid fa-wallet text-rose-500"></i> দৈনন্দিন খরচ রেকর্ড এন্ট্রি</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">তারিখ:</label>
+                        <input type="date" id="exp-date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">খরচের নাম / বিবরণ:</label>
+                        <input type="text" id="exp-name" placeholder="যেমন: চিকেন, ময়দা বা গ্যাস" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">পরিমাণ / নোট:</label>
+                        <input type="text" id="exp-qty" placeholder="যেমন: ৫ কেজি" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">টাকার পরিমাণ (৳):</label>
+                        <input type="number" id="exp-price" placeholder="৳০.০০" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none font-bold">
+                    </div>
+                </div>
+
+                <button onclick="addExpense()" class="bg-rose-600 hover:bg-rose-700 text-white font-extrabold py-2.5 px-6 rounded-xl transition shadow-md text-xs flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> খরচ সেভ করুন
+                </button>
+            </div>
+
+            <!-- Expense List Display -->
+            <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-lg space-y-3">
+                <div id="today-expense-summary" class="text-sm font-bold border-b border-slate-800 pb-2 text-rose-400">
+                    আজকের মোট খরচ: 0৳
+                </div>
+                <div id="today-expense-list" class="space-y-2 max-h-80 overflow-y-auto">
+                    <!-- Dynamic expense rows -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 7: Staff Management Page -->
+        <div id="staff-list-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                <h3 class="text-base font-extrabold text-slate-800"><i class="fa-solid fa-users text-purple-600"></i> স্টাফ প্রোফাইল ডিরেক্টরি</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input type="text" id="new-staff-name" placeholder="স্টাফের নাম" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    <input type="text" id="new-staff-post" placeholder="পদবী (যেমন: Head Chef)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    <input type="email" id="new-staff-email" placeholder="ইমেইল অ্যাড্রেস" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                </div>
+                <button onclick="addNewStaffProfile()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl text-xs transition">
+                    + নতুন স্টাফ যুক্ত করুন
+                </button>
+            </div>
+
+            <div id="staff-name-list" class="space-y-3">
+                <!-- Staff profile cards -->
+            </div>
+        </div>
+
+        <!-- PAGE 8: Staff Detail Sheet Page -->
+        <div id="staff-detail-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                <div class="flex items-center justify-between">
+                    <button onclick="showPage('staff-list-page')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs transition">
+                        ⬅ পেছনে যান
+                    </button>
+                    <button onclick="sendStaffEmail()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane"></i> মেইল রিপোর্ট
+                    </button>
+                </div>
+
+                <div>
+                    <h3 id="display-staff-name" class="text-lg font-extrabold text-momo-600"></h3>
+                    <p id="display-staff-post" class="text-xs text-slate-500"></p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-center border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 font-bold text-slate-700 border-b border-slate-300">
+                                <th class="p-2 border border-slate-200">তারিখ</th>
+                                <th class="p-2 border border-slate-200">স্ট্যাটাস</th>
+                                <th class="p-2 border border-slate-200">In Time</th>
+                                <th class="p-2 border border-slate-200">Out Time</th>
+                                <th class="p-2 border border-slate-200">Break</th>
+                                <th class="p-2 border border-slate-200">নোট</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-monthly-sheet">
+                            <!-- Monthly editable grid -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <button onclick="deleteStaffProfile()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition mt-4">
+                    🗑️ স্টাফ প্রোফাইল মুছে ফেলুন
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Hidden Printable Receipt Frame -->
+    <iframe id="printFrame" class="hidden"></iframe>
+
+    <script>
+        // Exact Menu Catalog from Momology Menu V3
+        const defaultMenuData = {
+            "🥟 STEAM MOMO (5 Pcs)": [
+                ["Classic Steam Momo", 100],
+                ["Sausage Carnival Momo", 130],
+                ["Spicy Naga Fire Momo", 110],
+                ["Masala Momo", 110],
+                ["Soup Momo", 199]
+            ],
+            "🔥 FRIED MOMO (5 Pcs)": [
+                ["Crispy Fried Momo", 100],
+                ["Naga Fire Momo", 110],
+                ["Kurkure Crunch Momo", 120]
+            ],
+            "🍖 BBQ MOMO (5 Pcs)": [
+                ["Smoky BBQ Momo", 120],
+                ["Spicy Naga BBQ Fusion", 130]
+            ],
+            "🧀 SPECIAL CHEESE MOMO (5 Pcs)": [
+                ["Steamed Cheesy Melt Momo", 140],
+                ["Crispy Fried Cheesy Blast", 140],
+                ["Crunch-X Kurkure Cheesy Burst", 160],
+                ["Smoky BBQ Cheesy Melt", 160],
+                ["Spicy Naga BBQ Cheesy Fusion", 170],
+                ["The Ultimate Motka Cheesy Bake", 170]
+            ],
+            "🍱 PLATTERS (10 Pcs)": [
+                ["Twin-Fire Fried Platter", 220],
+                ["The Ultimate Kurkure Crunch Platter", 240],
+                ["Mega 5-Flavor Platter", 240]
+            ],
+            "🧀 CHEESEY PLATTERS (10 Pcs)": [
+                ["Twin-Cheese Fried Platter", 290],
+                ["The Grand Cheesy Steamed Platter", 310],
+                ["The Ultimate Kurkure Cheese Platter", 330]
+            ],
+            "👑 COMBO & FUSION PLATTERS": [
+                ["Solo Crispy Combo", 259],
+                ["Momo & Wings Craze Platter", 299],
+                ["The Ultimate Crispy Feast", 449],
+                ["Momology Mega Fusion Platter", 449],
+                ["The Big Brother Feast", 679]
+            ],
+            "🍜 MAINS & SIDES": [
+                ["Ramen", 190],
+                ["Cheesy Baked Pasta", 190],
+                ["Meatbox", 159],
+                ["Crispy Golden Fries", 90],
+                ["Loaded Cheesy Fries", 199]
+            ],
+            "🍔 BURGER & SUB STATION": [
+                ["Twin-Tower Cheesy Burger", 339],
+                ["Grilled Cheesy Burger", 249],
+                ["Crispy Cheesy Burger", 239],
+                ["Sub Burger", 160],
+                ["Sub Sandwich", 160]
+            ],
+            "🍗 CRISPY CORNER": [
+                ["Crispy Fried Chicken (1pc)", 129],
+                ["Crispy Wings (5 Pcs)", 199],
+                ["BBQ Wings (5 Pcs)", 249],
+                ["Naga Wings (5 Pcs)", 259],
+                ["Crispy Chicken Finger", 149]
+            ]
+        };
+
+        // Load custom saved menu or fallback to V3
+        let storedMenu = localStorage.getItem('momo_custom_menu');
+        let menuData = defaultMenuData;
+
+        if (storedMenu) {
+            try {
+                let parsed = JSON.parse(storedMenu);
+                if (!parsed["👑 COMBO & FUSION PLATTERS"]) {
+                    parsed["👑 COMBO & FUSION PLATTERS"] = defaultMenuData["👑 COMBO & FUSION PLATTERS"];
+                    localStorage.setItem('momo_custom_menu', JSON.stringify(parsed));
+                }
+                menuData = parsed;
+            } catch(e) {
+                menuData = defaultMenuData;
+            }
+        }
+
+        let orders = { 1: { cart: {}, total: 0, subtotal: 0, discount: 0, container: 0, delivery: 0 } };
+        let activeTabId = 1;
+        let orderID = localStorage.getItem('momo_lastID') ? parseInt(localStorage.getItem('momo_lastID')) + 1 : 1001;
+        let mainChart = null;
+
+        // Custom UI Notification Systems (Replacing native alert & confirm)
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-600' : type === 'success' ? 'bg-emerald-600' : 'bg-slate-800';
+            
+            toast.className = `pointer-events-auto ${bgClass} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-xmark' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info'} text-sm"></i> <span>${msg}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showConfirmModal(msg, onConfirm, title = "অনুমতি নিশ্চিতকরণ") {
+            const modal = document.getElementById('confirm-modal');
+            const titleEl = document.getElementById('confirm-title');
+            const msgEl = document.getElementById('confirm-msg');
+            const yesBtn = document.getElementById('confirm-btn-yes');
+            const cancelBtn = document.getElementById('confirm-btn-cancel');
+
+            titleEl.innerText = title;
+            msgEl.innerText = msg;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            const handleYes = () => {
+                cleanup();
+                onConfirm();
+            };
+
+            const handleCancel = () => {
+                cleanup();
+            };
+
+            const cleanup = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                yesBtn.removeEventListener('click', handleYes);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            yesBtn.addEventListener('click', handleYes);
+            cancelBtn.addEventListener('click', handleCancel);
+        }
+
+        function playBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch(e) {
+                console.log("Audio play blocked.");
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+
+        function init() {
+            checkSecurity();
+            renderMenu();
+            renderTabs();
+            refreshOrderUI();
+            applyUserRestrictions();
+            startLiveClock();
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'momo_history') {
+                    const currentHistory = JSON.parse(e.oldValue || "[]");
+                    const newHistory = JSON.parse(e.newValue || "[]");
+
+                    if (newHistory.length > currentHistory.length) {
+                        playBeep();
+                    }
+
+                    renderActiveDashboard();
+                    loadHistory();
+                }
+
+                if (e.key === 'momo_user_mode' || e.key === 'momo_locked') {
+                    location.reload();
+                }
+            });
+        }
+
+        function startLiveClock() {
+            setInterval(() => {
+                const clock = document.getElementById('live-clock');
+                if (clock) clock.innerText = new Date().toLocaleTimeString();
+            }, 1000);
+        }
+
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            if (!container) return;
+            container.innerHTML = "";
+
+            for (let section in menuData) {
+                container.innerHTML += `<div class="menu-section-title">${section}</div>`;
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-2 my-2";
+
+                menuData[section].forEach(item => {
+                    const safeId = "qty-" + item[0].replace(/[^a-zA-Z0-9]/g, '-');
+                    grid.innerHTML += `
+                        <div class="menu-item-card">
+                            <div>
+                                <div class="font-bold text-xs text-slate-800">${item[0]}</div>
+                                <div class="text-xs font-black text-momo-600 font-mono">৳${item[1]}</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button class="ctrl-btn" onclick="updateQty('${item[0]}', ${item[1]}, -1)">-</button>
+                                <span class="qty-display font-bold font-mono text-sm w-5 text-center text-slate-700" id="${safeId}">0</span>
+                                <button class="ctrl-btn" onclick="updateQty('${item[0]}', ${item[1]}, 1)">+</button>
+                            </div>
+                        </div>`;
+                });
+                container.appendChild(grid);
+            }
+        }
+
+        function filterMenu() {
+            const term = document.getElementById('menu-search-input').value.toLowerCase();
+            document.querySelectorAll('.menu-item-card').forEach(card => {
+                const text = card.innerText.toLowerCase();
+                card.style.display = text.includes(term) ? "flex" : "none";
+            });
+        }
+
+        function updateQty(name, price, change) {
+            const cur = orders[activeTabId];
+            if (change > 0) {
+                const rowId = "item-" + Date.now() + Math.floor(Math.random() * 1000);
+                cur.cart[rowId] = { name: name, qty: 1, price: price, type: "Dine-in" };
+            } else {
+                const keys = Object.keys(cur.cart).filter(k => cur.cart[k].name === name);
+                if (keys.length > 0) delete cur.cart[keys[keys.length - 1]];
+            }
+            refreshOrderUI();
+        }
+
+        function refreshOrderUI() {
+            const cur = orders[activeTabId];
+            let sub = 0;
+            const rowsContainer = document.getElementById('cart-rows');
+
+            if (rowsContainer) rowsContainer.innerHTML = "";
+            document.querySelectorAll('.qty-display').forEach(s => s.innerText = "0");
+
+            for (let id in cur.cart) {
+                const item = cur.cart[id];
+                sub += item.price;
+
+                const menuQtyEl = document.getElementById("qty-" + item.name.replace(/[^a-zA-Z0-9]/g, '-'));
+                if (menuQtyEl) menuQtyEl.innerText = parseInt(menuQtyEl.innerText) + 1;
+
+                if (rowsContainer) {
+                    rowsContainer.innerHTML += `
+                        <div class="flex items-center justify-between py-1.5 text-xs">
+                            <span class="font-bold text-slate-800">${item.name}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono font-bold text-momo-600">৳${item.price}</span>
+                                <select onchange="updateItemType('${id}', this.value)" class="text-[10px] py-0.5 px-1 rounded border border-momo-500 bg-white font-bold text-slate-700">
+                                    <option value="Dine-in" ${item.type === 'Dine-in' ? 'selected' : ''}>🍽️ Dine</option>
+                                    <option value="Parcel" ${item.type === 'Parcel' ? 'selected' : ''}>📦 Parcel</option>
+                                </select>
+                            </div>
+                        </div>`;
+                }
+            }
+
+            const d = parseFloat(document.getElementById('discount')?.value) || 0;
+            const c = parseFloat(document.getElementById('container')?.value) || 0;
+            const dl = parseFloat(document.getElementById('delivery')?.value) || 0;
+
+            cur.subtotal = sub;
+            cur.total = (sub - d) + c + dl;
+
+            if (document.getElementById('subtotal')) document.getElementById('subtotal').innerText = sub;
+            if (document.getElementById('total')) document.getElementById('total').innerText = cur.total;
+            calcChange();
+        }
+
+        function bulkSetType(newType) {
+            const cur = orders[activeTabId];
+            if (Object.keys(cur.cart).length === 0) return;
+            for (let id in cur.cart) {
+                cur.cart[id].type = newType;
+            }
+            refreshOrderUI();
+        }
+
+        function updateItemType(id, type) {
+            if (orders[activeTabId].cart[id]) {
+                orders[activeTabId].cart[id].type = type;
+            }
+        }
+
+        function setCash(v) {
+            document.getElementById('cash').value = v;
+            calcChange();
+        }
+
+        function calcChange() {
+            const p = parseFloat(document.getElementById('cash').value) || 0;
+            const diff = p - orders[activeTabId].total;
+            document.getElementById('change').innerText = diff > 0 ? diff : 0;
+        }
+
+        function resetCurrentOrder() {
+            orders[activeTabId] = { cart: {}, total: 0, subtotal: 0, discount: 0, container: 0, delivery: 0 };
+            if (document.getElementById('discount')) document.getElementById('discount').value = 0;
+            if (document.getElementById('container')) document.getElementById('container').value = 0;
+            if (document.getElementById('delivery')) document.getElementById('delivery').value = 0;
+            if (document.getElementById('cash')) document.getElementById('cash').value = "";
+            if (document.getElementById('table-no')) document.getElementById('table-no').value = "";
+            refreshOrderUI();
+        }
+
+        function saveOrder() {
+            const cur = orders[activeTabId];
+            if (!cur || Object.keys(cur.cart).length === 0) return showToast("অর্ডার তালিকায় কোনো আইটেম নেই!", "error");
+
+            const nameEl = document.getElementById('customer-name');
+            const phoneEl = document.getElementById('customer-phone');
+            const tableEl = document.getElementById('table-no');
+            const prepTime = parseInt(document.getElementById('prep-time')?.value) || 15;
+
+            const disc = parseFloat(document.getElementById('discount')?.value) || 0;
+            const cont = parseFloat(document.getElementById('container')?.value) || 0;
+            const deli = parseFloat(document.getElementById('delivery')?.value) || 0;
+
+            const processedItems = JSON.parse(JSON.stringify(cur.cart));
+            for (let id in processedItems) {
+                processedItems[id].itemStatus = 'pending';
+            }
+
+            const record = {
+                id: orderID,
+                status: 'active',
+                table: tableEl?.value || "Takeaway",
+                customerName: nameEl?.value || "Guest",
+                customerPhone: phoneEl?.value || "N/A",
+                items: processedItems,
+                total: cur.total,
+                subtotal: cur.subtotal,
+                discount: disc,
+                container: cont,
+                delivery: deli,
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString(),
+                endTime: new Date().getTime() + (prepTime * 60000)
+            };
+
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            history.unshift(record);
+            localStorage.setItem('momo_history', JSON.stringify(history));
+            localStorage.setItem('momo_lastID', orderID++);
+
+            if (record.customerPhone !== "N/A" && record.customerPhone.length >= 11) {
+                updateCustomerLoyalty(record.customerPhone, record.customerName, record.total);
+            }
+
+            printReceipts(record);
+            resetCurrentOrder();
+            renderActiveDashboard();
+            loadHistory();
+
+            showToast(`অর্ডার #${record.id} সফলভাবে সেভ হয়েছে!`, "success");
+        }
+
+        function updateCustomerLoyalty(phone, name, billAmount) {
+            let customers = JSON.parse(localStorage.getItem('momo_customers') || "{}");
+            if (!customers[phone]) customers[phone] = { name: name || "Guest", points: 0 };
+
+            const earnedPoints = Math.floor(billAmount / 100) * 5;
+            customers[phone].points += earnedPoints;
+            customers[phone].name = name || customers[phone].name;
+
+            localStorage.setItem('momo_customers', JSON.stringify(customers));
+        }
+
+        function checkLoyalty() {
+            const phone = document.getElementById('customer-phone').value;
+            const statusEl = document.getElementById('customer-status');
+            const infoEl = document.getElementById('loyalty-info');
+            const nameEl = document.getElementById('customer-name');
+
+            if (phone.length < 11) {
+                statusEl.innerText = "New Customer";
+                statusEl.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700 text-slate-300";
+                infoEl.innerText = "Points: 0";
+                return;
+            }
+
+            const customers = JSON.parse(localStorage.getItem('momo_customers') || "{}");
+            if (customers[phone]) {
+                statusEl.innerText = "Returning Member";
+                statusEl.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                infoEl.innerText = "Points: " + customers[phone].points;
+                if (customers[phone].name && customers[phone].name !== "Guest") {
+                    nameEl.value = customers[phone].name;
+                }
+            } else {
+                statusEl.innerText = "New Customer";
+                statusEl.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30";
+                infoEl.innerText = "Points: 0";
+            }
+        }
+
+        function printReceipts(o) {
+            const frame = document.getElementById('printFrame').contentWindow;
+
+            let itemsHtml = Object.values(o.items).map(i => `
+                <tr>
+                    <td align="left" style="padding:2px 0;">${i.name} (${i.type})</td>
+                    <td align="center">1</td>
+                    <td align="right">${i.price}</td>
+                </tr>
+            `).join('');
+
+            const customerReceipt = `
+            <html>
+            <head>
+                <style>
+                    body { font-family: 'Courier New', monospace; width: 220px; text-align: center; font-size: 11px; margin: 0; padding: 5px; }
+                    h2 { margin: 0; font-size: 16px; font-weight: bold; }
+                    .info { font-size: 10px; margin-bottom: 5px; border-bottom: 1px dashed #000; padding-bottom: 5px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 10px; }
+                    th { border-bottom: 1px dashed #000; padding-bottom: 3px; }
+                    .totals { text-align: right; margin-top: 8px; border-top: 1px dashed #000; padding-top: 5px; }
+                    .footer { margin-top: 12px; font-size: 10px; border-top: 1px solid #000; padding-top: 5px; }
+                </style>
+            </head>
+            <body>
+                <h2>MOMOLOGY</h2>
+                <div>Crave & Chemistry</div>
+                <div class="info">
+                    Cumilla, Bangladesh<br>
+                    Order: #${o.id} | Table: ${o.table}<br>
+                    Date: ${o.date} | ${o.time}
+                </div>
+                <table>
+                    <thead>
+                        <tr><th align="left">Item</th><th align="center">Qty</th><th align="right">Price</th></tr>
+                    </thead>
+                    <tbody>${itemsHtml}</tbody>
+                </table>
+                <div class="totals">
+                    Subtotal: ${o.subtotal} TK<br>
+                    Discount: -${o.discount} TK<br>
+                    Charges: +${o.container + o.delivery} TK<br>
+                    <strong style="font-size: 13px;">Total: ${o.total} TK</strong>
+                </div>
+                <div class="footer">
+                    Customer: ${o.customerName}<br>
+                    THANK YOU FOR COMING!
+                </div>
+            </body>
+            </html>`;
+
+            let kotHtml = Object.values(o.items).map(i => `
+                <div style="border-bottom:1px solid #000; padding:4px 0; text-align:left;">
+                    <b>${i.name}</b> <br> Type: <b>${i.type}</b>
+                </div>`).join('');
+
+            const kitchenReceipt = `
+            <html><body style="font-family:monospace; width:210px; font-size:13px; text-align:center;">
+                <h2 style="margin:0; border-bottom:2px solid #000;">KITCHEN COPY (KOT)</h2>
+                <p><b>Order: #${o.id} | Table: ${o.table}</b></p>
+                ${kotHtml}
+                <p style="font-size:10px;">${o.time}</p>
+            </body></html>`;
+
+            frame.document.open();
+            frame.document.write(customerReceipt);
+            frame.document.close();
+            frame.focus();
+            frame.print();
+
+            setTimeout(() => {
+                frame.document.open();
+                frame.document.write(kitchenReceipt);
+                frame.document.close();
+                frame.focus();
+                frame.print();
+            }, 500);
+        }
+
+        function renderActiveDashboard() {
+            const grid = document.getElementById('active-orders-grid');
+            const history = JSON.parse(localStorage.getItem('momo_history')) || [];
+            const activeOrders = history.filter(o => o.status === 'active');
+
+            const badge = document.getElementById('active-count-badge');
+            if (badge) badge.innerText = activeOrders.length;
+
+            grid.innerHTML = activeOrders.length === 0 ? 
+                `<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+                    <i class="fa-solid fa-square-check text-3xl mb-2 text-slate-300"></i>
+                    <p class="font-bold text-sm">কোনো রানিং অর্ডার নেই</p>
+                </div>` : "";
+
+            activeOrders.forEach((o) => {
+                let itemsHtml = "";
+
+                for (let itemId in o.items) {
+                    const item = o.items[itemId];
+                    const isDone = item.itemStatus === 'served';
+
+                    itemsHtml += `
+                        <div class="flex items-center justify-between p-2 rounded-lg mb-1.5 border ${isDone ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}">
+                            <span class="text-xs ${isDone ? 'line-through text-slate-400 font-normal' : 'text-slate-800 font-bold'}">
+                                ${item.name} <span class="text-[10px] text-amber-600 font-bold">(${item.type})</span>
+                            </span>
+                            ${!isDone ? 
+                                `<button onclick="markItemServed(${o.id}, '${itemId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white border-none px-2.5 py-1 rounded text-[10px] font-bold transition">Done</button>` 
+                                : '<span class="text-emerald-600 font-bold text-xs">✅ Ready</span>'}
+                        </div>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="order-card p-4 border-l-4 border-l-momo-600">
+                        <div class="flex justify-between items-center mb-2">
+                            <b class="text-sm text-slate-800">#${o.id} - Table: ${o.table || 'N/A'}</b>
+                            <span class="timer-tag" data-end="${o.endTime}">--:--</span>
+                        </div>
+                        <div class="space-y-1">${itemsHtml}</div>
+                        <button onclick="markAsServed(${o.id})" class="w-full mt-3 bg-slate-900 hover:bg-slate-800 text-white border-none py-2 rounded-xl font-bold text-xs transition">
+                            পুরো অর্ডার কমপ্লিট
+                        </button>
+                    </div>`;
+            });
+        }
+
+        function markItemServed(orderId, itemId) {
+            let history = JSON.parse(localStorage.getItem('momo_history')) || [];
+            const orderIdx = history.findIndex(o => o.id == orderId);
+
+            if (orderIdx !== -1) {
+                if (!history[orderIdx].items[itemId]) return;
+                history[orderIdx].items[itemId].itemStatus = 'served';
+                localStorage.setItem('momo_history', JSON.stringify(history));
+                renderActiveDashboard();
+            }
+        }
+
+        function markAsServed(id) {
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            const idx = history.findIndex(o => o.id == id);
+            if (idx !== -1) {
+                history[idx].status = 'completed';
+                localStorage.setItem('momo_history', JSON.stringify(history));
+                renderActiveDashboard();
+            }
+        }
+
+        setInterval(() => {
+            const now = new Date().getTime();
+            document.querySelectorAll('.timer-tag').forEach(t => {
+                const diff = t.getAttribute('data-end') - now;
+                if (diff > 0) {
+                    const m = Math.floor(diff / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    t.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                } else {
+                    t.innerText = "LATE / READY";
+                    t.style.color = "red";
+                }
+            });
+        }, 1000);
+
+        function renderTabs() {
+            const container = document.getElementById('active-order-tabs');
+            if (!container) return;
+            container.innerHTML = "";
+            Object.keys(orders).forEach(id => {
+                const div = document.createElement('div');
+                div.className = `multi-order-tab ${id == activeTabId ? 'active' : ''}`;
+                div.innerHTML = `ট্যাব ${id} <span onclick="removeTab(event, ${id})" class="hover:text-rose-400 ml-1">×</span>`;
+                div.onclick = () => { activeTabId = id; renderTabs(); refreshOrderUI(); };
+                container.appendChild(div);
+            });
+        }
+
+        function addNewTab() {
+            const nextId = Math.max(...Object.keys(orders).map(Number)) + 1;
+            orders[nextId] = { cart: {}, total: 0, subtotal: 0, discount: 0, container: 0, delivery: 0 };
+            activeTabId = nextId;
+            renderTabs();
+            refreshOrderUI();
+        }
+
+        function removeTab(e, id) {
+            e.stopPropagation();
+            if (Object.keys(orders).length <= 1) return;
+            delete orders[id];
+            if (activeTabId == id) activeTabId = Object.keys(orders)[0];
+            renderTabs();
+            refreshOrderUI();
+        }
+
+        function showPage(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            const target = document.getElementById(id);
+            if (target) target.classList.add('active');
+            if (btn) btn.classList.add('active');
+
+            if (id === 'active-dashboard') renderActiveDashboard();
+            if (id === 'expense-page') renderExpenseList(document.getElementById('exp-date').value || new Date().toISOString().split('T')[0]);
+            if (id === 'history-page') loadHistory();
+            if (id === 'report-page') generateAdvancedReports();
+            if (id === 'staff-list-page') renderStaffNameList();
+            if (id === 'menu-manage-page') renderMenuManager();
+        }
+
+        function renderMenuManager() {
+            const catalogContainer = document.getElementById('menu-manager-catalog');
+            const datalist = document.getElementById('category-options');
+            if (!catalogContainer) return;
+
+            catalogContainer.innerHTML = "";
+            if (datalist) datalist.innerHTML = "";
+
+            for (let category in menuData) {
+                if (datalist) {
+                    datalist.innerHTML += `<option value="${category}">`;
+                }
+
+                let itemsRows = menuData[category].map((item, idx) => `
+                    <div class="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-slate-800">${item[0]}</span>
+                            <span class="font-mono font-bold text-momo-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">৳${item[1]}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editMenuItemPrice('${category}', ${idx})" class="text-blue-600 hover:text-blue-800 font-bold px-2 py-1 bg-blue-50 rounded border border-blue-200 transition">
+                                <i class="fa-solid fa-pen"></i> প্রাইস পরিবর্তন
+                            </button>
+                            <button onclick="deleteMenuItem('${category}', ${idx})" class="text-rose-600 hover:text-rose-800 font-bold px-2 py-1 bg-rose-50 rounded border border-rose-200 transition">
+                                <i class="fa-solid fa-trash-can"></i> মুছে ফেলুন
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+                catalogContainer.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wide border-b border-slate-100 pb-2 flex items-center justify-between">
+                            <span>${category}</span>
+                            <span class="text-[10px] text-slate-400">(${menuData[category].length} টি আইটেম)</span>
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${itemsRows}
+                        </div>
+                    </div>`;
+            }
+        }
+
+        function addNewMenuItem() {
+            const category = document.getElementById('new-item-category').value.trim();
+            const name = document.getElementById('new-item-name').value.trim();
+            const price = parseFloat(document.getElementById('new-item-price').value);
+
+            if (!category || !name || isNaN(price) || price <= 0) {
+                return showToast("দয়া করে ক্যাটাগরি, আইটেমের নাম এবং সঠিক মূল্য প্রদান করুন!", "error");
+            }
+
+            if (!menuData[category]) {
+                menuData[category] = [];
+            }
+
+            menuData[category].push([name, price]);
+            saveCustomMenu();
+
+            document.getElementById('new-item-name').value = "";
+            document.getElementById('new-item-price').value = "";
+
+            renderMenu();
+            renderMenuManager();
+            showToast(`"${name}" খাবারটি সফলভাবে মেনুতে যোগ করা হয়েছে!`, "success");
+        }
+
+        function editMenuItemPrice(category, idx) {
+            const item = menuData[category][idx];
+            
+            // Custom modal for price edit
+            const newPriceStr = prompt(`"${item[0]}" এর নতুন মূল্য (৳) লিখুন:`, item[1]);
+            if (newPriceStr !== null) {
+                const newPrice = parseFloat(newPriceStr);
+                if (!isNaN(newPrice) && newPrice > 0) {
+                    menuData[category][idx][1] = newPrice;
+                    saveCustomMenu();
+                    renderMenu();
+                    renderMenuManager();
+                    refreshOrderUI();
+                    showToast("মূল্য আপডেট হয়েছে!", "success");
+                } else {
+                    showToast("সঠিক মূল্য উল্লেখ করুন!", "error");
+                }
+            }
+        }
+
+        function deleteMenuItem(category, idx) {
+            const item = menuData[category][idx];
+            showConfirmModal(`আপনি কি নিশ্চিতভাবে "${item[0]}" মেনু থেকে মুছে ফেলতে চান?`, () => {
+                menuData[category].splice(idx, 1);
+                if (menuData[category].length === 0) {
+                    delete menuData[category];
+                }
+                saveCustomMenu();
+                renderMenu();
+                renderMenuManager();
+                refreshOrderUI();
+                showToast(`"${item[0]}" মেনু থেকে সরানো হয়েছে`, "info");
+            }, "মেনু আইটেম ডিলিট");
+        }
+
+        function saveCustomMenu() {
+            localStorage.setItem('momo_custom_menu', JSON.stringify(menuData));
+        }
+
+        function resetMenuToDefault() {
+            showConfirmModal("আপনি কি নিশ্চিতভাবে মেনুটি রিসেট করে মূল ডিফল্ট মেনুতে ফিরিয়ে নিতে চান?", () => {
+                localStorage.removeItem('momo_custom_menu');
+                menuData = JSON.parse(JSON.stringify(defaultMenuData));
+                renderMenu();
+                renderMenuManager();
+                refreshOrderUI();
+                showToast("মেনু মূল ডিফল্ট সেটিংসে রিসেট হয়েছে!", "success");
+            }, "মেনু রিসেট");
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            const list = document.getElementById('history-list');
+            const today = new Date().toISOString().split('T')[0];
+            let total = 0;
+            if (!list) return;
+            list.innerHTML = "";
+
+            history.forEach(o => {
+                if (o.date === today) total += o.total;
+                const itemsStr = Object.values(o.items).map(i => i.name).join(', ');
+
+                list.innerHTML += `
+                    <div class="bg-white rounded-xl p-3 border-l-4 border-l-momo-500 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
+                        <div>
+                            <b class="text-sm text-slate-800">#${o.id}</b> - <span class="text-slate-500">${o.time}</span> (${o.table})
+                            <div class="text-[11px] text-slate-400 mt-0.5">${itemsStr}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-emerald-600 font-mono text-sm">${o.total} TK</div>
+                            <span class="text-[10px] px-2 py-0.5 rounded font-bold ${o.status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${o.status || 'Active'}</span>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('today-total-display').innerText = total;
+        }
+
+        function clearHistory() {
+            promptPinAndRun(() => {
+                showConfirmModal("আপনি কি নিশ্চিতভাবে সব হিস্টোরি মুছে ফেলতে চান?", () => {
+                    localStorage.removeItem('momo_history');
+                    loadHistory();
+                    renderActiveDashboard();
+                    showToast("সমস্ত হিস্টোরি মুছে ফেলা হয়েছে", "info");
+                }, "হিস্টোরি ডিলিট");
+            });
+        }
+
+        function addExpense() {
+            const date = document.getElementById('exp-date').value || new Date().toISOString().split('T')[0];
+            const name = document.getElementById('exp-name').value;
+            const qty = document.getElementById('exp-qty').value;
+            const price = parseFloat(document.getElementById('exp-price').value);
+
+            if (!name || isNaN(price) || price <= 0) return showToast("দয়া করে খরচের নাম ও সঠিক পরিমাণ দিন!", "error");
+
+            let expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+            expenses.unshift({ date, name, qty, price });
+            localStorage.setItem('momo_expenses', JSON.stringify(expenses));
+
+            document.getElementById('exp-name').value = "";
+            document.getElementById('exp-qty').value = "";
+            document.getElementById('exp-price').value = "";
+
+            renderExpenseList(date);
+            showToast("খরচ রেকর্ড করা হয়েছে!", "success");
+        }
+
+        function renderExpenseList(d) {
+            const expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+            const container = document.getElementById('today-expense-list');
+            const totalBox = document.getElementById('today-expense-summary');
+            let total = 0;
+            if (!container) return;
+            container.innerHTML = "";
+
+            expenses.filter(e => e.date === d).forEach(e => {
+                total += e.price;
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-800 p-2.5 rounded-xl border border-slate-700 text-xs">
+                        <div>
+                            <b class="text-white">${e.name}</b> <span class="text-slate-400 text-[10px]">(${e.qty || 'N/A'})</span>
+                        </div>
+                        <span class="font-bold font-mono text-rose-400">${e.price} ৳</span>
+                    </div>`;
+            });
+            if (totalBox) totalBox.innerText = `${d} তারিখের মোট খরচ: ${total}৳`;
+        }
+
+        function generateAdvancedReports() {
+            const history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            const expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(now.getDate() - 7);
+            const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const getSum = (arr, dateCond, field) => arr.filter(dateCond).reduce((a, b) => a + (b[field] || 0), 0);
+
+            const sToday = getSum(history, o => o.date === today, 'total');
+            const eToday = getSum(expenses, e => e.date === today, 'price');
+            const sWeek = getSum(history, o => new Date(o.date) >= sevenDaysAgo, 'total');
+            const eWeek = getSum(expenses, e => new Date(e.date) >= sevenDaysAgo, 'price');
+            const sMonth = getSum(history, o => new Date(o.date) >= firstOfMonth, 'total');
+            const eMonth = getSum(expenses, e => new Date(e.date) >= firstOfMonth, 'price');
+
+            const statsEl = document.getElementById('stats-summary');
+            if (statsEl) {
+                statsEl.innerHTML = `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm space-y-1">
+                        <h4 class="text-xs font-bold text-slate-500">আজকের হিসাব</h4>
+                        <p class="text-sm font-extrabold text-slate-800">বিক্রি: ${sToday}৳ | খরচ: ${eToday}৳</p>
+                        <span class="text-[10px] text-emerald-600 font-bold">লাভ: ${sToday - eToday}৳</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-blue-500 shadow-sm space-y-1">
+                        <h4 class="text-xs font-bold text-slate-500">সাপ্তাহিক হিসাব (৭ দিন)</h4>
+                        <p class="text-sm font-extrabold text-slate-800">বিক্রি: ${sWeek}৳ | খরচ: ${eWeek}৳</p>
+                        <span class="text-[10px] text-blue-600 font-bold">লাভ: ${sWeek - eWeek}৳</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 border-l-4 border-l-momo-500 shadow-sm space-y-1">
+                        <h4 class="text-xs font-bold text-slate-500">চলতি মাসের হিসাব</h4>
+                        <p class="text-sm font-extrabold text-slate-800">বিক্রি: ${sMonth}৳ | খরচ: ${eMonth}৳</p>
+                        <span class="text-[10px] text-momo-600 font-bold">লাভ: ${sMonth - eMonth}৳</span>
+                    </div>`;
+            }
+
+            const chartData = {};
+            for (let i = 6; i >= 0; i--) {
+                let d = new Date(); d.setDate(d.getDate() - i);
+                let ds = d.toISOString().split('T')[0];
+                chartData[ds] = { s: getSum(history, o => o.date === ds, 'total'), e: getSum(expenses, e => e.date === ds, 'price') };
+            }
+            updateChart(chartData);
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('mainChart');
+            if (!ctx) return;
+            if (mainChart) mainChart.destroy();
+            mainChart = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data).map(d => d.split('-')[2]),
+                    datasets: [
+                        { label: 'বিক্রি (৳)', data: Object.values(data).map(x => x.s), backgroundColor: '#27ae60' },
+                        { label: 'খরচ (৳)', data: Object.values(data).map(x => x.e), backgroundColor: '#e74c3c' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function showCustomReport() {
+            const date = document.getElementById('search-date').value;
+            if (!date) return;
+            const history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            const expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+            const s = history.filter(o => o.date === date).reduce((a, b) => a + b.total, 0);
+            const e = expenses.filter(ex => ex.date === date).reduce((a, b) => a + b.price, 0);
+
+            document.getElementById('custom-report-result').innerHTML = `
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
+                    <b>তারিখ: ${date}</b><br>
+                    বিক্রি: ${s}৳ | খরচ: ${e}৳
+                    <hr class="my-1 border-slate-200">
+                    <b class="text-emerald-600">নিট লাভ: ${s - e}৳</b>
+                </div>`;
+        }
+
+        let currentViewStaffId = null;
+
+        function renderStaffNameList() {
+            const staffs = JSON.parse(localStorage.getItem('momo_staff_data') || "[]");
+            const container = document.getElementById('staff-name-list');
+            if (!container) return;
+            container.innerHTML = "";
+
+            staffs.forEach(s => {
+                container.innerHTML += `
+                    <div onclick="openStaffPage(${s.id})" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-momo-500 transition">
+                        <div>
+                            <b class="text-sm text-slate-800">${s.name}</b>
+                            <div class="text-xs text-slate-500">${s.post}</div>
+                        </div>
+                        <span class="text-xs text-blue-600 font-bold">View Sheet ⮕</span>
+                    </div>`;
+            });
+        }
+
+        function addNewStaffProfile() {
+            const name = document.getElementById('new-staff-name').value;
+            const post = document.getElementById('new-staff-post').value;
+            const email = document.getElementById('new-staff-email').value;
+
+            if (!name || !email) return showToast("দয়া করে স্টাফের নাম এবং ইমেইল প্রদান করুন!", "error");
+
+            let staffs = JSON.parse(localStorage.getItem('momo_staff_data') || "[]");
+            staffs.push({ id: Date.now(), name, post, email, sheet: {} });
+            localStorage.setItem('momo_staff_data', JSON.stringify(staffs));
+
+            document.getElementById('new-staff-name').value = "";
+            document.getElementById('new-staff-post').value = "";
+            document.getElementById('new-staff-email').value = "";
+
+            renderStaffNameList();
+            showToast("নতুন স্টাফ সফলভাবে সংযুক্ত হয়েছে!", "success");
+        }
+
+        function openStaffPage(id) {
+            currentViewStaffId = id;
+            const staffs = JSON.parse(localStorage.getItem('momo_staff_data') || "[]");
+            const staff = staffs.find(s => s.id === id);
+
+            document.getElementById('display-staff-name').innerText = staff.name;
+            document.getElementById('display-staff-post').innerText = "Position: " + staff.post;
+
+            const tbody = document.getElementById('staff-monthly-sheet');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                let dayData = staff.sheet?.[i] || { status: '', in: '', out: '', break: '', note: '' };
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-1 border border-slate-200 font-bold bg-slate-100">${i}</td>
+                        <td class="p-0 border border-slate-200"><input type="text" oninput="updateSheet(${i}, 'status', this.value)" value="${dayData.status || ''}" class="w-full text-center py-1 bg-transparent focus:bg-amber-50"></td>
+                        <td class="p-0 border border-slate-200"><input type="text" oninput="updateSheet(${i}, 'in', this.value)" value="${dayData.in || ''}" class="w-full text-center py-1 bg-transparent focus:bg-amber-50"></td>
+                        <td class="p-0 border border-slate-200"><input type="text" oninput="updateSheet(${i}, 'out', this.value)" value="${dayData.out || ''}" class="w-full text-center py-1 bg-transparent focus:bg-amber-50"></td>
+                        <td class="p-0 border border-slate-200"><input type="text" oninput="updateSheet(${i}, 'break', this.value)" value="${dayData.break || ''}" class="w-full text-center py-1 bg-transparent focus:bg-amber-50"></td>
+                        <td class="p-0 border border-slate-200"><input type="text" oninput="updateSheet(${i}, 'note', this.value)" value="${dayData.note || ''}" class="w-full text-center py-1 bg-transparent focus:bg-amber-50"></td>
+                    </tr>`;
+            }
+            showPage('staff-detail-page');
+        }
+
+        function updateSheet(day, field, val) {
+            let staffs = JSON.parse(localStorage.getItem('momo_staff_data') || "[]");
+            let idx = staffs.findIndex(s => s.id === currentViewStaffId);
+
+            if (!staffs[idx].sheet) staffs[idx].sheet = {};
+            if (!staffs[idx].sheet[day]) staffs[idx].sheet[day] = {};
+
+            staffs[idx].sheet[day][field] = val;
+            localStorage.setItem('momo_staff_data', JSON.stringify(staffs));
+        }
+
+        function deleteStaffProfile() {
+            promptPinAndRun(() => {
+                showConfirmModal("আপনি কি নিশ্চিতভাবে এই স্টাফ প্রোফাইল মুছে ফেলতে চান?", () => {
+                    let staffs = JSON.parse(localStorage.getItem('momo_staff_data') || "[]");
+                    staffs = staffs.filter(s => s.id !== currentViewStaffId);
+                    localStorage.setItem('momo_staff_data', JSON.stringify(staffs));
+                    showPage('staff-list-page');
+                    renderStaffNameList();
+                    showToast("প্রোফাইল মোছা হয়েছে", "info");
+                }, "স্টাফ প্রোফাইল ডিলিট");
+            });
+        }
+
+        function sendStaffEmail() {
+            const staffs = JSON.parse(localStorage.getItem('momo_staff_data') || "[]");
+            const staff = staffs.find(s => s.id === currentViewStaffId);
+
+            if (!staff.sheet || Object.keys(staff.sheet).length === 0) {
+                return showToast("শিটে কোনো ডাটা নেই!", "error");
+            }
+
+            let body = `Momology - Attendance Report: ${staff.name} (${staff.post})\n\n`;
+            body += `Date | Status | In | Out | Break | Note\n-------------------------------------------\n`;
+
+            Object.keys(staff.sheet).sort((a,b) => a-b).forEach(day => {
+                let d = staff.sheet[day];
+                body += `${day} | ${d.status || '-'} | ${d.in || '-'} | ${d.out || '-'} | ${d.break || '-'}\n`;
+            });
+
+            window.location.href = `mailto:${staff.email}?subject=Monthly Attendance Sheet&body=${encodeURIComponent(body)}`;
+        }
+
+        let currentUserMode = localStorage.getItem('momo_user_mode') || "Admin";
+
+        function checkSecurity() {
+            const isLocked = localStorage.getItem('momo_locked') === 'true';
+            if (currentUserMode === "Staff") {
+                document.getElementById('pin-overlay').style.display = 'none';
+                localStorage.setItem('momo_locked', 'false');
+            } else if (isLocked) {
+                document.getElementById('pin-overlay').style.display = 'flex';
+            }
+        }
+
+        function lockSystem() {
+            localStorage.setItem('momo_locked', 'true');
+            document.getElementById('pin-overlay').style.display = 'flex';
+        }
+
+        function unlockSystem() {
+            const input = document.getElementById('admin-pin-input').value;
+            if (input === (localStorage.getItem('momo_admin_pin') || "2025")) {
+                localStorage.setItem('momo_locked', 'false');
+                document.getElementById('pin-overlay').style.display = 'none';
+                document.getElementById('admin-pin-input').value = "";
+                showToast("সিস্টেম আনলক হয়েছে!", "success");
+            } else {
+                showToast("ভুল পিন কোড!", "error");
+                document.getElementById('admin-pin-input').value = "";
+            }
+        }
+
+        function promptPinAndRun(callback) {
+            const pin = prompt("অ্যাডমিন পিন কোড দিন:");
+            if (pin === (localStorage.getItem('momo_admin_pin') || "2025")) {
+                callback();
+            } else {
+                showToast("ভুল পিন কোড!", "error");
+            }
+        }
+
+        function changeAdminPin() {
+            const currentPinInput = prompt("বর্তমান পিন কোড দিন:");
+            if (currentPinInput === (localStorage.getItem('momo_admin_pin') || "2025")) {
+                const newPin = prompt("নতুন ৪ ডিজিটের পিন কোড লিখুন:");
+                if (newPin && newPin.length === 4 && !isNaN(newPin)) {
+                    localStorage.setItem('momo_admin_pin', newPin);
+                    showToast("পিন কোড সফলভাবে পরিবর্তন করা হয়েছে!", "success");
+                } else {
+                    showToast("ভুল ফরম্যাট! ৪টি সংখ্যা ব্যবহার করুন।", "error");
+                }
+            } else {
+                showToast("ভুল পিন কোড!", "error");
+            }
+        }
+
+        function applyUserRestrictions() {
+            const isStaff = currentUserMode === "Staff";
+            const modeDisplay = document.getElementById('current-mode-display');
+            if (modeDisplay) modeDisplay.innerText = currentUserMode + " Mode";
+
+            const allowedStaffPages = ['active-dashboard', 'order-page', 'history-page'];
+
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                const onClickAttr = link.getAttribute('onclick') || "";
+                if (onClickAttr.includes('showPage')) {
+                    const isAllowed = allowedStaffPages.some(pageId => onClickAttr.includes(pageId));
+                    link.style.display = (isStaff && !isAllowed) ? "none" : "flex";
+                }
+            });
+        }
+
+        function switchUserMode() {
+            if (currentUserMode === "Admin") {
+                currentUserMode = "Staff";
+                localStorage.setItem('momo_user_mode', "Staff");
+                showToast("আপনি Staff Mode-এ স্যুইচ করেছেন।", "info");
+            } else {
+                promptPinAndRun(() => {
+                    currentUserMode = "Admin";
+                    localStorage.setItem('momo_user_mode', "Admin");
+                    showToast("Welcome back to Admin Mode!", "success");
+                });
+            }
+            applyUserRestrictions();
+        }
+
+        function openNav() {
+            document.getElementById("mySidebar").style.width = "260px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidebar").style.width = "0";
+        }
+    </script>
+</body>
+</html>
