@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MOMOLOGY - Crave & Chemistry POS System</title>
     <link rel="icon" type="image/png" href="logo.png">
 
@@ -35,11 +35,19 @@
     </script>
 
     <style>
-        body {
+        * { box-sizing: border-box; }
+        html, body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            position: relative;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f1f5f9;
             color: #334155;
             user-select: none;
+            -webkit-font-smoothing: antialiased;
         }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -184,7 +192,7 @@
         </div>
     </div>
 
-    <!-- Security PIN Lock Screen (Mandatory On Refresh) -->
+    <!-- Security PIN Lock Screen -->
     <div id="pin-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
         <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
             <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto rounded-2xl border border-slate-600 shadow-lg object-contain bg-white p-1" onerror="this.src='https://via.placeholder.com/80?text=MOMOLOGY'">
@@ -205,7 +213,7 @@
     <div id="mySidebar" class="sidebar">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-700">
             <div class="flex items-center gap-3">
-                <img src="logo.png" class="w-8 h-8 rounded-full bg-white object-contain" alt="Logo">
+                <img src="logo.png" class="w-8 h-8 rounded-full bg-white object-contain" alt="Logo" onerror="this.src='https://via.placeholder.com/32?text=M'">
                 <span class="font-extrabold text-momo-500 text-lg tracking-wide">MOMOLOGY</span>
             </div>
             <button onclick="closeNav()" class="text-slate-400 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
@@ -477,7 +485,17 @@
     <!-- Firebase SDK & POS Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc, 
+            getDoc, 
+            updateDoc, 
+            collection, 
+            query, 
+            where, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             projectId: "momology-loyalty"
@@ -486,34 +504,77 @@
         const db = getFirestore(app);
 
         const MANDATORY_PIN = "24466";
-        // ১. অডিও সেটআপ
-const alertAudio = new Audio('alert.mp3');
 
-// ব্রাউজারের অটো-প্লে ব্লক আনলক করার জন্য (প্রথম ক্লিকে একটিভ হবে)
-document.addEventListener('click', () => {
-  alertAudio.play().then(() => {
-    alertAudio.pause();
-    alertAudio.currentTime = 0;
-  }).catch(err => console.log("Audio unlock:", err));
-}, { once: true });
+        // ১. অডিও ইঞ্জিন (Browser Autoplay Unlock)
+        const alertAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // ডিফল্ট নোটিফিকেশন বেল
+        let audioUnlocked = false;
 
-function playSound() {
-  alertAudio.currentTime = 0;
-  alertAudio.play().catch(e => console.log("Sound error:", e));
-}
+        function unlockAudio() {
+            if (!audioUnlocked) {
+                alertAudio.play().then(() => {
+                    alertAudio.pause();
+                    alertAudio.currentTime = 0;
+                    audioUnlocked = true;
+                    console.log("Audio Alert Engine Ready");
+                }).catch(() => {});
+            }
+        }
+        document.addEventListener('click', unlockAudio, { once: true });
+        document.addEventListener('keydown', unlockAudio, { once: true });
 
-// ২. রিয়েলটাইম অর্ডার লিসেনার (Firestore)
-db.collection("orders")
-  .where("status", "==", "pending")
-  .onSnapshot((snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === "added") {
-        playSound(); // নতুন অর্ডার এলেই সাউন্ড বাজবে
-        // এখানে আপনার নতুন অর্ডার ডিসপ্লে করার ফাংশনটি কল করুন
-        console.log("New order received:", change.doc.data());
-      }
-    });
-  });
+        function playSound() {
+            try {
+                alertAudio.currentTime = 0;
+                alertAudio.play().catch(e => console.log("Sound play error:", e));
+            } catch (err) {}
+        }
+
+        // ২. রিয়েলটাইম অর্ডার লিসেনার (Firestore Modular API)
+        let isInitialLoad = true;
+        const q = query(collection(db, "orders"), where("status", "==", "available"));
+        
+        onSnapshot(q, (snapshot) => {
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                return; // পেজ লোড হওয়ার সময় আগের পুরনো অর্ডারে সাউন্ড বাজবে না
+            }
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const newOrder = change.doc.data();
+                    playSound();
+                    showToast(`🔔 নতুন অর্ডার এসেছে! (#${change.doc.id})`, "success");
+
+                    // KDS ও Local Storage এ সরাসরি যুক্ত করা
+                    let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+                    const exists = history.some(o => o.claimCode === change.doc.id || o.id === newOrder.id);
+                    if (!exists) {
+                        history.unshift({
+                            id: newOrder.id || Math.floor(1000 + Math.random() * 9000),
+                            claimCode: change.doc.id,
+                            status: 'active',
+                            table: newOrder.table || 'Online',
+                            customerName: newOrder.customerName || 'Web Customer',
+                            customerPhone: newOrder.customerPhone || 'N/A',
+                            items: newOrder.items || { 1: { name: "Online Momo Order", price: newOrder.amount, type: "Parcel" } },
+                            total: newOrder.amount || 0,
+                            subtotal: newOrder.amount || 0,
+                            discount: 0,
+                            container: 0,
+                            delivery: 0,
+                            points: newOrder.points || 0,
+                            date: new Date().toISOString().split('T')[0],
+                            time: new Date().toLocaleTimeString(),
+                            endTime: new Date().getTime() + (15 * 60000)
+                        });
+                        localStorage.setItem('momo_history', JSON.stringify(history));
+                        renderActiveDashboard();
+                        loadHistory();
+                    }
+                }
+            });
+        }, (error) => {
+            console.error("Firestore Listener Error:", error);
+        });
 
         const defaultMenuData = {
             "🥟 STEAM MOMO (5 Pcs)": [
@@ -584,14 +645,14 @@ db.collection("orders")
         let orders = { 1: { cart: {}, total: 0, subtotal: 0, discount: 0, container: 0, delivery: 0 } };
         let activeTabId = 1;
         let orderID = localStorage.getItem('momo_lastID') ? parseInt(localStorage.getItem('momo_lastID')) + 1 : 1001;
-        let mainChart = null;
 
-        // Security PIN logic on every page refresh
+        // Security PIN
         window.unlockSystem = function() {
             const input = document.getElementById('admin-pin-input').value;
             if (input === MANDATORY_PIN) {
                 document.getElementById('pin-overlay').style.display = 'none';
                 document.getElementById('admin-pin-input').value = "";
+                unlockAudio();
                 showToast("সিস্টেমে স্বাগতম!", "success");
             } else {
                 showToast("ভুল পিন কোড! সঠিক কোড লিখুন।", "error");
@@ -750,7 +811,6 @@ db.collection("orders")
             const table = document.getElementById('table-no').value.trim() || "Takeaway";
             const prepTime = parseInt(document.getElementById('prep-time').value) || 15;
 
-            // 10% Loyalty Calculation (10 pts per 100 BDT)
             const earnedPoints = Math.floor(cur.total * 0.10);
             const claimCode = "MOMO-" + orderID;
 
@@ -774,16 +834,18 @@ db.collection("orders")
             };
 
             try {
-                // 1. Save to Firebase 'orders' collection for instant portal claim
+                // 1. Save to Firebase 'orders' collection
                 await setDoc(doc(db, "orders", claimCode), {
+                    id: record.id,
                     amount: record.total,
                     points: earnedPoints,
                     status: 'available',
                     table: table,
+                    items: record.items,
                     createdAt: new Date().toISOString()
                 });
 
-                // 2. If customer phone provided, auto-credit points to customer profile
+                // 2. Auto-credit points if phone provided
                 if (phone && phone.length >= 11) {
                     const custRef = doc(db, "customers", phone);
                     const custSnap = await getDoc(custRef);
@@ -797,14 +859,14 @@ db.collection("orders")
                         await setDoc(custRef, {
                             name: name || "Member",
                             phone: phone,
-                            points: 10 + earnedPoints, // 10 welcome pts
+                            points: 10 + earnedPoints,
                             userId: "MM-" + Math.floor(1000 + Math.random() * 9000),
                             joinedAt: new Date().toISOString()
                         });
                     }
                 }
 
-                // 3. Local storage log for offline fallback & KDS
+                // 3. Local storage log
                 let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
                 history.unshift(record);
                 localStorage.setItem('momo_history', JSON.stringify(history));
@@ -850,7 +912,6 @@ db.collection("orders")
                 </style>
             </head>
             <body>
-                <img src="logo.png" style="width:50px; height:50px; object-contain:contain; margin-bottom:4px;" onerror="this.style.display='none'">
                 <h2 style="margin:0; font-size:16px;">MOMOLOGY</h2>
                 <div style="font-size:10px;">crave & chemistry</div>
                 <div class="info">
@@ -979,7 +1040,7 @@ db.collection("orders")
                     <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-sm flex items-center justify-between text-xs">
                         <div>
                             <b class="text-sm text-slate-800">#${o.id}</b> - (${o.table})
-                            <div class="text-[11px] text-slate-400">কোড: ${o.claimCode || 'N/A'} | পয়েন্ট: +${o.points}</div>
+                            <div class="text-[11px] text-slate-400">কোড: ${o.claimCode || 'N/A'} | পয়েন্ট: +${o.points}</div>
                         </div>
                         <div class="text-right">
                             <div class="font-bold text-emerald-600 font-mono text-sm">${o.total} TK</div>
