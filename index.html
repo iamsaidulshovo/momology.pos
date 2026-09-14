@@ -529,33 +529,40 @@
             } catch (err) {}
         }
 
-        // ২. রিয়েলটাইম অর্ডার লিসেনার (Firestore Modular API)
+        // ২. রিয়েলটাইম অর্ডার লিসেনার (ডুপ্লিকেট প্রতিরোধসহ)
         let isInitialLoad = true;
         const q = query(collection(db, "orders"), where("status", "==", "available"));
         
         onSnapshot(q, (snapshot) => {
             if (isInitialLoad) {
                 isInitialLoad = false;
-                return; // পেজ লোড হওয়ার সময় আগের পুরনো অর্ডারে সাউন্ড বাজবে না
+                return; // পেজ প্রথম লোড হওয়ার সময় আগের অর্ডারে কোনো অ্যাকশন হবে না
             }
+
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            let newOrderAdded = false;
+
             snapshot.docChanges().forEach((change) => {
                 if (change.type === "added") {
                     const newOrder = change.doc.data();
-                    playSound();
-                    showToast(`🔔 নতুন অর্ডার এসেছে! (#${change.doc.id})`, "success");
+                    const docId = change.doc.id;
 
-                    // KDS ও Local Storage এ সরাসরি যুক্ত করা
-                    let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
-                    const exists = history.some(o => o.claimCode === change.doc.id || o.id === newOrder.id);
-                    if (!exists) {
+                    // নিখুঁত ডুপ্লিকেট চেক (claimCode বা id দিয়ে)
+                    const alreadyExists = history.some(o => 
+                        (o.claimCode && o.claimCode === docId) || 
+                        (newOrder.id && o.id == newOrder.id)
+                    );
+
+                    // যদি অর্ডারটি এই POS থেকেই তৈরি না হয়ে থাকে (অর্থাৎ ওয়েবসাইট থেকে আসে)
+                    if (!alreadyExists) {
                         history.unshift({
                             id: newOrder.id || Math.floor(1000 + Math.random() * 9000),
-                            claimCode: change.doc.id,
+                            claimCode: docId,
                             status: 'active',
-                            table: newOrder.table || 'Online',
+                            table: newOrder.table || 'Web Online',
                             customerName: newOrder.customerName || 'Web Customer',
                             customerPhone: newOrder.customerPhone || 'N/A',
-                            items: newOrder.items || { 1: { name: "Online Momo Order", price: newOrder.amount, type: "Parcel" } },
+                            items: newOrder.items || { 1: { name: "Online Order", price: newOrder.amount || 0, type: "Parcel" } },
                             total: newOrder.amount || 0,
                             subtotal: newOrder.amount || 0,
                             discount: 0,
@@ -566,12 +573,18 @@
                             time: new Date().toLocaleTimeString(),
                             endTime: new Date().getTime() + (15 * 60000)
                         });
-                        localStorage.setItem('momo_history', JSON.stringify(history));
-                        renderActiveDashboard();
-                        loadHistory();
+                        newOrderAdded = true;
                     }
                 }
             });
+
+            if (newOrderAdded) {
+                localStorage.setItem('momo_history', JSON.stringify(history));
+                playSound();
+                showToast("🔔 ওয়েবসাইট থেকে নতুন অর্ডার এসেছে!", "success");
+                renderActiveDashboard();
+                loadHistory();
+            }
         }, (error) => {
             console.error("Firestore Listener Error:", error);
         });
