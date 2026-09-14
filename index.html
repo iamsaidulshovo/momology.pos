@@ -486,6 +486,34 @@
         const db = getFirestore(app);
 
         const MANDATORY_PIN = "24466";
+        // ১. অডিও সেটআপ
+const alertAudio = new Audio('alert.mp3');
+
+// ব্রাউজারের অটো-প্লে ব্লক আনলক করার জন্য (প্রথম ক্লিকে একটিভ হবে)
+document.addEventListener('click', () => {
+  alertAudio.play().then(() => {
+    alertAudio.pause();
+    alertAudio.currentTime = 0;
+  }).catch(err => console.log("Audio unlock:", err));
+}, { once: true });
+
+function playSound() {
+  alertAudio.currentTime = 0;
+  alertAudio.play().catch(e => console.log("Sound error:", e));
+}
+
+// ২. রিয়েলটাইম অর্ডার লিসেনার (Firestore)
+db.collection("orders")
+  .where("status", "==", "pending")
+  .onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        playSound(); // নতুন অর্ডার এলেই সাউন্ড বাজবে
+        // এখানে আপনার নতুন অর্ডার ডিসপ্লে করার ফাংশনটি কল করুন
+        console.log("New order received:", change.doc.data());
+      }
+    });
+  });
 
         const defaultMenuData = {
             "🥟 STEAM MOMO (5 Pcs)": [
