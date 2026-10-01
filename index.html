@@ -59,7 +59,7 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
 
-    <!-- Security PIN Lock Screen (Refresh korlei eta asbe) -->
+    <!-- Security PIN Lock Screen -->
     <div id="pin-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
         <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
             <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto rounded-2xl border border-slate-600 shadow-lg object-contain bg-white p-1" onerror="this.src='https://via.placeholder.com/80?text=MOMOLOGY'">
@@ -200,7 +200,6 @@
 
         <!-- 3. LIVE INVENTORY -->
         <div id="inventory-page" class="page space-y-4">
-            
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <h3 class="font-extrabold text-slate-800 mb-3"><i class="fa-solid fa-plus-circle text-indigo-500"></i> Add New Inventory Item</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -232,7 +231,6 @@
 
         <!-- 4. REPORTS & ANALYTICS -->
         <div id="reports-page" class="page space-y-4">
-            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="stat-card">
                     <p class="text-xs text-slate-500 font-bold mb-1">Today's Total Sales</p>
@@ -277,15 +275,22 @@
         <!-- 5. CASH FLOW (EOD) -->
         <div id="expense-page" class="page space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Updated Expense Entry UI with Quantity -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                     <h3 class="font-extrabold text-slate-800 mb-3"><i class="fa-solid fa-cart-shopping text-rose-500"></i> Daily Expense Entry</h3>
-                    <div class="space-y-2">
-                        <input type="text" id="exp-name" placeholder="Details (e.g., Chicken 5kg)" class="w-full bg-slate-50 border p-2 text-sm rounded-lg">
-                        <input type="number" id="exp-amount" placeholder="Amount (৳)" class="w-full bg-slate-50 border p-2 text-sm rounded-lg font-bold">
-                        <button onclick="addExpense()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg text-sm transition">Save Expense</button>
+                    <div class="space-y-3">
+                        <input type="text" id="exp-name" placeholder="Details (e.g., Chicken / Gas)" class="w-full bg-slate-50 border p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-rose-400">
+                        <div class="flex gap-2">
+                            <input type="text" id="exp-qty" placeholder="Qty (e.g., 5 kg / 1 cyl)" class="w-1/2 bg-slate-50 border p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-rose-400">
+                            <input type="number" id="exp-amount" placeholder="Total (৳)" class="w-1/2 bg-slate-50 border p-2 text-sm rounded-lg font-bold text-rose-600 outline-none focus:ring-1 focus:ring-rose-400">
+                        </div>
+                        <button onclick="addExpense()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm transition">Save Expense</button>
                     </div>
-                    <div id="today-expense-list" class="mt-4 space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+                    <div id="today-expense-list" class="mt-4 space-y-2 max-h-48 overflow-y-auto"></div>
                 </div>
+
+                <!-- EOD Calculator -->
                 <div class="bg-slate-900 rounded-2xl p-5 shadow-lg text-white space-y-4 relative overflow-hidden">
                     <h3 class="font-extrabold text-momo-500 relative z-10"><i class="fa-solid fa-cash-register"></i> End of Day (EOD) Tally</h3>
                     <div class="space-y-2 text-sm text-slate-300 relative z-10">
@@ -297,6 +302,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -369,15 +375,15 @@
         let charts = { day: null, menu: null, hour: null, expense: null };
 
         let inventory = JSON.parse(localStorage.getItem('momo_inventory')) || {
-    "Chicken": { stock: 15, unit: "kg", alert: 3 },
-    "Onion": { stock: 20, unit: "kg", alert: 5 },
-    "Green_Chili": { stock: 2, unit: "kg", alert: 0.5 },
-    "Moida": { stock: 10, unit: "kg", alert: 2 },
-    "Box_450ml": { stock: 300, unit: "pcs", alert: 50 },
-    "Sauce_Cup": { stock: 500, unit: "pcs", alert: 100 },
-    "Poly_Bag": { stock: 400, unit: "pcs", alert: 50 },
-    "Cheese": { stock: 5, unit: "kg", alert: 1 }
-};
+            "Chicken": { stock: 15, unit: "kg", alert: 3 },
+            "Onion": { stock: 20, unit: "kg", alert: 5 },
+            "Green_Chili": { stock: 2, unit: "kg", alert: 0.5 },
+            "Moida": { stock: 10, unit: "kg", alert: 2 },
+            "Box_450ml": { stock: 300, unit: "pcs", alert: 50 },
+            "Sauce_Cup": { stock: 500, unit: "pcs", alert: 100 },
+            "Poly_Bag": { stock: 400, unit: "pcs", alert: 50 },
+            "Cheese": { stock: 5, unit: "kg", alert: 1 }
+        };
         let inventory_usage = JSON.parse(localStorage.getItem('momo_inv_usage')) || {};
 
         // TOAST UTILITY
@@ -449,8 +455,16 @@
 
         window.addToCart = function(name, price) {
             let id = "item-" + Date.now() + Math.random();
-            cart[id] = { name, price, qty: 1, type: "Dine-in" };
+            cart[id] = { name, price, qty: 1, type: "Dine-in" }; // Default Dine-in, could add toggle
+            
+            // Auto Parcel logic helper if user clicks "Parcel" version (optional to expand later)
+            // But for now, we will add a small select to change type in the cart.
             refreshCartUI();
+        };
+
+        // Allow toggling Dine-in vs Parcel for packaging deduction
+        window.changeItemType = function(id, newType) {
+            if(cart[id]) cart[id].type = newType;
         };
 
         window.refreshCartUI = function() {
@@ -463,7 +477,13 @@
                 sub += item.price;
                 rows.innerHTML += `
                     <div class="flex justify-between items-center py-2 text-xs">
-                        <span class="font-bold text-white">${item.name}</span>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-white">${item.name}</span>
+                            <select onchange="changeItemType('${id}', this.value)" class="text-[10px] mt-1 bg-slate-800 text-slate-300 border border-slate-600 rounded px-1 outline-none">
+                                <option value="Dine-in" ${item.type === 'Dine-in' ? 'selected' : ''}>🍽️ Dine-in</option>
+                                <option value="Parcel" ${item.type === 'Parcel' ? 'selected' : ''}>📦 Parcel</option>
+                            </select>
+                        </div>
                         <div class="flex items-center gap-3">
                             <span class="font-mono text-momo-500 font-bold">৳${item.price}</span>
                             <button onclick="delete cart['${id}']; refreshCartUI();" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
@@ -473,7 +493,7 @@
             document.getElementById('total').innerText = sub;
         };
 
-        // 3. INVENTORY LOGIC
+        // 3. INVENTORY LOGIC (Updated to standard mixture BOM)
         window.renderInventory = function() {
             const tb = document.getElementById('inventory-tbody');
             tb.innerHTML = "";
@@ -516,8 +536,8 @@
             let unit = document.getElementById('inv-new-unit').value.trim();
             let alertLevel = parseFloat(document.getElementById('inv-new-alert').value) || 0;
             
-            if(!name || !unit) return alert("Item Name and Unit are required!");
-            if(inventory[name]) return alert("This item already exists in Inventory!");
+            if(!name || !unit) return showToast("Item Name and Unit are required!", "error");
+            if(inventory[name]) return showToast("This item already exists!", "error");
 
             inventory[name] = { stock: 0, unit: unit, alert: alertLevel };
             localStorage.setItem('momo_inventory', JSON.stringify(inventory));
@@ -537,9 +557,7 @@
                     inventory[key].stock = parsed;
                     localStorage.setItem('momo_inventory', JSON.stringify(inventory));
                     renderInventory();
-                    showToast("Stock Updated Successfully", "success");
-                } else {
-                    showToast("Invalid number entered!", "error");
+                    showToast("Stock Updated", "success");
                 }
             }
         };
@@ -552,15 +570,13 @@
                     inventory[key].stock += parsed;
                     localStorage.setItem('momo_inventory', JSON.stringify(inventory));
                     renderInventory();
-                    showToast("Stock Added Successfully", "success");
-                } else {
-                    showToast("Invalid number entered!", "error");
+                    showToast("Stock Added", "success");
                 }
             }
         };
 
         window.deleteStock = function(key) {
-            if(confirm(`Are you sure you want to permanently delete ${key} from inventory?`)) {
+            if(confirm(`Are you sure you want to permanently delete ${key}?`)) {
                 delete inventory[key];
                 localStorage.setItem('momo_inventory', JSON.stringify(inventory));
                 renderInventory();
@@ -568,80 +584,74 @@
             }
         }
 
+        // --- Standard Recipe Yield BOM ---
         function trackInventoryUsage(itemsObj) {
-    let currentMonth = new Date().toISOString().slice(0,7);
-    if(!inventory_usage[currentMonth]) inventory_usage[currentMonth] = {};
+            let currentMonth = new Date().toISOString().slice(0,7);
+            if(!inventory_usage[currentMonth]) inventory_usage[currentMonth] = {};
 
-    // --- রেসিপি রেশিও সেটআপ ---
-    const totalMix = 1 + 1.2 + 0.01; // Chicken(1) + Onion(1.2) + Chili(0.01) = 2.21 kg
-    const chickenPct = 1 / totalMix; // মিক্সচারের কত অংশ চিকেন
-    const onionPct = 1.2 / totalMix; // মিক্সচারের কত অংশ পেঁয়াজ
-    const chiliPct = 0.01 / totalMix; // মিক্সচারের কত অংশ মরিচ
-    
-    // প্রতি পিস মোমোতে ফিলিং ও ময়দার পরিমাণ (গ্রাম হিসেবে)
-    const fillingPerPiece = 0.02; // ধরে নিচ্ছি ১ পিস মোমোতে ২০ গ্রাম ফিলিং থাকে (0.02 kg)
-    const moidaPerPiece = 0.01;   // ১ পিস মোমোর ডো-এর জন্য ১০ গ্রাম ময়দা (0.01 kg)
-
-    let isParcelOrder = false; // পলি ব্যাগের হিসাবের জন্য
-
-    for(let id in itemsObj) {
-        let item = itemsObj[id];
-        let name = item.name.toLowerCase();
-        let type = item.type; // "Dine-in" নাকি "Parcel"
-        let qty = item.qty || 1; // কয় প্লেট অর্ডার হয়েছে
-        let deduct = {};
-
-        // পিস নির্ধারণ (প্ল্যাটার হলে ১০ পিস, নরমাল হলে ৫ পিস)
-        let pcsPerPlate = name.includes('platter') ? 10 : (name.includes('momo') ? 5 : 0);
-        let totalPcs = pcsPerPlate * qty;
-
-        if(totalPcs > 0) {
-            let totalFillingKg = totalPcs * fillingPerPiece; // মোট ফিলিং (কেজি)
+            const totalMix = 1 + 1.2 + 0.01; // 2.21 kg mix
+            const chickenPct = 1 / totalMix; 
+            const onionPct = 1.2 / totalMix; 
+            const chiliPct = 0.01 / totalMix; 
             
-            // রেশিও অনুযায়ী কাঁচামাল কাটা হচ্ছে
-            deduct['Chicken'] = totalFillingKg * chickenPct;
-            deduct['Onion'] = totalFillingKg * onionPct;
-            deduct['Green_Chili'] = totalFillingKg * chiliPct;
-            deduct['Moida'] = totalPcs * moidaPerPiece;
-        }
+            const fillingPerPiece = 0.02; // 20g filling per piece
+            const moidaPerPiece = 0.01;   // 10g dough per piece
+            let isParcelOrder = false;
 
-        if(name.includes('cheese')) { 
-            deduct['Cheese'] = totalPcs * 0.01; // প্রতি পিস চিজ মোমোতে ১০ গ্রাম চিজ
-        }
+            for(let id in itemsObj) {
+                let item = itemsObj[id];
+                let name = item.name.toLowerCase();
+                let type = item.type || "Dine-in";
+                let qty = item.qty || 1;
+                let deduct = {};
 
-        // --- প্যাকেজিং লজিক (শুধুমাত্র পার্সেলের জন্য) ---
-        if(type === 'Parcel') {
-            isParcelOrder = true;
-            if(pcsPerPlate === 5 || name.includes('mains') || name.includes('burger')) {
-                deduct['Box_450ml'] = 1 * qty;
-                deduct['Sauce_Cup'] = 1 * qty;
-            } 
-            else if(pcsPerPlate === 10) {
-                // প্ল্যাটারের জন্য হয়তো ২টা বক্স বা বড় বক্স লাগে
-                deduct['Box_450ml'] = 2 * qty; 
-                deduct['Sauce_Cup'] = 2 * qty;
+                let pcsPerPlate = name.includes('platter') ? 10 : (name.includes('momo') ? 5 : 0);
+                let totalPcs = pcsPerPlate * qty;
+
+                if(totalPcs > 0) {
+                    let totalFillingKg = totalPcs * fillingPerPiece;
+                    deduct['Chicken'] = totalFillingKg * chickenPct;
+                    deduct['Onion'] = totalFillingKg * onionPct;
+                    deduct['Green_Chili'] = totalFillingKg * chiliPct;
+                    deduct['Moida'] = totalPcs * moidaPerPiece;
+                }
+
+                if(name.includes('cheese')) { 
+                    deduct['Cheese'] = totalPcs * 0.01; 
+                }
+
+                // Packaging logic
+                if(type === 'Parcel') {
+                    isParcelOrder = true;
+                    if(pcsPerPlate === 5 || name.includes('mains') || name.includes('burger')) {
+                        deduct['Box_450ml'] = 1 * qty;
+                        deduct['Sauce_Cup'] = 1 * qty;
+                    } 
+                    else if(pcsPerPlate === 10) {
+                        deduct['Box_450ml'] = 2 * qty; 
+                        deduct['Sauce_Cup'] = 2 * qty;
+                    }
+                }
+
+                // Apply deductions
+                for(let k in deduct) {
+                    if(inventory[k]) {
+                        inventory[k].stock -= deduct[k];
+                        inventory_usage[currentMonth][k] = (parseFloat(inventory_usage[currentMonth][k]) || 0) + deduct[k];
+                    }
+                }
             }
-        }
 
-        // লুপ চালিয়ে ডাটাবেস থেকে স্টক মাইনাস করা
-        for(let k in deduct) {
-            if(inventory[k]) {
-                inventory[k].stock -= deduct[k];
-                inventory_usage[currentMonth][k] = (parseFloat(inventory_usage[currentMonth][k]) || 0) + deduct[k];
+            // Poly Bag for parcel orders (1 per whole order)
+            if(isParcelOrder && inventory['Poly_Bag']) {
+                inventory['Poly_Bag'].stock -= 1;
+                inventory_usage[currentMonth]['Poly_Bag'] = (parseFloat(inventory_usage[currentMonth]['Poly_Bag']) || 0) + 1;
             }
+
+            localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+            localStorage.setItem('momo_inv_usage', JSON.stringify(inventory_usage));
+            renderInventory(); // Force UI update
         }
-    }
-
-    // পুরো অর্ডারে অন্তত একটি পার্সেল আইটেম থাকলে ১টি পলি ব্যাগ কাটবে (প্রতি প্লেটের জন্য নয়, পুরো অর্ডারের জন্য ১টি)
-    if(isParcelOrder && inventory['Poly_Bag']) {
-        inventory['Poly_Bag'].stock -= 1;
-        inventory_usage[currentMonth]['Poly_Bag'] = (parseFloat(inventory_usage[currentMonth]['Poly_Bag']) || 0) + 1;
-    }
-
-    // লোকাল স্টোরেজে নতুন স্টক সেভ করা
-    localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-    localStorage.setItem('momo_inv_usage', JSON.stringify(inventory_usage));
-}
 
         // 4. ORDER CONFIRMATION
         window.saveMasterOrder = function() {
@@ -655,7 +665,7 @@
                 total = parseFloat(document.getElementById('fp-amount').value);
                 commission = total * 0.25; net = total - commission;
                 if(!orderRefId || !total) return showToast("Enter Online ID and Amount!", "error");
-                itemsToSave = { 1: { name: "Online Combo", price: total, type: currentSource } };
+                itemsToSave = { 1: { name: "Online Combo", price: total, type: "Parcel" } };
             }
 
             const record = {
@@ -672,6 +682,7 @@
             localStorage.setItem('momo_history', JSON.stringify(history));
             localStorage.setItem('momo_lastID', ++orderID);
             
+            // Only Direct orders deduct stock from POS. (Assuming Foodpanda updates backend or can be added here if needed)
             if(currentSource === 'Direct') trackInventoryUsage(itemsToSave);
 
             showToast(`${currentSource} Order Confirmed!`, "success");
@@ -696,7 +707,7 @@
             grid.innerHTML = active.map(o => `
                 <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 ${o.source === 'Direct' ? 'border-momo-500' : 'border-momo-panda'}">
                     <div class="flex justify-between font-bold text-sm mb-2"><span>#${o.id} (${o.source})</span><span class="text-slate-400 text-xs">${o.time}</span></div>
-                    <div class="space-y-1 mb-3">${Object.values(o.items).map(i => `<div class="bg-slate-50 px-2 py-1 text-xs font-bold text-slate-700 rounded">${i.name}</div>`).join('')}</div>
+                    <div class="space-y-1 mb-3">${Object.values(o.items).map(i => `<div class="bg-slate-50 px-2 py-1 text-xs font-bold text-slate-700 rounded">${i.name}${i.type ? `<span class="font-normal text-slate-500">(${i.type})</span>` : ''}</div>`).join('')}</div>
                     <button onclick="markReady(${o.id})" class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs transition">Mark Ready</button>
                 </div>
             `).join('');
@@ -713,17 +724,23 @@
             }
         };
 
-        // 6. EXPENSE & DAILY TALLY
+        // 6. EXPENSE & DAILY TALLY (WITH QUANTITY)
         window.addExpense = function() {
             let name = document.getElementById('exp-name').value;
+            let qty = document.getElementById('exp-qty').value; // Added Quantity Input
             let amt = parseFloat(document.getElementById('exp-amount').value);
-            if(!name || !amt || isNaN(amt)) return showToast("Enter Name and Amount clearly!", "error");
+            
+            if(!name || !amt || isNaN(amt)) return showToast("Enter Name and Total Amount clearly!", "error");
 
             let exp = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
-            exp.push({ name, amount: amt, date: new Date().toISOString().split('T')[0] });
+            exp.push({ name, qty, amount: amt, date: new Date().toISOString().split('T')[0] });
             localStorage.setItem('momo_expenses', JSON.stringify(exp));
             
-            document.getElementById('exp-name').value = ""; document.getElementById('exp-amount').value = "";
+            // Clear inputs
+            document.getElementById('exp-name').value = ""; 
+            document.getElementById('exp-qty').value = ""; 
+            document.getElementById('exp-amount').value = "";
+            
             showToast("Expense Saved!", "success");
             calcEOD(); buildReports();
         };
@@ -751,9 +768,14 @@
             // Update Performance Widget Data
             updatePerformanceWidget(history, totalExp, directSales, onlineNet, totalOrders);
 
+            // Render Expense List with QTY
             document.getElementById('today-expense-list').innerHTML = todayExpList.map(e => `
-                <div class="flex justify-between bg-slate-50 p-2 rounded border border-slate-100 text-sm">
-                    <span>${e.name}</span><span class="font-bold text-rose-500">-${e.amount} ৳</span>
+                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded border border-slate-100 text-sm">
+                    <div>
+                        <span class="font-bold text-slate-700">${e.name}</span>
+                        ${e.qty ? `<span class="text-xs text-slate-500 ml-1 bg-slate-200 px-1 rounded">${e.qty}</span>` : ''}
+                    </div>
+                    <span class="font-bold text-rose-500">-${e.amount} ৳</span>
                 </div>
             `).join('');
         };
