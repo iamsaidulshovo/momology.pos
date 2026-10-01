@@ -569,26 +569,79 @@
         }
 
         function trackInventoryUsage(itemsObj) {
-            let currentMonth = new Date().toISOString().slice(0,7);
-            if(!inventory_usage[currentMonth]) inventory_usage[currentMonth] = {};
+    let currentMonth = new Date().toISOString().slice(0,7);
+    if(!inventory_usage[currentMonth]) inventory_usage[currentMonth] = {};
 
-            for(let id in itemsObj) {
-                let name = itemsObj[id].name.toLowerCase();
-                let deduct = {};
-                if(name.includes('momo')) { deduct['Chicken'] = 0.08; deduct['Moida'] = 0.05; deduct['Momo_Box'] = 1; }
-                if(name.includes('burger')) { deduct['Chicken'] = 0.12; }
-                if(name.includes('cheese')) { deduct['Cheese'] = 0.05; }
-                
-                for(let k in deduct) {
-                    if(inventory[k]) {
-                        inventory[k].stock -= deduct[k];
-                        inventory_usage[currentMonth][k] = (parseFloat(inventory_usage[currentMonth][k]) || 0) + deduct[k];
-                    }
-                }
-            }
-            localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-            localStorage.setItem('momo_inv_usage', JSON.stringify(inventory_usage));
+    // --- রেসিপি রেশিও সেটআপ ---
+    const totalMix = 1 + 1.2 + 0.01; // Chicken(1) + Onion(1.2) + Chili(0.01) = 2.21 kg
+    const chickenPct = 1 / totalMix; // মিক্সচারের কত অংশ চিকেন
+    const onionPct = 1.2 / totalMix; // মিক্সচারের কত অংশ পেঁয়াজ
+    const chiliPct = 0.01 / totalMix; // মিক্সচারের কত অংশ মরিচ
+    
+    // প্রতি পিস মোমোতে ফিলিং ও ময়দার পরিমাণ (গ্রাম হিসেবে)
+    const fillingPerPiece = 0.02; // ধরে নিচ্ছি ১ পিস মোমোতে ২০ গ্রাম ফিলিং থাকে (0.02 kg)
+    const moidaPerPiece = 0.01;   // ১ পিস মোমোর ডো-এর জন্য ১০ গ্রাম ময়দা (0.01 kg)
+
+    let isParcelOrder = false; // পলি ব্যাগের হিসাবের জন্য
+
+    for(let id in itemsObj) {
+        let item = itemsObj[id];
+        let name = item.name.toLowerCase();
+        let type = item.type; // "Dine-in" নাকি "Parcel"
+        let qty = item.qty || 1; // কয় প্লেট অর্ডার হয়েছে
+        let deduct = {};
+
+        // পিস নির্ধারণ (প্ল্যাটার হলে ১০ পিস, নরমাল হলে ৫ পিস)
+        let pcsPerPlate = name.includes('platter') ? 10 : (name.includes('momo') ? 5 : 0);
+        let totalPcs = pcsPerPlate * qty;
+
+        if(totalPcs > 0) {
+            let totalFillingKg = totalPcs * fillingPerPiece; // মোট ফিলিং (কেজি)
+            
+            // রেশিও অনুযায়ী কাঁচামাল কাটা হচ্ছে
+            deduct['Chicken'] = totalFillingKg * chickenPct;
+            deduct['Onion'] = totalFillingKg * onionPct;
+            deduct['Green_Chili'] = totalFillingKg * chiliPct;
+            deduct['Moida'] = totalPcs * moidaPerPiece;
         }
+
+        if(name.includes('cheese')) { 
+            deduct['Cheese'] = totalPcs * 0.01; // প্রতি পিস চিজ মোমোতে ১০ গ্রাম চিজ
+        }
+
+        // --- প্যাকেজিং লজিক (শুধুমাত্র পার্সেলের জন্য) ---
+        if(type === 'Parcel') {
+            isParcelOrder = true;
+            if(pcsPerPlate === 5 || name.includes('mains') || name.includes('burger')) {
+                deduct['Box_450ml'] = 1 * qty;
+                deduct['Sauce_Cup'] = 1 * qty;
+            } 
+            else if(pcsPerPlate === 10) {
+                // প্ল্যাটারের জন্য হয়তো ২টা বক্স বা বড় বক্স লাগে
+                deduct['Box_450ml'] = 2 * qty; 
+                deduct['Sauce_Cup'] = 2 * qty;
+            }
+        }
+
+        // লুপ চালিয়ে ডাটাবেস থেকে স্টক মাইনাস করা
+        for(let k in deduct) {
+            if(inventory[k]) {
+                inventory[k].stock -= deduct[k];
+                inventory_usage[currentMonth][k] = (parseFloat(inventory_usage[currentMonth][k]) || 0) + deduct[k];
+            }
+        }
+    }
+
+    // পুরো অর্ডারে অন্তত একটি পার্সেল আইটেম থাকলে ১টি পলি ব্যাগ কাটবে (প্রতি প্লেটের জন্য নয়, পুরো অর্ডারের জন্য ১টি)
+    if(isParcelOrder && inventory['Poly_Bag']) {
+        inventory['Poly_Bag'].stock -= 1;
+        inventory_usage[currentMonth]['Poly_Bag'] = (parseFloat(inventory_usage[currentMonth]['Poly_Bag']) || 0) + 1;
+    }
+
+    // লোকাল স্টোরেজে নতুন স্টক সেভ করা
+    localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+    localStorage.setItem('momo_inv_usage', JSON.stringify(inventory_usage));
+}
 
         // 4. ORDER CONFIRMATION
         window.saveMasterOrder = function() {
