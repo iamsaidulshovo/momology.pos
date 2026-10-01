@@ -369,11 +369,15 @@
         let charts = { day: null, menu: null, hour: null, expense: null };
 
         let inventory = JSON.parse(localStorage.getItem('momo_inventory')) || {
-            "Chicken": { stock: 15, unit: "kg", alert: 3 },
-            "Moida": { stock: 10, unit: "kg", alert: 2 },
-            "Momo_Box": { stock: 300, unit: "pcs", alert: 50 },
-            "Cheese": { stock: 5, unit: "kg", alert: 1 }
-        };
+    "Chicken": { stock: 15, unit: "kg", alert: 3 },
+    "Onion": { stock: 20, unit: "kg", alert: 5 },
+    "Green_Chili": { stock: 2, unit: "kg", alert: 0.5 },
+    "Moida": { stock: 10, unit: "kg", alert: 2 },
+    "Box_450ml": { stock: 300, unit: "pcs", alert: 50 },
+    "Sauce_Cup": { stock: 500, unit: "pcs", alert: 100 },
+    "Poly_Bag": { stock: 400, unit: "pcs", alert: 50 },
+    "Cheese": { stock: 5, unit: "kg", alert: 1 }
+};
         let inventory_usage = JSON.parse(localStorage.getItem('momo_inv_usage')) || {};
 
         // TOAST UTILITY
