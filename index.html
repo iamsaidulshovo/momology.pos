@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MOMOLOGY - Ultimate POS & Analytics</title>
+    <link rel="icon" type="image/png" href="logo.png">
+
+    <!-- Tailwind CSS & Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        momo: { 50: '#fffdf5', 500: '#e67e22', 600: '#d35400', navy: '#1e2b37', panda: '#d70f64' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f1f5f9; color: #334155; user-select: none; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #1e2b37; overflow-x: hidden; transition: 0.3s; }
+        .sidebar a { padding: 12px 20px; text-decoration: none; font-size: 14px; color: #cbd5e1; display: flex; align-items: center; gap: 12px; border-left: 4px solid transparent; }
+        .sidebar a:hover, .sidebar a.active { background-color: rgba(230, 126, 34, 0.15); color: #fff; border-left-color: #e67e22; }
+        
+        .tab-btn { padding: 8px 14px; border-radius: 10px; font-weight: 700; background: #e2e8f0; color: #475569; white-space: nowrap; transition: 0.2s; }
+        .tab-btn.active { background: #e67e22; color: white; box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3); }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .menu-section-title { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; margin: 14px 0 8px 0; }
+        .menu-item-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; }
+        
+        .source-btn { padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 13px; border: 2px solid transparent; transition: 0.2s; cursor: pointer; }
+        .source-btn.direct { background: #f8fafc; border-color: #e2e8f0; color: #475569; }
+        .source-btn.direct.active { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
+        .source-btn.panda { background: #fdf2f8; border-color: #fce7f3; color: #be185d; }
+        .source-btn.panda.active { background: #fdf2f8; border-color: #d70f64; color: #d70f64; }
+        
+        .stat-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        
+        @media print { body * { visibility: hidden; } #printFrame, #printFrame * { visibility: visible; } #printFrame { position: absolute; left: 0; top: 0; width: 100%; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebar">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-slate-700">
+            <span class="font-extrabold text-momo-500 text-lg tracking-wide">MOMOLOGY</span>
+            <button onclick="closeNav()" class="text-slate-400 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <nav class="mt-4 space-y-1">
+            <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active"><i class="fa-solid fa-cash-register"></i> POS Terminal</a>
+            <a href="#" onclick="showPage('active-dashboard'); closeNav()" class="sidebar-link"><i class="fa-solid fa-fire text-amber-500"></i> Kitchen KDS</a>
+            <a href="#" onclick="showPage('inventory-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-boxes-stacked text-indigo-400"></i> Inventory Tracker</a>
+            <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-chart-line text-emerald-400"></i> Reports & Analytics</a>
+            <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Cash Flow</a>
+        </nav>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="openNav()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center transition hover:bg-slate-200">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <div>
+                    <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
+                    <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg text-xs font-semibold">
+                    <i class="fa-regular fa-clock text-momo-500"></i> <span id="live-clock">--:--:--</span>
+                </div>
+                <button onclick="showPage('active-dashboard')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-fire"></i> KDS (<span id="active-count-badge">0</span>)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-3 py-4 flex-1 w-full">
+        <!-- Navigation Tabs -->
+        <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS</button>
+            <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> KDS</button>
+            <button onclick="showPage('inventory-page', this)" class="tab-btn"><i class="fa-solid fa-boxes-stacked mr-1"></i> Inventory</button>
+            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-chart-pie mr-1"></i> Analytics</button>
+            <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> P&L Setup</button>
+        </div>
+
+        <!-- 1. POS ORDER PAGE -->
+        <div id="order-page" class="page active space-y-4">
+            <div class="bg-white rounded-xl p-2 border border-slate-200 shadow-sm flex gap-2">
+                <button onclick="setOrderSource('Direct')" id="src-direct" class="source-btn direct active flex-1"><i class="fa-solid fa-store mr-1"></i> Direct (Dine-in/Parcel)</button>
+                <button onclick="setOrderSource('Foodpanda')" id="src-panda" class="source-btn panda flex-1"><i class="fa-solid fa-motorcycle mr-1"></i> Foodpanda / Foodi</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <!-- Menu / Quick Entry -->
+                <div class="lg:col-span-7 space-y-3">
+                    <div id="direct-menu-ui" class="block">
+                        <div class="relative mb-3">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500">
+                        </div>
+                        <div id="menu-container" class="max-h-[600px] overflow-y-auto pr-1"></div>
+                    </div>
+
+                    <div id="panda-quick-ui" class="hidden bg-white p-6 rounded-2xl border border-momo-panda shadow-sm space-y-4">
+                        <div class="flex items-center gap-2 text-momo-panda mb-2">
+                            <i class="fa-solid fa-bolt text-xl"></i><h2 class="text-lg font-black">Online Quick Entry</h2>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-bold text-slate-600 mb-1">Order ID</label><input type="text" id="fp-order-id" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-sm font-bold"></div>
+                            <div><label class="block text-xs font-bold text-slate-600 mb-1">Total Bill (Customer Paid)</label><input type="number" id="fp-amount" oninput="calcFpNet()" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-sm font-bold text-momo-panda"></div>
+                        </div>
+                        <div class="bg-rose-50 p-4 rounded-xl border border-rose-100">
+                            <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Platform Comm. (25%)</span><span class="font-bold text-rose-600">- <span id="fp-commission">0</span> TK</span></div>
+                            <div class="flex justify-between text-base border-t border-rose-200 pt-2 mt-2"><span class="font-black text-slate-800">Net Payout to Momology</span><span class="font-black text-emerald-600"><span id="fp-net">0</span> TK</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart -->
+                <div class="lg:col-span-5 space-y-3">
+                    <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-lg space-y-4">
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
+                            <div class="flex justify-between text-xs mb-2">
+                                <span class="font-bold text-emerald-400"><i class="fa-solid fa-user"></i> Customer Sync</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700">Optional</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" id="customer-phone" placeholder="Mobile" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                <input type="text" id="customer-name" placeholder="Name" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                            </div>
+                        </div>
+
+                        <div id="cart-section">
+                            <div id="cart-rows" class="max-h-40 overflow-y-auto min-h-[60px] divide-y divide-slate-700"></div>
+                        </div>
+
+                        <div class="bg-momo-600 rounded-xl p-3 text-center shadow-md">
+                            <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট বিল</div>
+                            <div class="text-3xl font-black font-mono"><span id="total">0</span> TK</div>
+                        </div>
+
+                        <button onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-paper-plane"></i> CONFIRM & PRINT
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. KITCHEN KDS -->
+        <div id="active-dashboard" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
+                <h2 class="font-extrabold text-slate-800"><i class="fa-solid fa-fire text-momo-600"></i> Kitchen KDS</h2>
+                <button onclick="renderKDS()" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+            <div id="kds-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+        <!-- 3. LIVE INVENTORY -->
+        <div id="inventory-page" class="page space-y-4">
+            
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 mb-3"><i class="fa-solid fa-plus-circle text-indigo-500"></i> Add New Inventory Item</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="text" id="inv-new-name" placeholder="Item Name (e.g. Garlic)" class="bg-slate-50 border border-slate-200 p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                    <input type="text" id="inv-new-unit" placeholder="Unit (kg/pcs)" class="bg-slate-50 border border-slate-200 p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                    <input type="number" id="inv-new-alert" placeholder="Alert Level (e.g. 2)" class="bg-slate-50 border border-slate-200 p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
+                    <button onclick="addNewInventoryItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm transition">Add Item</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm">
+                <h2 class="font-extrabold text-slate-800 mb-4"><i class="fa-solid fa-boxes-stacked text-indigo-500"></i> Current Stock Tracker</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+                            <tr>
+                                <th class="py-3 px-2">Item</th>
+                                <th class="py-3 px-2">Current Stock</th>
+                                <th class="py-3 px-2">Status</th>
+                                <th class="py-3 px-2">Consumed (This Month)</th>
+                                <th class="py-3 px-2">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-tbody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. REPORTS & ANALYTICS -->
+        <div id="reports-page" class="page space-y-4">
+            
+            <!-- Performance Widget -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="stat-card">
+                    <p class="text-xs text-slate-500 font-bold mb-1">Today's Total Sales</p>
+                    <h3 class="text-2xl font-black text-slate-800">৳<span id="perf-today-sales">0</span></h3>
+                    <p id="perf-sales-diff" class="text-xs font-bold mt-1"></p>
+                </div>
+                <div class="stat-card">
+                    <p class="text-xs text-slate-500 font-bold mb-1">Total Orders</p>
+                    <h3 class="text-2xl font-black text-slate-800"><span id="perf-today-orders">0</span></h3>
+                    <p id="perf-orders-diff" class="text-xs font-bold mt-1"></p>
+                </div>
+                <div class="stat-card">
+                    <p class="text-xs text-slate-500 font-bold mb-1">Foodpanda/Foodi Net</p>
+                    <h3 class="text-2xl font-black text-momo-panda">৳<span id="perf-fp-sales">0</span></h3>
+                </div>
+                <div class="stat-card border-emerald-200 bg-emerald-50">
+                    <p class="text-xs text-emerald-700 font-bold mb-1">Net Profit Today</p>
+                    <h3 class="text-2xl font-black text-emerald-600">৳<span id="perf-net-profit">0</span></h3>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-700 mb-2">Sales Last 7 Days (Direct vs Online)</h3>
+                    <div class="chart-container"><canvas id="chartSalesByDay"></canvas></div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-700 mb-2">Top Menu Items (Direct)</h3>
+                    <div class="chart-container"><canvas id="chartMenu"></canvas></div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-700 mb-2">Sales by Hour (Traffic Flow)</h3>
+                    <div class="chart-container"><canvas id="chartHour"></canvas></div>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-700 mb-2">Monthly Expenses by Day</h3>
+                    <div class="chart-container"><canvas id="chartExpense"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. CASH FLOW (EOD) -->
+        <div id="expense-page" class="page space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                    <h3 class="font-extrabold text-slate-800 mb-3"><i class="fa-solid fa-cart-shopping text-rose-500"></i> Daily Expense Entry</h3>
+                    <div class="space-y-2">
+                        <input type="text" id="exp-name" placeholder="Details (e.g., Chicken 5kg)" class="w-full bg-slate-50 border p-2 text-sm rounded-lg">
+                        <input type="number" id="exp-amount" placeholder="Amount (৳)" class="w-full bg-slate-50 border p-2 text-sm rounded-lg font-bold">
+                        <button onclick="addExpense()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg text-sm transition">Save Expense</button>
+                    </div>
+                    <div id="today-expense-list" class="mt-4 space-y-2 max-h-40 overflow-y-auto text-xs"></div>
+                </div>
+                <div class="bg-slate-900 rounded-2xl p-5 shadow-lg text-white space-y-4 relative overflow-hidden">
+                    <h3 class="font-extrabold text-momo-500 relative z-10"><i class="fa-solid fa-cash-register"></i> End of Day (EOD) Tally</h3>
+                    <div class="space-y-2 text-sm text-slate-300 relative z-10">
+                        <div class="flex justify-between"><span>Direct Sales (Cash):</span> <span id="eod-cash-sales" class="font-bold text-white">0 ৳</span></div>
+                        <div class="flex justify-between border-b border-slate-700 pb-2"><span>Total Expenses (Cash):</span> <span id="eod-expenses" class="font-bold text-rose-400">0 ৳</span></div>
+                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-4">
+                            <label class="text-xs text-slate-400 block mb-1">Expected Cash in Drawer:</label>
+                            <div class="text-2xl font-mono font-black text-amber-400 mb-2"><span id="eod-expected-drawer">0</span> ৳</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <iframe id="printFrame" class="hidden"></iframe>
+
+    <!-- NO type="module" applied so functions attach globally & perfectly on local file -->
+    <script type="text/javascript">
+        // 1. DATA & STATE INITIALIZATION
+        const defaultMenuData = {
+            "🥟 STEAM MOMO (5 Pcs)": [
+                ["Classic Steam Momo", 100], ["Sausage Carnival Momo", 130],
+                ["Spicy Naga Fire Momo", 110], ["Masala Momo", 110], ["Soup Momo", 199]
+            ],
+            "🔥 FRIED MOMO (5 Pcs)": [
+                ["Crispy Fried Momo", 100], ["Naga Fire Momo", 110], ["Kurkure Crunch Momo", 120]
+            ],
+            "🍖 BBQ MOMO (5 Pcs)": [
+                ["Smoky BBQ Momo", 120], ["Spicy Naga BBQ Fusion", 130]
+            ],
+            "🧀 SPECIAL CHEESE MOMO (5 Pcs)": [
+                ["Steamed Cheesy Melt Momo", 140], ["Crispy Fried Cheesy Blast", 140],
+                ["Crunch-X Kurkure Cheesy Burst", 160], ["Smoky BBQ Cheesy Melt", 160],
+                ["Spicy Naga BBQ Cheesy Fusion", 170], ["The Ultimate Motka Cheesy Bake", 170]
+            ],
+            "🍱 PLATTERS (10 Pcs)": [
+                ["Twin-Fire Fried Platter", 220], ["The Ultimate Kurkure Crunch Platter", 240], ["Mega 5-Flavor Platter", 240]
+            ],
+            "🧀 CHEESEY PLATTERS (10 Pcs)": [
+                ["Twin-Cheese Fried Platter", 290], ["The Grand Cheesy Steamed Platter", 310], ["The Ultimate Kurkure Cheese Platter", 330]
+            ],
+            "👑 COMBO & FUSION PLATTERS": [
+                ["Solo Crispy Combo", 259], ["Momo & Wings Craze Platter", 299],
+                ["The Ultimate Crispy Feast", 449], ["Momology Mega Fusion Platter", 449], ["The Big Brother Feast", 679]
+            ],
+            "🍜 MAINS & SIDES": [
+                ["Ramen", 190], ["Cheesy Baked Pasta", 190], ["Meatbox", 159],
+                ["Crispy Golden Fries", 90], ["Loaded Cheesy Fries", 199]
+            ],
+            "🍔 BURGER & SUB STATION": [
+                ["Twin-Tower Cheesy Burger", 339], ["Grilled Cheesy Burger", 249],
+                ["Crispy Cheesy Burger", 239], ["Sub Burger", 160], ["Sub Sandwich", 160]
+            ],
+            "🍗 CRISPY CORNER": [
+                ["Crispy Fried Chicken (1pc)", 129], ["Crispy Wings (5 Pcs)", 199],
+                ["BBQ Wings (5 Pcs)", 249], ["Naga Wings (5 Pcs)", 259], ["Crispy Chicken Finger", 149]
+            ]
+        };
+
+        let currentSource = 'Direct';
+        let cart = {};
+        let orderID = localStorage.getItem('momo_lastID') ? parseInt(localStorage.getItem('momo_lastID')) : 1001;
+        let charts = { day: null, menu: null, hour: null, expense: null };
+
+        let inventory = JSON.parse(localStorage.getItem('momo_inventory')) || {
+            "Chicken": { stock: 15, unit: "kg", alert: 3 },
+            "Moida": { stock: 10, unit: "kg", alert: 2 },
+            "Momo_Box": { stock: 300, unit: "pcs", alert: 50 },
+            "Cheese": { stock: 5, unit: "kg", alert: 1 }
+        };
+        let inventory_usage = JSON.parse(localStorage.getItem('momo_inv_usage')) || {};
+
+        // TOAST UTILITY
+        window.showToast = function(msg, type = "info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-slate-800');
+            toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
+        // 2. POS CORE LOGIC
+        window.setOrderSource = function(src) {
+            currentSource = src;
+            document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+            if(src === 'Direct') {
+                document.getElementById('src-direct').classList.add('active');
+                document.getElementById('direct-menu-ui').classList.remove('hidden');
+                document.getElementById('panda-quick-ui').classList.add('hidden');
+                document.getElementById('cart-section').style.display = 'block';
+            } else {
+                document.getElementById('src-panda').classList.add('active');
+                document.getElementById('direct-menu-ui').classList.add('hidden');
+                document.getElementById('panda-quick-ui').classList.remove('hidden');
+                document.getElementById('cart-section').style.display = 'none';
+            }
+            refreshCartUI();
+        };
+
+        window.calcFpNet = function() {
+            let amt = parseFloat(document.getElementById('fp-amount').value) || 0;
+            let commission = amt * 0.25;
+            let net = amt - commission;
+            document.getElementById('fp-commission').innerText = commission.toFixed(2);
+            document.getElementById('fp-net').innerText = net.toFixed(2);
+            document.getElementById('total').innerText = amt;
+        };
+
+        window.renderMenu = function() {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = "";
+            for (let section in defaultMenuData) {
+                container.innerHTML += `<div class="menu-section-title">${section}</div>`;
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-2 my-2";
+                defaultMenuData[section].forEach(item => {
+                    grid.innerHTML += `
+                        <div class="menu-item-card">
+                            <div><div class="font-bold text-xs text-slate-800">${item[0]}</div><div class="text-xs font-black text-momo-600">৳${item[1]}</div></div>
+                            <button class="bg-slate-100 text-slate-700 px-3 py-1 rounded font-bold text-xs hover:bg-slate-200 transition" onclick="addToCart('${item[0]}', ${item[1]})">Add</button>
+                        </div>`;
+                });
+                container.appendChild(grid);
+            }
+        };
+
+        window.filterMenu = function() {
+            const term = document.getElementById('menu-search-input').value.toLowerCase();
+            document.querySelectorAll('.menu-item-card').forEach(card => {
+                card.style.display = card.innerText.toLowerCase().includes(term) ? "flex" : "none";
+            });
+        };
+
+        window.addToCart = function(name, price) {
+            let id = "item-" + Date.now() + Math.random();
+            cart[id] = { name, price, qty: 1, type: "Dine-in" };
+            refreshCartUI();
+        };
+
+        window.refreshCartUI = function() {
+            if(currentSource !== 'Direct') return;
+            let sub = 0;
+            const rows = document.getElementById('cart-rows');
+            rows.innerHTML = "";
+            for (let id in cart) {
+                let item = cart[id];
+                sub += item.price;
+                rows.innerHTML += `
+                    <div class="flex justify-between items-center py-2 text-xs">
+                        <span class="font-bold text-white">${item.name}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="font-mono text-momo-500 font-bold">৳${item.price}</span>
+                            <button onclick="delete cart['${id}']; refreshCartUI();" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            }
+            document.getElementById('total').innerText = sub;
+        };
+
+        // 3. INVENTORY LOGIC (BUG FIXED)
+        window.renderInventory = function() {
+            const tb = document.getElementById('inventory-tbody');
+            tb.innerHTML = "";
+            let currentMonth = new Date().toISOString().slice(0,7);
+
+            for(let key in inventory) {
+                let item = inventory[key];
+                
+                // Safe Check for Corrupted DB
+                let currentStock = parseFloat(item.stock);
+                if (isNaN(currentStock)) currentStock = 0; 
+                inventory[key].stock = currentStock; // Repairing local state safely
+                
+                let isLow = currentStock <= (parseFloat(item.alert) || 0);
+                
+                // Safe Check for Monthly Usage
+                let consumed = 0;
+                if(inventory_usage[currentMonth] && inventory_usage[currentMonth][key]) {
+                    consumed = parseFloat(inventory_usage[currentMonth][key]);
+                    if(isNaN(consumed)) consumed = 0;
+                }
+                
+                tb.innerHTML += `
+                    <tr>
+                        <td class="py-3 px-2 font-bold text-slate-700">${key.replace(/_/g, ' ')}</td>
+                        <td class="py-3 px-2">
+                            <span class="font-mono text-sm ${isLow ? 'text-rose-600 font-black' : 'font-bold'}">${currentStock.toFixed(2)} ${item.unit}</span>
+                        </td>
+                        <td class="py-3 px-2">${isLow ? '<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[10px] font-bold">Low Stock</span>' : '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">OK</span>'}</td>
+                        <td class="py-3 px-2 text-xs text-slate-500 font-mono">${consumed.toFixed(2)} ${item.unit}</td>
+                        <td class="py-3 px-2 flex gap-1.5">
+                            <button onclick="editStock('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded text-xs font-bold text-slate-700 transition">Edit</button>
+                            <button onclick="addStock('${key}')" class="bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded text-xs font-bold text-indigo-700 transition">+ Add</button>
+                            <button onclick="deleteStock('${key}')" class="bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded text-xs font-bold text-rose-600 transition"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+            }
+        };
+
+        window.addNewInventoryItem = function() {
+            let name = document.getElementById('inv-new-name').value.trim().replace(/ /g, '_');
+            let unit = document.getElementById('inv-new-unit').value.trim();
+            let alertLevel = parseFloat(document.getElementById('inv-new-alert').value) || 0;
+            
+            if(!name || !unit) return alert("Item Name and Unit are required!");
+            if(inventory[name]) return alert("This item already exists in Inventory!");
+
+            inventory[name] = { stock: 0, unit: unit, alert: alertLevel };
+            localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+            
+            document.getElementById('inv-new-name').value = '';
+            document.getElementById('inv-new-unit').value = '';
+            document.getElementById('inv-new-alert').value = '';
+            renderInventory();
+            showToast(`Added ${name.replace(/_/g, ' ')} successfully`, "success");
+        };
+
+        window.editStock = function(key) {
+            let newVal = prompt(`Enter Exact New Stock for ${key} (Current: ${inventory[key].stock}):`);
+            if (newVal !== null && newVal.trim() !== '') {
+                let parsed = parseFloat(newVal);
+                if (!isNaN(parsed)) {
+                    inventory[key].stock = parsed;
+                    localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+                    renderInventory();
+                    showToast("Stock Updated Successfully", "success");
+                } else {
+                    showToast("Invalid number entered!", "error");
+                }
+            }
+        };
+
+        window.addStock = function(key) {
+            let addVal = prompt(`How much to ADD to ${key}? (Current: ${inventory[key].stock})`);
+            if (addVal !== null && addVal.trim() !== '') {
+                let parsed = parseFloat(addVal);
+                if (!isNaN(parsed)) {
+                    inventory[key].stock += parsed;
+                    localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+                    renderInventory();
+                    showToast("Stock Added Successfully", "success");
+                } else {
+                    showToast("Invalid number entered!", "error");
+                }
+            }
+        };
+
+        window.deleteStock = function(key) {
+            if(confirm(`Are you sure you want to permanently delete ${key} from inventory?`)) {
+                delete inventory[key];
+                localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+                renderInventory();
+                showToast("Item deleted", "info");
+            }
+        }
+
+        function trackInventoryUsage(itemsObj) {
+            let currentMonth = new Date().toISOString().slice(0,7);
+            if(!inventory_usage[currentMonth]) inventory_usage[currentMonth] = {};
+
+            for(let id in itemsObj) {
+                let name = itemsObj[id].name.toLowerCase();
+                let deduct = {};
+                if(name.includes('momo')) { deduct['Chicken'] = 0.08; deduct['Moida'] = 0.05; deduct['Momo_Box'] = 1; }
+                if(name.includes('burger')) { deduct['Chicken'] = 0.12; }
+                if(name.includes('cheese')) { deduct['Cheese'] = 0.05; }
+                
+                for(let k in deduct) {
+                    if(inventory[k]) {
+                        inventory[k].stock -= deduct[k];
+                        inventory_usage[currentMonth][k] = (parseFloat(inventory_usage[currentMonth][k]) || 0) + deduct[k];
+                    }
+                }
+            }
+            localStorage.setItem('momo_inventory', JSON.stringify(inventory));
+            localStorage.setItem('momo_inv_usage', JSON.stringify(inventory_usage));
+        }
+
+        // 4. ORDER CONFIRMATION
+        window.saveMasterOrder = function() {
+            let total = 0, commission = 0, net = 0, itemsToSave = {}, orderRefId = "";
+            if (currentSource === 'Direct') {
+                if (Object.keys(cart).length === 0) return alert("Cart is empty!");
+                total = parseFloat(document.getElementById('total').innerText);
+                net = total; itemsToSave = cart; orderRefId = "MOMO-" + orderID;
+            } else {
+                orderRefId = document.getElementById('fp-order-id').value;
+                total = parseFloat(document.getElementById('fp-amount').value);
+                commission = total * 0.25; net = total - commission;
+                if(!orderRefId || !total) return alert("Enter Online ID and Amount!");
+                itemsToSave = { 1: { name: "Online Combo", price: total, type: currentSource } };
+            }
+
+            const record = {
+                id: orderID, claimCode: orderRefId, source: currentSource,
+                items: itemsToSave, total: total, netPayout: net,
+                status: 'kitchen_prep',
+                date: new Date().toISOString().split('T')[0], 
+                time: new Date().toLocaleTimeString(),
+                hour: new Date().getHours()
+            };
+
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            history.unshift(record);
+            localStorage.setItem('momo_history', JSON.stringify(history));
+            localStorage.setItem('momo_lastID', ++orderID);
+            
+            if(currentSource === 'Direct') trackInventoryUsage(itemsToSave);
+
+            showToast(`${currentSource} Order Confirmed!`, "success");
+            cart = {}; refreshCartUI();
+            
+            if(currentSource !== 'Direct') {
+                document.getElementById('fp-order-id').value = '';
+                document.getElementById('fp-amount').value = '';
+                calcFpNet();
+            }
+            
+            renderKDS(); calcEOD(); buildReports();
+        };
+
+        // 5. KITCHEN DISPLAY (KDS)
+        window.renderKDS = function() {
+            const grid = document.getElementById('kds-grid');
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            let active = history.filter(o => o.status === 'kitchen_prep');
+            document.getElementById('active-count-badge').innerText = active.length;
+
+            grid.innerHTML = active.map(o => `
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 ${o.source === 'Direct' ? 'border-momo-500' : 'border-momo-panda'}">
+                    <div class="flex justify-between font-bold text-sm mb-2"><span>#${o.id} (${o.source})</span><span class="text-slate-400 text-xs">${o.time}</span></div>
+                    <div class="space-y-1 mb-3">${Object.values(o.items).map(i => `<div class="bg-slate-50 px-2 py-1 text-xs font-bold text-slate-700 rounded">${i.name}</div>`).join('')}</div>
+                    <button onclick="markReady(${o.id})" class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs transition">Mark Ready</button>
+                </div>
+            `).join('');
+        };
+
+        window.markReady = function(id) {
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            let idx = history.findIndex(o => o.id == id);
+            if(idx > -1) {
+                history[idx].status = 'completed';
+                localStorage.setItem('momo_history', JSON.stringify(history));
+                showToast(`Order #${id} is Ready!`, "success");
+                renderKDS();
+            }
+        };
+
+        // 6. EXPENSE & DAILY TALLY
+        window.addExpense = function() {
+            let name = document.getElementById('exp-name').value;
+            let amt = parseFloat(document.getElementById('exp-amount').value);
+            if(!name || !amt || isNaN(amt)) return showToast("Enter Name and Amount clearly!", "error");
+
+            let exp = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+            exp.push({ name, amount: amt, date: new Date().toISOString().split('T')[0] });
+            localStorage.setItem('momo_expenses', JSON.stringify(exp));
+            
+            document.getElementById('exp-name').value = ""; document.getElementById('exp-amount').value = "";
+            showToast("Expense Saved!", "success");
+            calcEOD(); buildReports();
+        };
+
+        window.calcEOD = function() {
+            let today = new Date().toISOString().split('T')[0];
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            let expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+
+            let directSales = 0, onlineNet = 0, totalExp = 0, totalOrders = 0;
+
+            history.filter(o => o.date === today).forEach(o => {
+                totalOrders++;
+                if(o.source === 'Direct') directSales += o.total;
+                else onlineNet += o.netPayout;
+            });
+
+            let todayExpList = expenses.filter(e => e.date === today);
+            todayExpList.forEach(e => totalExp += e.amount);
+
+            document.getElementById('eod-cash-sales').innerText = directSales + " ৳";
+            document.getElementById('eod-expenses').innerText = totalExp + " ৳";
+            document.getElementById('eod-expected-drawer').innerText = (directSales - totalExp);
+
+            // Update Performance Widget Data
+            updatePerformanceWidget(history, totalExp, directSales, onlineNet, totalOrders);
+
+            document.getElementById('today-expense-list').innerHTML = todayExpList.map(e => `
+                <div class="flex justify-between bg-slate-50 p-2 rounded border border-slate-100 text-sm">
+                    <span>${e.name}</span><span class="font-bold text-rose-500">-${e.amount} ৳</span>
+                </div>
+            `).join('');
+        };
+
+        function updatePerformanceWidget(history, todayExp, todayDirect, todayOnline, todayOrders) {
+            let today = new Date().toISOString().split('T')[0];
+            let yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            
+            let yDaySales = 0, yDayOrders = 0;
+            history.filter(o => o.date === yesterday).forEach(o => {
+                yDayOrders++;
+                yDaySales += (o.source === 'Direct' ? o.total : o.netPayout);
+            });
+
+            let todaySales = todayDirect + todayOnline;
+            
+            document.getElementById('perf-today-sales').innerText = todaySales;
+            document.getElementById('perf-today-orders').innerText = todayOrders;
+            document.getElementById('perf-fp-sales').innerText = todayOnline;
+            document.getElementById('perf-net-profit').innerText = (todaySales - todayExp);
+
+            let salesDiff = yDaySales ? ((todaySales - yDaySales) / yDaySales * 100).toFixed(1) : (todaySales > 0 ? 100 : 0);
+            let orderDiff = yDayOrders ? ((todayOrders - yDayOrders) / yDayOrders * 100).toFixed(1) : (todayOrders > 0 ? 100 : 0);
+            
+            const renderDiff = (elId, diff) => {
+                let el = document.getElementById(elId);
+                if(diff > 0) { el.innerHTML = `<span class="text-emerald-500"><i class="fa-solid fa-arrow-up"></i> +${diff}% vs Yesterday</span>`; }
+                else if(diff < 0) { el.innerHTML = `<span class="text-rose-500"><i class="fa-solid fa-arrow-down"></i> ${diff}% vs Yesterday</span>`; }
+                else { el.innerHTML = `<span class="text-slate-400">- Same as Yesterday</span>`; }
+            };
+
+            renderDiff('perf-sales-diff', salesDiff);
+            renderDiff('perf-orders-diff', orderDiff);
+        }
+
+        // 7. CHARTS ENGINE
+        window.buildReports = function() {
+            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
+            let expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
+            
+            let dates = [];
+            for(let i=6; i>=0; i--) { dates.push(new Date(Date.now() - i*86400000).toISOString().split('T')[0]); }
+
+            // Chart 1: Sales By Day
+            let dailyDirect = [], dailyOnline = [];
+            dates.forEach(d => {
+                let ds = 0, onl = 0;
+                history.filter(o => o.date === d).forEach(o => { if(o.source === 'Direct') ds += o.total; else onl += o.netPayout; });
+                dailyDirect.push(ds); dailyOnline.push(onl);
+            });
+
+            if(charts.day) charts.day.destroy();
+            charts.day = new Chart(document.getElementById('chartSalesByDay'), {
+                type: 'bar',
+                data: { labels: dates.map(d=>d.slice(5)), datasets: [
+                    { label: 'Direct (Cash)', data: dailyDirect, backgroundColor: '#e67e22' },
+                    { label: 'Online (Bank)', data: dailyOnline, backgroundColor: '#d70f64' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+            });
+
+            // Chart 2: Top Menu Items
+            let itemCounts = {};
+            history.forEach(o => {
+                if(o.source === 'Direct') {
+                    for(let id in o.items) { itemCounts[o.items[id].name] = (itemCounts[o.items[id].name] || 0) + 1; }
+                }
+            });
+            let sortedItems = Object.entries(itemCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            
+            if(charts.menu) charts.menu.destroy();
+            charts.menu = new Chart(document.getElementById('chartMenu'), {
+                type: 'doughnut',
+                data: { labels: sortedItems.map(i=>i[0]), datasets: [{ data: sortedItems.map(i=>i[1]), backgroundColor: ['#e67e22', '#27ae60', '#f1c40f', '#e74c3c', '#9b59b6'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Chart 3: Sales by Hour
+            let hours = new Array(24).fill(0);
+            history.forEach(o => { if(o.hour !== undefined && !isNaN(o.hour)) hours[o.hour]++; });
+            
+            if(charts.hour) charts.hour.destroy();
+            charts.hour = new Chart(document.getElementById('chartHour'), {
+                type: 'line',
+                data: { labels: [...Array(24).keys()].map(h=>h+":00"), datasets: [{ label: 'Orders', data: hours, borderColor: '#3498db', tension: 0.3, fill: true, backgroundColor: 'rgba(52, 152, 219, 0.2)' }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Chart 4: Daily Expenses
+            let dailyExp = [];
+            dates.forEach(d => {
+                let sum = 0;
+                expenses.filter(e => e.date === d).forEach(e => sum += parseFloat(e.amount) || 0);
+                dailyExp.push(sum);
+            });
+
+            if(charts.expense) charts.expense.destroy();
+            charts.expense = new Chart(document.getElementById('chartExpense'), {
+                type: 'bar',
+                data: { labels: dates.map(d=>d.slice(5)), datasets: [{ label: 'Expenses (৳)', data: dailyExp, backgroundColor: '#e74c3c' }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        };
+
+        // UI & NAV LOGIC
+        window.showPage = function(id, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (btn) btn.classList.add('active');
+            
+            if(id === 'active-dashboard') renderKDS();
+            if(id === 'inventory-page') renderInventory();
+            if(id === 'reports-page') buildReports();
+            if(id === 'expense-page') calcEOD();
+        };
+
+        window.openNav = () => document.getElementById("mySidebar").style.width = "260px";
+        window.closeNav = () => document.getElementById("mySidebar").style.width = "0";
+
+        // APP INIT
+        renderMenu(); renderInventory(); renderKDS(); calcEOD(); buildReports();
+        setInterval(() => document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(), 1000);
+    </script>
+</body>
+</html>
