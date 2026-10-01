@@ -59,6 +59,23 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
 
+    <!-- Security PIN Lock Screen (Refresh korlei eta asbe) -->
+    <div id="pin-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
+        <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
+            <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto rounded-2xl border border-slate-600 shadow-lg object-contain bg-white p-1" onerror="this.src='https://via.placeholder.com/80?text=MOMOLOGY'">
+            <div>
+                <h2 class="text-xl font-black text-momo-500 tracking-wide">MOMOLOGY POS</h2>
+                <p class="text-xs text-slate-400 mt-1">লগইন করতে ৫ ডিজিট সিকিউরিটি পিন দিন</p>
+            </div>
+            <input type="password" id="admin-pin-input" placeholder="*****" maxlength="5" class="text-center text-2xl tracking-[0.5em] w-44 py-2.5 mx-auto bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-momo-500 text-white font-mono" onkeypress="if(event.key==='Enter') unlockSystem()">
+            <div>
+                <button onclick="unlockSystem()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-key"></i> আনলক সিস্টেম
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <div id="mySidebar" class="sidebar">
         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-700">
@@ -71,6 +88,7 @@
             <a href="#" onclick="showPage('inventory-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-boxes-stacked text-indigo-400"></i> Inventory Tracker</a>
             <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-chart-line text-emerald-400"></i> Reports & Analytics</a>
             <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Cash Flow</a>
+            <a href="#" onclick="lockSystem(); closeNav()" class="sidebar-link text-rose-400 hover:text-rose-300 border-t border-slate-700 mt-2"><i class="fa-solid fa-lock"></i> Lock System</a>
         </nav>
     </div>
 
@@ -215,7 +233,6 @@
         <!-- 4. REPORTS & ANALYTICS -->
         <div id="reports-page" class="page space-y-4">
             
-            <!-- Performance Widget -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="stat-card">
                     <p class="text-xs text-slate-500 font-bold mb-1">Today's Total Sales</p>
@@ -237,7 +254,6 @@
                 </div>
             </div>
 
-            <!-- Charts Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-white p-4 rounded-xl border border-slate-200">
                     <h3 class="text-sm font-bold text-slate-700 mb-2">Sales Last 7 Days (Direct vs Online)</h3>
@@ -287,8 +303,25 @@
     </main>
     <iframe id="printFrame" class="hidden"></iframe>
 
-    <!-- NO type="module" applied so functions attach globally & perfectly on local file -->
     <script type="text/javascript">
+        // PIN LOCK SYSTEM LOGIC
+        const MANDATORY_PIN = "24466";
+        window.unlockSystem = function() {
+            const input = document.getElementById('admin-pin-input').value;
+            if (input === MANDATORY_PIN) {
+                document.getElementById('pin-overlay').style.display = 'none';
+                document.getElementById('admin-pin-input').value = "";
+                showToast("সিস্টেমে স্বাগতম!", "success");
+            } else {
+                showToast("ভুল পিন কোড! সঠিক কোড লিখুন।", "error");
+                document.getElementById('admin-pin-input').value = "";
+            }
+        };
+
+        window.lockSystem = function() {
+            document.getElementById('pin-overlay').style.display = 'flex';
+        };
+
         // 1. DATA & STATE INITIALIZATION
         const defaultMenuData = {
             "🥟 STEAM MOMO (5 Pcs)": [
@@ -436,7 +469,7 @@
             document.getElementById('total').innerText = sub;
         };
 
-        // 3. INVENTORY LOGIC (BUG FIXED)
+        // 3. INVENTORY LOGIC
         window.renderInventory = function() {
             const tb = document.getElementById('inventory-tbody');
             tb.innerHTML = "";
@@ -445,14 +478,12 @@
             for(let key in inventory) {
                 let item = inventory[key];
                 
-                // Safe Check for Corrupted DB
                 let currentStock = parseFloat(item.stock);
                 if (isNaN(currentStock)) currentStock = 0; 
-                inventory[key].stock = currentStock; // Repairing local state safely
+                inventory[key].stock = currentStock;
                 
                 let isLow = currentStock <= (parseFloat(item.alert) || 0);
                 
-                // Safe Check for Monthly Usage
                 let consumed = 0;
                 if(inventory_usage[currentMonth] && inventory_usage[currentMonth][key]) {
                     consumed = parseFloat(inventory_usage[currentMonth][key]);
@@ -559,14 +590,14 @@
         window.saveMasterOrder = function() {
             let total = 0, commission = 0, net = 0, itemsToSave = {}, orderRefId = "";
             if (currentSource === 'Direct') {
-                if (Object.keys(cart).length === 0) return alert("Cart is empty!");
+                if (Object.keys(cart).length === 0) return showToast("Cart is empty!", "error");
                 total = parseFloat(document.getElementById('total').innerText);
                 net = total; itemsToSave = cart; orderRefId = "MOMO-" + orderID;
             } else {
                 orderRefId = document.getElementById('fp-order-id').value;
                 total = parseFloat(document.getElementById('fp-amount').value);
                 commission = total * 0.25; net = total - commission;
-                if(!orderRefId || !total) return alert("Enter Online ID and Amount!");
+                if(!orderRefId || !total) return showToast("Enter Online ID and Amount!", "error");
                 itemsToSave = { 1: { name: "Online Combo", price: total, type: currentSource } };
             }
 
