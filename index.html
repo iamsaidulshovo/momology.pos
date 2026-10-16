@@ -61,7 +61,7 @@
     <!-- Security PIN Lock Screen -->
     <div id="pin-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
         <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
-            <div id="lock-logo-placeholder"></div>
+            <img src="logo.png" alt="MOMOLOGY" class="w-20 h-20 mx-auto rounded-full shadow-lg border border-slate-700 bg-black p-1 object-contain" onerror="this.src='https://via.placeholder.com/80?text=MOMO'">
             <div>
                 <h2 class="text-xl font-black text-momo-500 tracking-wide">MOMOLOGY POS</h2>
                 <p class="text-xs text-slate-400 mt-1">লগইন করতে ৫ ডিজিট সিকিউরিটি পিন দিন</p>
@@ -98,7 +98,7 @@
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
                 <div class="flex items-center gap-2">
-                    <div id="header-logo-placeholder"></div>
+                    <img src="logo.png" alt="MOMOLOGY" class="w-8 h-8 rounded-full border border-momo-500 bg-black object-contain" onerror="this.src='https://via.placeholder.com/32?text=M'">
                     <div>
                         <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
                         <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS & REWARDS ENGINE</p>
@@ -230,7 +230,6 @@
 
         <!-- 3. INTEGRATED SALES & MONTH HISTORY ARCHIVE -->
         <div id="reports-page" class="page space-y-4">
-            <!-- Filter Bar for Past Months & Dates -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-calendar-days text-momo-600 text-lg"></i>
@@ -241,13 +240,11 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <!-- Specific Date Filter -->
                     <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
                         <span class="text-xs font-bold text-slate-500">দিন:</span>
                         <input type="date" id="filter-date" onchange="filterHistoryByDate()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
                     </div>
 
-                    <!-- Month Filter -->
                     <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
                         <span class="text-xs font-bold text-slate-500">পুরো মাস:</span>
                         <input type="month" id="filter-month" onchange="filterHistoryByMonth()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
@@ -262,7 +259,6 @@
                 </div>
             </div>
 
-            <!-- Filtered Analytics Stats Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="stat-card">
                     <p class="text-xs text-slate-500 font-bold mb-1">মোট বিক্রয় (Selected Period)</p>
@@ -282,7 +278,6 @@
                 </div>
             </div>
 
-            <!-- Historical Orders List -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <h3 class="font-extrabold text-slate-800 text-sm mb-3 flex items-center justify-between">
                     <span><i class="fa-solid fa-receipt text-momo-600 mr-1.5"></i> ফিল্টারকৃত অর্ডার হিস্ট্রি (<span id="hist-order-count">0</span>)</span>
@@ -349,7 +344,6 @@
                 </div>
             </div>
 
-            <!-- Expenses List Table -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                 <h3 class="font-extrabold text-slate-800 text-sm mb-3">খরচের হিস্ট্রি তালিকা</h3>
                 <div class="overflow-x-auto max-h-96">
@@ -372,20 +366,10 @@
         </div>
     </main>
 
-    <!-- PRINT SLIP TEMPLATES (CUSTOMER & KITCHEN KOT) -->
+    <!-- PRINT SLIP TEMPLATES -->
     <div id="printArea"></div>
 
     <script>
-        // ================= EMBEDDED HIGH-RES ASSETS (CLEAN BASE64 - 100% RELIABLE) =================
-        const MOMOLOGY_LOGO_SRC = "data:image/png;base64,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rpnZ/TP74cyuM7M/ntmtZvbjM7ttZreb2e1mdtXM/nBmt8zs2jO7Y2bfmtn1ZnbdzG4ws1vM7CYz+4GZ/WhmN83spjP7gcxumNmNZnabmd1sZjec2Q1nds2Z3XRmN5nZ92Z258y+Z2a3mtkPZvYTM7tpZreY2S1mdrOZ/WhmP5jZbWb2yJn9xMw+PLO7z+zaM7t1Zved2V1mdt2Z/dDMbjeza8/s2jO7zczumNm1Z3a3md1qZjed2W1mdoOZ3TCzG2Z2/czuMrPrZ3bDmf3ezO42s6tn9t2ZfX9m18/s1jO788xuMbMfmNnVM/t/Z3aTmX3/zH5wZjea2bVm9r2Z/Whmd5zZ/8/smjO7Y2a3ndn1Z3admX13ZtfO7PqZ/Xhmt8zshjP7npndamY/M7NrzewGM7vlzG4zs2vN7CYz+52Z3TKzq2d2vZndaGbXndmtZvbjmd1mZrfO7Hdn9uDMbjez353ZXTO7zczumNkNZvbjmb1iZvea2bVndquZfdfMfjKzq2d2g5ndamY3mdkNZnbLzG6c2Q9ndsPMrpnZT2R2zczumtm/z+ymM7vFzG4+s5vP7KqZXTuzG8/sZjP7qczuMrPvmNkPz+x2M7vhzH5yZj/I7D5mdvOZ3X5mt5vZLWb2vZndNLPrZvb9md1sZtfO7K4zu9HMfjyzm8zsljO77cxuMbM7zuxmM7vFzG41s5vM7CYz+8nMbjez68zsVjP7rsz+aGZ3mdmtM7t9ZreY2bVnds2ZXTOzW8zs+zP7kcweNrNrz+yGM7vdzG4xsxvN7DYzu9XMvmdmN5nZbWb2XZndMLMbzuxWM7tmZred2Q9m9kczu2Vmd53ZbWf23TO7zcyuN7MbzeymM7vhzG4xs5vP7Loz+8nMfmhmt8zsmjP7qczuMrM7ZnbLzK41s5vN7Ccy+0Fmd8zsejO77cxuMrPrZ3b3zG41s2tn9kczu/bMbjGzn5jZX2d2k5n9wczuPrPrzuy2M/ujmd04sztn9kMzu21mN5nZbWd2k5n90MxumNm1Z3b9zH5qZvea2fdmds2ZfcdndpuZ3XRmt5jZTWZ248x+eGa3zOzmM/uBmd1kZjeY2XVndp2Z3W5mN87spjP7scxuNrObz+yGM7tmZjfO7Ecye+TMfnJm15nZrWb23TO7aWb3z+x7M/uhmf14Zjec2fdmdtXMbjiz/zezW83shjP73szeMbPrZva9md0ysxvO7Iczu83MfjKzW83sdzK7bmY3mNl3zux2M7vezK49s5vN7BYz+5OZff/M7jWz62d2wcw+MrPvntmPZnarmd1qZtfP7BYz++HMfjyza2f2P2Z23cx+ZGb/c2Z3zOy6M7vFzG4xs5vN7HYz+/HMbjGz78zsLjP70cxuNrPrzeyGM7vBzG6Y2c1nds2ZfdfMvmdm15zZDWZ2k5ndYWbXn9kNZnbLzH4gsxvN7K8yu9PMbjezf5zZLTP7kcweMrPrzOyfzez2md01s2vN7FYz+92Z/fHMvmdmt8zs+zP7vpl9+8x+dGb3mNm/zuyOmV13ZjeZ2c1mdsuZ3TazW8zsZjP78czumtl1Znb7md1wZjed2TVmdsPMbjKzW8zsNjO7ycz+dGb/NLNrz+xGM7veze6e2V1mds/M/p/vffgf3/+Omd1qZjed2TVmdsuZfe/MbjezP5zZTWb2P2d2k5ldM7PrZ3aTmd1mZneY2c1mdtOZ3WJm35nZbWb2vZndbGbXmdk1Z3bLzH44s2tn9sOZfW9mN83s92f2fZndMLMbzeyGM/vOzG41s1vO7Pu71cweMrPrzOy7M7tqZred2Q9nds2Z/dDMrpnZd8zsVjP7icxuNrOfzOx2M7vezG4xs5/I7GYzu/bMrjezG8zs1pl99539wczuPrPrzeymM7vFzG4+s1vN7Ccyu2VmP5jZTWd2vZndM7Przey6mX3vzG41s+vP7Pszu9XMfjyzH87sNjO7zcxumdkdM7tqZtec2T9P70cye9TM/mRmj5zZo2f2/z780X1mdtfMrjOz68zsFjP70cy+P7PvmNl1Znbrmf2zmV01s+vN7P4zu8XMvjWzXz+z787s9jP70czunNldZnbzmb10ZtfP7Pszu/bMbjez78zsZjP78czunNmtM/vvZvb9md1sZvea2bUz+/HM7jWzG87shpn9zszeMbPvmNktZnbHzK4xs1vO7Pu71cweMrNbz+w7M7vuzG4xs5vN7BYzu/bMrjezG8zs1pl99539wczuPrPrzeymM7vFzG4+s1vN7Ccyu2VmP5jZTWd2vZndM7Przey6mX3vzG41s+vP7Pszu9XMfjyzH87sNjO7zcxumdkdM7tqZtec2T9P70cye9TM/mRmj5zZo2f2/z780X1mdtfMrjOz68zsFjP70cy+P7PvmNl1Znbrmf2zmV01s+vN7P4zu8XMvjWzXz+z787s9jP70czunNldZnbzmb10ZtfP7Pszu/bMbjez78zsZjP78czunNmtM/vvZvb9md1sZvea2bUz+/HM7jWzG87shpn9zszeMbPvmNktZnbHzK4xs1vO7Pu71cweMrNbz+w7M7vuzG4xs5vN7BYzu+bM7jKza8zs1pl9d2bfndltZnaPmf2nmf37zK4xsxvO7BYz+8nMfnJmt57Z9Wd2zc5uN7PrZnb1zP5kZreY2bVnds2Z3WVmP5jZT2R2zcwemNkdM7vBzG6b2S1m9oeZXWtmvzmzW8zs+zP7vpl978z+aGa3ntkPZnarXTM7+P7kY2Z288yeNrN3zexRM/vzmT10Zved2f2ze2Z288z+eGb3zuyGmd04s+/P7Mazh87s/zOzG2d2k5n9+cy+M7O7Z3b/zG6c2fVmdt3Mvj+za2Z298xumNlPzuzGM7v2zB4ysxvP7MazG8zsFjO7wczuP7M/ndmtZnbDmb1kZjea2U1m9pGZ/WBmd5zZHz+zR87sETP7s5k9dGb3z+zhM7t3ZvfO7CYz+8jM3jGz28zs5pl9Z2bXz+whM7v+zB48sx/O7Doz+/7MHjyzG2d2zcweMrPvmNl1ZvfN7AYzu+bMfmJmN5zZ9TP73szuMbOfmdmtZvYTM/vumT18Zrec2bVn9ocze+TMHjKzB87sz2b2sJndMbN7ZvaLmd1xZk+b2f/63vf//773/f+/733//+973//v/wWwF7c276F7wQAAAABJRU5ErkJggg==";
-
-        // Official Provided QR Code (Clean Base64 PNG)
-        const MOMOLOGY_QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAeKADAAQAAAABAAAAeAAAAACD0v3QAAAFXElEQVR4Ae3du24bRxSA4Z2U21Su0qRIkQvfgm7eF9A7b+U8h+VbOPa9d+0L6G2C2sQWkMS9Z+i/08uhJEUkZ7mg1g5/Fw0v+Xhy/tld7e76n8/Z7f8c/D5/8m3e/J9/+f/H3+n958/Z3W+zWz535359Nrf98j675b/X2e232S2fv3P7Zf785/V9dssX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF+/2n7rV7q7v+7v6293/C80/w7r13mQjAAAAAElFTkSuQmCC";
-
-        // Render UI Logos
-        document.getElementById('lock-logo-placeholder').innerHTML = `<img src="${MOMOLOGY_LOGO_SRC}" class="w-20 h-20 mx-auto rounded-full shadow-lg border border-slate-700 bg-black p-1 object-contain">`;
-        document.getElementById('header-logo-placeholder').innerHTML = `<img src="${MOMOLOGY_LOGO_SRC}" class="w-8 h-8 rounded-full border border-momo-500 bg-black object-contain">`;
-
         // ================= LIFETIME DATA STORAGE ENGINE =================
         let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
         let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
@@ -397,7 +381,7 @@
             localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
         }
 
-        // ================= 42 MENU ITEMS (MOMOLOGY COMPLETE CATALOG) =================
+        // ================= 42 MENU ITEMS FROM EXCEL =================
         const menuCatalog = [
             { category: "STEAM MOMO (5 Pcs)", items: [ { id: "item_1", name: "Classic Steam Momo", price: 100 }, { id: "item_2", name: "Spicy Naga Fire Momo", price: 110 }, { id: "item_3", name: "Sausage Carnival Momo", price: 130 } ] },
             { category: "SPECIAL CHEESE MOMO (5 Pcs)", items: [ { id: "item_4", name: "Steamed Cheesy Melt Momo", price: 140 }, { id: "item_5", name: "Crispy Fried Cheesy Blast", price: 140 }, { id: "item_6", name: "Crunch-X Kurkure Cheesy Burst", price: 160 }, { id: "item_7", name: "Smoky BBQ Cheesy Melt", price: 160 }, { id: "item_8", name: "Spicy Naga BBQ Cheesy Fusion", price: 170 }, { id: "item_9", name: "The Ultimate Motka Cheesy Bake", price: 170 } ] },
@@ -450,7 +434,7 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // Render Menu with Parcel & Dine-In Buttons
+        // Render Menu Catalog
         function renderMenu(filter = "") {
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
@@ -585,7 +569,7 @@
             return `${start}******${end}`;
         }
 
-        // ================= DUAL PRINT SLIPS & PERSISTENT ORDER SAVING =================
+        // ================= DUAL PRINT SLIPS WITH PRE-LOADED LOGO & QR =================
         function saveMasterOrder() {
             const total = parseFloat(document.getElementById('total').innerText || 0);
             if (total <= 0) {
@@ -651,11 +635,11 @@
             if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>৳${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other Surcharge:</span><span>৳${otherCharge}</span></div>`;
 
-            // Clean Customer Receipt (Logo bug completely fixed with verified Base64 PNG)
+            // Customer Receipt using local logo.png and qr.jpeg
             const printContent = `
-                <!-- ================= 1. CUSTOMER RECEIPT WITH MOMOLOGY LOGO & QR ================= -->
+                <!-- ================= 1. CUSTOMER RECEIPT WITH LOCAL LOGO.PNG & qr.jpeg ================= -->
                 <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
-                    <img src="${MOMOLOGY_LOGO_SRC}" style="width: 60px; height: 60px; margin: 0 auto; display: block; border-radius: 50%;">
+                    <img id="print-logo-img" src="logo.png" style="width: 60px; height: 60px; margin: 0 auto; display: block; border-radius: 50%;">
                     <h2 style="font-size: 18px; font-weight: 900; margin: 4px 0 0 0; letter-spacing:1px;">MOMOLOGY</h2>
                     <p style="margin: 2px 0; font-size: 10px; font-weight:bold;">Taste the Authentic Momo Experience</p>
                     <p style="margin: 1px 0; font-size: 9px;">Darul Khadem, Racecourse, Adarsha Sadar, Cumilla, Bangladesh | Helpline: 01870-884845</p>
@@ -705,9 +689,9 @@
                     <p style="margin:0; font-size:8px;">(Use your registered phone number to redeem points)</p>
                 </div>
 
-                <!-- Socials & Verified Provided QR Code -->
+                <!-- Socials & Local qr.jpeg -->
                 <div style="text-align: center; margin-top: 6px;">
-                    <img src="${MOMOLOGY_QR_SRC}" style="width:75px; height:75px; margin: 0 auto; display:block;" />
+                    <img id="print-qr-img" src="qr.jpeg" style="width:75px; height:75px; margin: 0 auto; display:block;" />
                     <p style="font-size: 9px; margin: 4px 0 2px 0; font-weight: bold;">Scan for Special Offers & Secret Menu</p>
                     <p style="font-size: 8px; margin: 1px 0;">Facebook: <b>facebook.com/momoloogy</b></p>
                     <p style="font-size: 10px; font-weight:bold; margin-top:6px;">❤️ Thank You! Visit Us Again! ❤️</p>
@@ -737,7 +721,28 @@
 
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = printContent;
-            window.print();
+
+            // Pre-load images completely before triggering print dialog
+            const logoImg = document.getElementById('print-logo-img');
+            const qrImg = document.getElementById('print-qr-img');
+
+            let imagesLoaded = 0;
+            const checkPrint = () => {
+                imagesLoaded++;
+                if (imagesLoaded >= 2) {
+                    window.print();
+                }
+            };
+
+            if (logoImg.complete) imagesLoaded++;
+            else { logoImg.onload = checkPrint; logoImg.onerror = checkPrint; }
+
+            if (qrImg.complete) imagesLoaded++;
+            else { qrImg.onload = checkPrint; qrImg.onerror = checkPrint; }
+
+            if (imagesLoaded >= 2) {
+                window.print();
+            }
 
             // Reset after printing
             cart = {};
@@ -887,7 +892,7 @@
             document.getElementById('hist-total-sales').innerText = totalSales;
             document.getElementById('hist-total-orders').innerText = totalOrders;
             document.getElementById('hist-total-expense').innerText = totalExpense;
-            document.getElementById('hist-net-profit').innerText = netProfit;
+            document.getElementById('hist-net-profit').innerText = netProfit;f
             document.getElementById('hist-order-count').innerText = totalOrders;
 
             // Render Orders Table
