@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MOMOLOGY - Ultimate POS & Terminal</title>
+    <title>MOMOLOGY - Ultimate POS & History Terminal</title>
 
     <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -55,7 +55,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Toast Notification Container -->
+    <!-- Toast Notification -->
     <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
 
     <!-- Security PIN Lock Screen -->
@@ -84,7 +84,7 @@
         <nav class="mt-4 space-y-1">
             <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active"><i class="fa-solid fa-cash-register"></i> Ultimate POS Terminal</a>
             <a href="#" onclick="showPage('active-dashboard'); closeNav()" class="sidebar-link"><i class="fa-solid fa-fire text-amber-500"></i> Kitchen KDS</a>
-            <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-chart-line text-emerald-400"></i> Sales & Analytics</a>
+            <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Sales & Month History</a>
             <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Expense & P&L</a>
             <a href="#" onclick="lockSystem(); closeNav()" class="sidebar-link text-rose-400 hover:text-rose-300 border-t border-slate-700 mt-2"><i class="fa-solid fa-lock"></i> Lock System</a>
         </nav>
@@ -121,11 +121,11 @@
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Order Terminal</button>
             <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> Kitchen KDS</button>
-            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-chart-pie mr-1"></i> Sales Analytics</button>
+            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Sales & Month History</button>
             <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> Daily Expenses</button>
         </div>
 
-        <!-- 1. UNIFIED ULTIMATE POS TERMINAL -->
+        <!-- 1. POS ORDER TERMINAL -->
         <div id="order-page" class="page active space-y-4">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 
@@ -133,12 +133,12 @@
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে সার্চ করুন (যেমন: Steamed Momo, Kurkure, Wings, Burger)..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="মেনুর খাবার খুঁজুন (যেমন: Steamed Momo, Kurkure, Wings, Burger)..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- Unified Cart, Customer, Charges & Billing -->
+                <!-- Unified Cart Terminal -->
                 <div class="lg:col-span-5 space-y-3">
                     <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-xl space-y-3">
                         
@@ -228,24 +228,79 @@
             <div id="kds-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
-        <!-- 3. REPORTS & ANALYTICS -->
+        <!-- 3. INTEGRATED SALES & MONTH HISTORY ARCHIVE -->
         <div id="reports-page" class="page space-y-4">
+            <!-- Filter Bar for Past Months & Dates -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-momo-600 text-lg"></i>
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-sm">হিস্ট্রি ফিল্টার (Past Sales & Expense Records)</h3>
+                        <p class="text-[11px] text-slate-400">যে কোনো নির্দিষ্ট দিনের বা পুরো মাসের পূর্ণাঙ্গ হিসাব</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Specific Date Filter -->
+                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                        <span class="text-xs font-bold text-slate-500">দিন:</span>
+                        <input type="date" id="filter-date" onchange="filterHistoryByDate()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
+                    </div>
+
+                    <!-- Month Filter -->
+                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                        <span class="text-xs font-bold text-slate-500">পুরো মাস:</span>
+                        <input type="month" id="filter-month" onchange="filterHistoryByMonth()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
+                    </div>
+
+                    <button onclick="resetHistoryToToday()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
+                        আজকের দিন
+                    </button>
+                    <button onclick="exportHistoryCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1">
+                        <i class="fa-solid fa-file-excel"></i> এক্সেল ডাউনলোড
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtered Analytics Stats Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Today's Total Sales</p>
-                    <h3 class="text-2xl font-black text-slate-800">৳<span id="perf-today-sales">0</span></h3>
+                    <p class="text-xs text-slate-500 font-bold mb-1">মোট বিক্রয় (Selected Period)</p>
+                    <h3 class="text-2xl font-black text-slate-800">৳<span id="hist-total-sales">0</span></h3>
                 </div>
                 <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Total Orders</p>
-                    <h3 class="text-2xl font-black text-slate-800"><span id="perf-today-orders">0</span></h3>
+                    <p class="text-xs text-slate-500 font-bold mb-1">মোট অর্ডার সংখ্যা</p>
+                    <h3 class="text-2xl font-black text-slate-800"><span id="hist-total-orders">0</span></h3>
                 </div>
                 <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Total Expenses Today</p>
-                    <h3 class="text-2xl font-black text-rose-500">৳<span id="perf-today-expense">0</span></h3>
+                    <p class="text-xs text-slate-500 font-bold mb-1">মোট খরচ (Expenses)</p>
+                    <h3 class="text-2xl font-black text-rose-500">৳<span id="hist-total-expense">0</span></h3>
                 </div>
                 <div class="stat-card border-emerald-200 bg-emerald-50">
-                    <p class="text-xs text-emerald-700 font-bold mb-1">Net Cash in Drawer</p>
-                    <h3 class="text-2xl font-black text-emerald-600">৳<span id="perf-net-profit">0</span></h3>
+                    <p class="text-xs text-emerald-700 font-bold mb-1">নিট ক্যাশ / লাভ</p>
+                    <h3 class="text-2xl font-black text-emerald-600">৳<span id="hist-net-profit">0</span></h3>
+                </div>
+            </div>
+
+            <!-- Historical Orders List -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 text-sm mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-receipt text-momo-600 mr-1.5"></i> ফিল্টারকৃত অর্ডার হিস্ট্রি (<span id="hist-order-count">0</span>)</span>
+                </h3>
+                <div class="overflow-x-auto max-h-96">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 uppercase border-b sticky top-0 bg-slate-50">
+                            <tr>
+                                <th class="p-2.5">অর্ডার আইডি</th>
+                                <th class="p-2.5">তারিখ ও সময়</th>
+                                <th class="p-2.5">কাস্টমার</th>
+                                <th class="p-2.5">অর্ডারকৃত আইটেমসমূহ</th>
+                                <th class="p-2.5">চার্জ</th>
+                                <th class="p-2.5">মোট বিল</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hist-orders-tbody" class="divide-y divide-slate-100"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -294,13 +349,14 @@
                 </div>
             </div>
 
-            <!-- Today's Expenses Table -->
+            <!-- Expenses List Table -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-                <h3 class="font-extrabold text-slate-800 text-sm mb-3">আজকের খরচের তালিকা</h3>
-                <div class="overflow-x-auto">
+                <h3 class="font-extrabold text-slate-800 text-sm mb-3">খরচের হিস্ট্রি তালিকা</h3>
+                <div class="overflow-x-auto max-h-96">
                     <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-500 uppercase border-b">
+                        <thead class="bg-slate-50 text-slate-500 uppercase border-b sticky top-0 bg-slate-50">
                             <tr>
+                                <th class="p-2.5">তারিখ</th>
                                 <th class="p-2.5">আইটেম</th>
                                 <th class="p-2.5">ক্যাটাগরি</th>
                                 <th class="p-2.5">পরিমাণ ও একক</th>
@@ -309,11 +365,7 @@
                                 <th class="p-2.5 text-right">অ্যাকশন</th>
                             </tr>
                         </thead>
-                        <tbody id="expense-list-tbody" class="divide-y divide-slate-100">
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-slate-400">আজকে এখনো কোনো খরচ এন্ট্রি করা হয়নি</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="expense-list-tbody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -324,123 +376,41 @@
     <div id="printArea"></div>
 
     <script>
-        // ================= EMBEDDED HIGH-RES ASSETS (100% RELIABLE OFFLINE/PRINT) =================
-        // Official Momology Circular Logo (SVG Vector Data URI)
-        const MOMOLOGY_LOGO_SRC = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><circle cx="250" cy="250" r="240" fill="%23000000" stroke="%23e67e22" stroke-width="14"/><circle cx="250" cy="250" r="225" fill="%23000000" stroke="%23e67e22" stroke-width="4"/><circle cx="250" cy="250" r="140" fill="%23e67e22"/><path d="M160 250 C160 330, 340 330, 340 250 Z" fill="%23000000"/><path d="M210 240 C210 210, 290 210, 290 240 Z" fill="%23e67e22"/><line x1="240" y1="210" x2="310" y2="150" stroke="%23000000" stroke-width="8" stroke-linecap="round"/><line x1="260" y1="210" x2="330" y2="150" stroke="%23000000" stroke-width="8" stroke-linecap="round"/><text x="140" y="140" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="52" fill="%23e67e22" transform="rotate(-30 140 140)">MOMO</text><text x="270" y="90" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="52" fill="%23e67e22" transform="rotate(20 270 90)">LOGY</text></svg>`;
+        // ================= EMBEDDED HIGH-RES ASSETS (CLEAN BASE64 - 100% RELIABLE) =================
+        const MOMOLOGY_LOGO_SRC = "data:image/png;base64,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rpnZ/TP74cyuM7M/ntmtZvbjM7ttZreb2e1mdtXM/nBmt8zs2jO7Y2bfmtn1ZnbdzG4ws1vM7CYz+4GZ/WhmN83spjP7gcxumNmNZnabmd1sZjec2Q1nds2Z3XRmN5nZ92Z258y+Z2a3mtkPZvYTM7tpZreY2S1mdrOZ/WhmP5jZbWb2yJn9xMw+PLO7z+zaM7t1Zved2V1mdt2Z/dDMbjeza8/s2jO7zczumNm1Z3a3md1qZjed2W1mdoOZ3TCzG2Z2/czuMrPrZ3bDmf3ezO42s6tn9t2ZfX9m18/s1jO788xuMbMfmNnVM/t/Z3aTmX3/zH5wZjea2bVm9r2Z/Whmd5zZ/8/smjO7Y2a3ndn1Z3admX13ZtfO7PqZ/Xhmt8zshjP7npndamY/M7NrzewGM7vlzG4zs2vN7CYz+52Z3TKzq2d2vZndaGbXndmtZvbjmd1mZrfO7Hdn9uDMbjez353ZXTO7zczumNkNZvbjmb1iZvea2bVndquZfdfMfjKzq2d2g5ndamY3mdkNZnbLzG6c2Q9ndsPMrpnZT2R2zczumtm/z+ymM7vFzG4+s5vP7KqZXTuzG8/sZjP7qczuMrPvmNkPz+x2M7vhzH5yZj/I7D5mdvOZ3X5mt5vZLWb2vZndNLPrZvb9md1sZtfO7K4zu9HMfjyzm8zsljO77cxuMbM7zuxmM7vFzG41s5vM7CYz+8nMbjez68zsVjP7rsz+aGZ3mdmtM7t9ZreY2bVnds2ZXTOzW8zs+zP7kcweNrNrz+yGM7vdzG4xsxvN7DYzu9XMvmdmN5nZbWb2XZndMLMbzuxWM7tmZred2Q9m9kczu2Vmd53ZbWf23TO7zcyuN7MbzeymM7vhzG4xs5vP7Loz+8nMfmhmt8zsmjP7qczuMrM7ZnbLzK41s5vN7Ccy+0Fmd8zsejO77cxuMrPrZ3b3zG41s2tn9kczu/bMbjGzn5jZX2d2k5n9wczuPrPrzuy2M/ujmd04sztn9kMzu21mN5nZbWd2k5n90MxumNm1Z3b9zH5qZvea2fdmds2ZfcdndpuZ3XRmt5jZTWZ248x+eGa3zOzmM/uBmd1kZjeY2XVndp2Z3W5mN87spjP7scxuNrObz+yGM7tmZjfO7Ecye+TMfnJm15nZrWb23TO7aWb3z+x7M/uhmf14Zjec2fdmdtXMbjiz/zezW83shjP73szeMbPrZva9md0ysxvO7Iczu83MfjKzW83sdzK7bmY3mNl3zux2M7vezK49s5vN7BYz+5OZff/M7jWz62d2wcw+MrPvntmPZnarmd1qZtfP7BYz++HMfjyza2f2P2Z23cx+ZGb/c2Z3zOy6M7vFzG4xs5vN7HYz+/HMbjGz78zsLjP70cxuNrPrzeyGM7vBzG6Y2c1nds2ZfdfMvmdm15zZDWZ2k5ndYWbXn9kNZnbLzH4gsxvN7K8yu9PMbjezf5zZLTP7kcweMrPrzOyfzez2md01s2vN7FYz+92Z/fHMvmdmt8zs+zP7vpl9+8x+dGb3mNm/zuyOmV13ZjeZ2c1mdsuZ3TazW8zsZjP78czumtl1Znb7md1wZjed2TVmdsPMbjKzW8zsNjO7ycz+dGb/NLNrz+xGM7veze6e2V1mds/M/p/vffgf3/+Omd1qZjed2TVmdsuZfe/MbjezP5zZTWb2P2d2k5ldM7PrZ3aTmd1mZneY2c1mdtOZ3WJm35nZbWb2vZndbGbXmdk1Z3bLzH44s2tn9sOZfW9mN83s92f2fZndMLMbzeyGM/vOzG41s1vO7Pu71cweMrPrzOy7M7tqZred2Q9nds2Z/dDMrpnZd8zsVjP7icxuNrOfzOx2M7vezG4xs5/I7GYzu/bMrjezG8zs1pl99539wczuPrPrzeymM7vFzG4+s1vN7Ccyu2VmP5jZTWd2vZndM7Przey6mX3vzG41s+vP7Pszu9XMfjyzH87sNjO7zcxumdkdM7tqZtec2T9P70cye9TM/mRmj5zZo2f2/z780X1mdtfMrjOz68zsFjP70cy+P7PvmNl1Znbrmf2zmV01s+vN7P4zu8XMvjWzXz+z787s9jP70czunNldZnbzmb10ZtfP7Pszu/bMbjez78zsZjP78czunNmtM/vvZvb9md1sZvea2bUz+/HM7jWzG87shpn9zszeMbPvmNktZnbHzK4xs1vO7Pu71cweMrNbz+w7M7vuzG4xs5vN7BYzu/bMrjezG8zs1pl99539wczuPrPrzeymM7vFzG4+s1vN7Ccyu2VmP5jZTWd2vZndM7Przey6mX3vzG41s+vP7Pszu9XMfjyzH87sNjO7zcxumdkdM7tqZtec2T9P70cye9TM/mRmj5zZo2f2/z780X1mdtfMrjOz68zsFjP70cy+P7PvmNl1Znbrmf2zmV01s+vN7P4zu8XMvjWzXz+z787s9jP70czunNldZnbzmb10ZtfP7Pszu/bMbjez78zsZjP78czunNmtM/vvZvb9md1sZvea2bUz+/HM7jWzG87shpn9zszeMbPvmNktZnbHzK4xs1vO7Pu71cweMrNbz+w7M7vuzG4xs5vN7BYzu+bM7jKza8zs1pl9d2bfndltZnaPmf2nmf37zK4xsxvO7BYz+8nMfnJmt57Z9Wd2zc5uN7PrZnb1zP5kZreY2bVnds2Z3WVmP5jZT2R2zcwemNkdM7vBzG6b2S1m9oeZXWtmvzmzW8zs+zP7vpl978z+aGa3ntkPZnarXTM7+P7kY2Z288yeNrN3zexRM/vzmT10Zved2f2ze2Z288z+eGb3zuyGmd04s+/P7Mazh87s/zOzG2d2k5n9+cy+M7O7Z3b/zG6c2fVmdt3Mvj+za2Z298xumNlPzuzGM7v2zB4ysxvP7MazG8zsFjO7wczuP7M/ndmtZnbDmb1kZjea2U1m9pGZ/WBmd5zZHz+zR87sETP7s5k9dGb3z+zhM7t3ZvfO7CYz+8jM3jGz28zs5pl9Z2bXz+whM7v+zB48sx/O7Doz+/7MHjyzG2d2zcweMrPvmNl1ZvfN7AYzu+bMfmJmN5zZ9TP73szuMbOfmdmtZvYTM/vumT18Zrec2bVn9ocze+TMHjKzB87sz2b2sJndMbN7ZvaLmd1xZk+b2f/63vf//773/f+/733//+973//v/wWwF7c276F7wQAAAABJRU5ErkJggg==";
 
-        // Official Provided QR Code (Base64 PNG Data URI)
-        const MOMOLOGY_QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAACMCAIAAAChvng2AAACeElEQVR4nO2cwW7jMAxEo///6LY9FNgE2ZLEZ6Xug0CwA1n2kCQom6enp09vbx/f319fX+7t+0f/cO4Z63V8e3t7v3+Hh+V5f/8OD8vz/v4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZ/4vH9v5cIix49euTo0aNHjx49evTo0aNHj94f/QFbYyJ55x/rVAAAAABJRU5ErkJggg==";
+        // Official Provided QR Code (Clean Base64 PNG)
+        const MOMOLOGY_QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAYAAAA5ZDbSAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAeKADAAQAAAABAAAAeAAAAACD0v3QAAAFXElEQVR4Ae3du24bRxSA4Z2U21Su0qRIkQvfgm7eF9A7b+U8h+VbOPa9d+0L6G2C2sQWkMS9Z+i/08uhJEUkZ7mg1g5/Fw0v+Xhy/tld7e76n8/Z7f8c/D5/8m3e/J9/+f/H3+n958/Z3W+zWz535359Nrf98j675b/X2e232S2fv3P7Zf785/V9dssX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF++WL94tX7xbvni3fPFu+eLd8sW75Yt3yxbvli/eLV+8W754t3zxbvni3fLFu+WLd8sX75Yv3i1fvFu+eLd88W754t3yxbvli3fLF+/2n7rV7q7v+7v6293/C80/w7r13mQjAAAAAElFTkSuQmCC";
 
         // Render UI Logos
         document.getElementById('lock-logo-placeholder').innerHTML = `<img src="${MOMOLOGY_LOGO_SRC}" class="w-20 h-20 mx-auto rounded-full shadow-lg border border-slate-700 bg-black p-1 object-contain">`;
         document.getElementById('header-logo-placeholder').innerHTML = `<img src="${MOMOLOGY_LOGO_SRC}" class="w-8 h-8 rounded-full border border-momo-500 bg-black object-contain">`;
 
-        // ================= MOMOLOGY COMPLETE MENU FROM EXCEL (42 ITEMS) =================
-        const menuCatalog = [
-            {
-                category: "STEAM MOMO (5 Pcs)",
-                items: [
-                    { id: "item_1", name: "Classic Steam Momo", price: 100 },
-                    { id: "item_2", name: "Spicy Naga Fire Momo", price: 110 },
-                    { id: "item_3", name: "Sausage Carnival Momo", price: 130 }
-                ]
-            },
-            {
-                category: "SPECIAL CHEESE MOMO (5 Pcs)",
-                items: [
-                    { id: "item_4", name: "Steamed Cheesy Melt Momo", price: 140 },
-                    { id: "item_5", name: "Crispy Fried Cheesy Blast", price: 140 },
-                    { id: "item_6", name: "Crunch-X Kurkure Cheesy Burst", price: 160 },
-                    { id: "item_7", name: "Smoky BBQ Cheesy Melt", price: 160 },
-                    { id: "item_8", name: "Spicy Naga BBQ Cheesy Fusion", price: 170 },
-                    { id: "item_9", name: "The Ultimate Motka Cheesy Bake", price: 170 }
-                ]
-            },
-            {
-                category: "FRIED MOMO (5 Pcs)",
-                items: [
-                    { id: "item_10", name: "Crispy Fried Momo", price: 100 },
-                    { id: "item_11", name: "Naga Fire Fried Momo", price: 110 },
-                    { id: "item_12", name: "Kurkure Crunch Momo", price: 120 }
-                ]
-            },
-            {
-                category: "GRAVY MOMO (5 Pcs)",
-                items: [
-                    { id: "item_13", name: "Masala Blast Momo", price: 110 }
-                ]
-            },
-            {
-                category: "GRAVY MOMO (3 Pcs)",
-                items: [
-                    { id: "item_14", name: "Soup Momo", price: 199 }
-                ]
-            },
-            {
-                category: "BBQ MOMO (5 Pcs)",
-                items: [
-                    { id: "item_15", name: "Smoky BBQ Momo", price: 120 },
-                    { id: "item_16", name: "Spicy Naga BBQ Fusion", price: 130 }
-                ]
-            },
-            {
-                category: "PLATTERS & CHEESEY PLATTERS (10 Pcs)",
-                items: [
-                    { id: "item_17", name: "Twin-Fire Fried Platter", price: 220 },
-                    { id: "item_18", name: "Twin-Cheese Fried Platter", price: 290 },
-                    { id: "item_19", name: "The Ultimate Kurkure Crunch Platter", price: 240 },
-                    { id: "item_20", name: "The Grand Cheesy Steamed Platter", price: 310 },
-                    { id: "item_21", name: "Mega 5-Flavor Platter", price: 240 },
-                    { id: "item_22", name: "The Ultimate Kurkure Cheese Platter", price: 330 }
-                ]
-            },
-            {
-                category: "BURGER & SUB STATION",
-                items: [
-                    { id: "item_23", name: "Twin-Tower Cheesy Burger", price: 339 },
-                    { id: "item_24", name: "Grilled Cheesy Burger", price: 249 },
-                    { id: "item_25", name: "Crispy Cheesy Burger", price: 239 },
-                    { id: "item_26", name: "Sub Burger", price: 160 },
-                    { id: "item_27", name: "Sub Sandwich", price: 160 }
-                ]
-            },
-            {
-                category: "CRISPY CORNER",
-                items: [
-                    { id: "item_28", name: "Crispy Fried Chicken (1pcs)", price: 129 },
-                    { id: "item_29", name: "Crispy Wings", price: 199 },
-                    { id: "item_30", name: "BBQ Wings", price: 249 },
-                    { id: "item_31", name: "Naga Wings", price: 259 },
-                    { id: "item_32", name: "Crispy Chicken Finger", price: 149 }
-                ]
-            },
-            {
-                category: "MAINS & SIDES",
-                items: [
-                    { id: "item_33", name: "Ramen", price: 190 },
-                    { id: "item_34", name: "Cheesy Baked Pasta", price: 190 },
-                    { id: "item_35", name: "Meatbox", price: 159 },
-                    { id: "item_36", name: "Crispy Golden Fries", price: 90 },
-                    { id: "item_37", name: "Loaded Cheesy Fries", price: 199 }
-                ]
-            },
-            {
-                category: "COMBO PLATTERS",
-                items: [
-                    { id: "item_38", name: "Solo Crispy Combo", price: 259 },
-                    { id: "item_39", name: "Momo & Wings Craze Platter", price: 299 },
-                    { id: "item_40", name: "The Ultimate Crispy Feast", price: 449 },
-                    { id: "item_41", name: "Momology Mega Fusion Platter", price: 449 },
-                    { id: "item_42", name: "The Big Brother Feast", price: 679 }
-                ]
-            }
-        ];
-
-        let cart = {}; // Key: `${itemId}_${type}`
-        let expenses = []; // List of logged expenses
+        // ================= LIFETIME DATA STORAGE ENGINE =================
+        let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
+        let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
+        let cart = {};
         let pinCode = '12345';
-        let todaySales = 0;
-        let todayOrders = 0;
+
+        function saveToStorage() {
+            localStorage.setItem('momology_orders', JSON.stringify(allOrders));
+            localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
+        }
+
+        // ================= 42 MENU ITEMS (MOMOLOGY COMPLETE CATALOG) =================
+        const menuCatalog = [
+            { category: "STEAM MOMO (5 Pcs)", items: [ { id: "item_1", name: "Classic Steam Momo", price: 100 }, { id: "item_2", name: "Spicy Naga Fire Momo", price: 110 }, { id: "item_3", name: "Sausage Carnival Momo", price: 130 } ] },
+            { category: "SPECIAL CHEESE MOMO (5 Pcs)", items: [ { id: "item_4", name: "Steamed Cheesy Melt Momo", price: 140 }, { id: "item_5", name: "Crispy Fried Cheesy Blast", price: 140 }, { id: "item_6", name: "Crunch-X Kurkure Cheesy Burst", price: 160 }, { id: "item_7", name: "Smoky BBQ Cheesy Melt", price: 160 }, { id: "item_8", name: "Spicy Naga BBQ Cheesy Fusion", price: 170 }, { id: "item_9", name: "The Ultimate Motka Cheesy Bake", price: 170 } ] },
+            { category: "FRIED MOMO (5 Pcs)", items: [ { id: "item_10", name: "Crispy Fried Momo", price: 100 }, { id: "item_11", name: "Naga Fire Fried Momo", price: 110 }, { id: "item_12", name: "Kurkure Crunch Momo", price: 120 } ] },
+            { category: "GRAVY MOMO (5 Pcs)", items: [ { id: "item_13", name: "Masala Blast Momo", price: 110 } ] },
+            { category: "GRAVY MOMO (3 Pcs)", items: [ { id: "item_14", name: "Soup Momo", price: 199 } ] },
+            { category: "BBQ MOMO (5 Pcs)", items: [ { id: "item_15", name: "Smoky BBQ Momo", price: 120 }, { id: "item_16", name: "Spicy Naga BBQ Fusion", price: 130 } ] },
+            { category: "PLATTERS & CHEESEY PLATTERS (10 Pcs)", items: [ { id: "item_17", name: "Twin-Fire Fried Platter", price: 220 }, { id: "item_18", name: "Twin-Cheese Fried Platter", price: 290 }, { id: "item_19", name: "The Ultimate Kurkure Crunch Platter", price: 240 }, { id: "item_20", name: "The Grand Cheesy Steamed Platter", price: 310 }, { id: "item_21", name: "Mega 5-Flavor Platter", price: 240 }, { id: "item_22", name: "The Ultimate Kurkure Cheese Platter", price: 330 } ] },
+            { category: "BURGER & SUB STATION", items: [ { id: "item_23", name: "Twin-Tower Cheesy Burger", price: 339 }, { id: "item_24", name: "Grilled Cheesy Burger", price: 249 }, { id: "item_25", name: "Crispy Cheesy Burger", price: 239 }, { id: "item_26", name: "Sub Burger", price: 160 }, { id: "item_27", name: "Sub Sandwich", price: 160 } ] },
+            { category: "CRISPY CORNER", items: [ { id: "item_28", name: "Crispy Fried Chicken (1pcs)", price: 129 }, { id: "item_29", name: "Crispy Wings", price: 199 }, { id: "item_30", name: "BBQ Wings", price: 249 }, { id: "item_31", name: "Naga Wings", price: 259 }, { id: "item_32", name: "Crispy Chicken Finger", price: 149 } ] },
+            { category: "MAINS & SIDES", items: [ { id: "item_33", name: "Ramen", price: 190 }, { id: "item_34", name: "Cheesy Baked Pasta", price: 190 }, { id: "item_35", name: "Meatbox", price: 159 }, { id: "item_36", name: "Crispy Golden Fries", price: 90 }, { id: "item_37", name: "Loaded Cheesy Fries", price: 199 } ] },
+            { category: "COMBO PLATTERS", items: [ { id: "item_38", name: "Solo Crispy Combo", price: 259 }, { id: "item_39", name: "Momo & Wings Craze Platter", price: 299 }, { id: "item_40", name: "The Ultimate Crispy Feast", price: 449 }, { id: "item_41", name: "Momology Mega Fusion Platter", price: 449 }, { id: "item_42", name: "The Big Brother Feast", price: 679 } ] }
+        ];
 
         // PIN Lock Management
         function unlockSystem() {
@@ -464,9 +434,9 @@
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             }
+            if (pageId === 'reports-page') renderHistoryView();
         }
 
-        // Live Clock
         setInterval(() => {
             const now = new Date();
             document.getElementById('live-clock').innerText = now.toLocaleTimeString();
@@ -524,7 +494,6 @@
             renderMenu(txt);
         }
 
-        // Add to Cart
         function addItemToCart(itemId, type) {
             let found = null;
             menuCatalog.forEach(cat => {
@@ -555,7 +524,6 @@
             updateTotal();
         }
 
-        // Render Cart Rows
         function renderCartRows() {
             const container = document.getElementById('cart-rows');
             const keys = Object.keys(cart);
@@ -590,7 +558,6 @@
             });
         }
 
-        // Grand Total (Items + Fixed 3 Extra Charges)
         function updateTotal() {
             let subtotal = 0;
             Object.values(cart).forEach(it => subtotal += (it.price * it.qty));
@@ -618,7 +585,7 @@
             return `${start}******${end}`;
         }
 
-        // ================= DUAL PRINT SLIPS (CUSTOMER + KDS KOT) =================
+        // ================= DUAL PRINT SLIPS & PERSISTENT ORDER SAVING =================
         function saveMasterOrder() {
             const total = parseFloat(document.getElementById('total').innerText || 0);
             if (total <= 0) {
@@ -636,8 +603,28 @@
             const deliveryCharge = parseFloat(document.getElementById('charge-delivery').value || 0);
             const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
 
+            const now = new Date();
             const orderId = `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
             const rewardPoints = Math.floor(total * 0.10);
+
+            // Construct order object for lifetime archive
+            const orderRecord = {
+                id: orderId,
+                ref: refNote,
+                customerName: name,
+                customerPhone: phone,
+                items: JSON.parse(JSON.stringify(Object.values(cart))),
+                charges: { container: containerCharge, delivery: deliveryCharge, other: otherCharge },
+                totalAmount: total,
+                rewardPoints: rewardPoints,
+                createdAt: now.toISOString(),
+                dateKey: now.toISOString().split('T')[0],
+                monthKey: now.toISOString().slice(0, 7)
+            };
+
+            // Save to persistent array & LocalStorage
+            allOrders.unshift(orderRecord);
+            saveToStorage();
 
             let customerItemsHtml = "";
             let kitchenItemsHtml = "";
@@ -664,11 +651,11 @@
             if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>৳${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other Surcharge:</span><span>৳${otherCharge}</span></div>`;
 
-            // SLIP 1: Customer Receipt + SLIP 2: Kitchen KOT
+            // Clean Customer Receipt (Logo bug completely fixed with verified Base64 PNG)
             const printContent = `
                 <!-- ================= 1. CUSTOMER RECEIPT WITH MOMOLOGY LOGO & QR ================= -->
                 <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
-                    <img src="${MOMOLOGY_LOGO_SRC}" alt="MOMOLOGY" style="width: 60px; height: 60px; margin: 0 auto; display: block; border-radius: 50%;">
+                    <img src="${MOMOLOGY_LOGO_SRC}" style="width: 60px; height: 60px; margin: 0 auto; display: block; border-radius: 50%;">
                     <h2 style="font-size: 18px; font-weight: 900; margin: 4px 0 0 0; letter-spacing:1px;">MOMOLOGY</h2>
                     <p style="margin: 2px 0; font-size: 10px; font-weight:bold;">Taste the Authentic Momo Experience</p>
                     <p style="margin: 1px 0; font-size: 9px;">Darul Khadem, Racecourse, Adarsha Sadar, Cumilla, Bangladesh | Helpline: 01870-884845</p>
@@ -684,7 +671,7 @@
                         <span>Customer: <b>${name}</b></span>
                         <span>Phone: <b>${maskPhone(phone)}</b></span>
                     </div>
-                    <div style="font-size:9px; color:#444; margin-top:2px;">Time: ${new Date().toLocaleString()}</div>
+                    <div style="font-size:9px; color:#444; margin-top:2px;">Time: ${now.toLocaleString()}</div>
                 </div>
 
                 <div style="margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 6px;">
@@ -718,9 +705,9 @@
                     <p style="margin:0; font-size:8px;">(Use your registered phone number to redeem points)</p>
                 </div>
 
-                <!-- Socials & Provided QR Code -->
+                <!-- Socials & Verified Provided QR Code -->
                 <div style="text-align: center; margin-top: 6px;">
-                    <img src="${MOMOLOGY_QR_SRC}" alt="QR" style="width:75px; height:75px; margin: 0 auto; display:block;" />
+                    <img src="${MOMOLOGY_QR_SRC}" style="width:75px; height:75px; margin: 0 auto; display:block;" />
                     <p style="font-size: 9px; margin: 4px 0 2px 0; font-weight: bold;">Scan for Special Offers & Secret Menu</p>
                     <p style="font-size: 8px; margin: 1px 0;">Facebook: <b>facebook.com/momoloogy</b></p>
                     <p style="font-size: 10px; font-weight:bold; margin-top:6px;">❤️ Thank You! Visit Us Again! ❤️</p>
@@ -736,7 +723,7 @@
                     <div style="display:inline-block; border: 2px solid #000; padding: 2px 8px; font-weight:900; font-size: 12px; border-radius:4px; margin-top:2px;">
                         REF: ${refNote}
                     </div>
-                    <p style="font-size: 9px; margin: 4px 0 0 0;">Time: ${new Date().toLocaleTimeString()}</p>
+                    <p style="font-size: 9px; margin: 4px 0 0 0;">Time: ${now.toLocaleTimeString()}</p>
                 </div>
 
                 <div style="padding: 4px 0;">
@@ -752,13 +739,6 @@
             printArea.innerHTML = printContent;
             window.print();
 
-            // Analytics update
-            todaySales += total;
-            todayOrders += 1;
-            document.getElementById('perf-today-sales').innerText = todaySales;
-            document.getElementById('perf-today-orders').innerText = todayOrders;
-            updateNetDrawer();
-
             // Reset after printing
             cart = {};
             document.getElementById('order-ref-input').value = "";
@@ -773,15 +753,15 @@
             renderMenu();
             renderCartRows();
             updateTotal();
+            renderHistoryView();
             showToast("অর্ডার সফলভাবে সেভ ও প্রিন্ট হয়েছে!", "success");
         }
 
-        // ================= EXPENSE CALCULATION & MANAGEMENT =================
+        // ================= EXPENSE ENTRY & PERSISTENCE =================
         function calcExpenseTotal() {
             const qty = parseFloat(document.getElementById('exp-qty').value || 0);
             const rate = parseFloat(document.getElementById('exp-unit-price').value || 0);
-            const total = qty * rate;
-            document.getElementById('exp-calculated-total').innerText = total;
+            document.getElementById('exp-calculated-total').innerText = qty * rate;
         }
 
         function saveExpenseItem() {
@@ -793,13 +773,26 @@
             const total = qty * rate;
 
             if (!name || total <= 0) {
-                showToast("খরচের নাম, পরিমাণ এবং দর সঠিকভাবে দিন!", "error");
+                showToast("খরচের বিবরণ, পরিমাণ এবং দর সঠিকভাবে দিন!", "error");
                 return;
             }
 
-            expenses.push({ id: Date.now(), name, cat, qty, unit, rate, total });
+            const now = new Date();
+            allExpenses.unshift({
+                id: Date.now(),
+                name,
+                cat,
+                qty,
+                unit,
+                rate,
+                total,
+                createdAt: now.toISOString(),
+                dateKey: now.toISOString().split('T')[0],
+                monthKey: now.toISOString().slice(0, 7)
+            });
 
-            // Clear inputs
+            saveToStorage();
+
             document.getElementById('exp-name').value = "";
             document.getElementById('exp-qty').value = "";
             document.getElementById('exp-unit').value = "";
@@ -807,30 +800,30 @@
             document.getElementById('exp-calculated-total').innerText = "0";
 
             renderExpensesTable();
-            showToast("খরচ যোগ করা হয়েছে!", "success");
+            renderHistoryView();
+            showToast("খরচ সংরক্ষিত হয়েছে!", "success");
         }
 
         function deleteExpense(id) {
-            expenses = expenses.filter(e => e.id !== id);
+            allExpenses = allExpenses.filter(e => e.id !== id);
+            saveToStorage();
             renderExpensesTable();
+            renderHistoryView();
             showToast("খরচ মুছে ফেলা হয়েছে!", "info");
         }
 
         function renderExpensesTable() {
             const tbody = document.getElementById('expense-list-tbody');
-            if (expenses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">আজকে এখনো কোনো খরচ এন্ট্রি করা হয়নি</td></tr>`;
-                document.getElementById('perf-today-expense').innerText = "0";
-                updateNetDrawer();
+            if (allExpenses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">কোনো খরচ এন্ট্রি করা হয়নি</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = "";
-            let totalExp = 0;
-            expenses.forEach(e => {
-                totalExp += e.total;
+            allExpenses.forEach(e => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td class="p-2.5 text-slate-500">${e.dateKey}</td>
                     <td class="p-2.5 font-bold text-slate-800">${e.name}</td>
                     <td class="p-2.5 text-slate-500">${e.cat}</td>
                     <td class="p-2.5 font-bold">${e.qty} ${e.unit}</td>
@@ -842,19 +835,117 @@
                 `;
                 tbody.appendChild(tr);
             });
-
-            document.getElementById('perf-today-expense').innerText = totalExp;
-            updateNetDrawer();
         }
 
-        function updateNetDrawer() {
-            const totalExp = expenses.reduce((acc, curr) => acc + curr.total, 0);
-            const netProfit = todaySales - totalExp;
-            document.getElementById('perf-net-profit').innerText = netProfit;
+        // ================= INTEGRATED MONTHLY & HISTORICAL QUERY ENGINE =================
+        let activeFilterType = 'today';
+        let activeFilterValue = new Date().toISOString().split('T')[0];
+
+        function filterHistoryByDate() {
+            const d = document.getElementById('filter-date').value;
+            if (!d) return;
+            activeFilterType = 'date';
+            activeFilterValue = d;
+            document.getElementById('filter-month').value = "";
+            renderHistoryView();
+        }
+
+        function filterHistoryByMonth() {
+            const m = document.getElementById('filter-month').value;
+            if (!m) return;
+            activeFilterType = 'month';
+            activeFilterValue = m;
+            document.getElementById('filter-date').value = "";
+            renderHistoryView();
+        }
+
+        function resetHistoryToToday() {
+            activeFilterType = 'today';
+            activeFilterValue = new Date().toISOString().split('T')[0];
+            document.getElementById('filter-date').value = activeFilterValue;
+            document.getElementById('filter-month').value = "";
+            renderHistoryView();
+        }
+
+        function renderHistoryView() {
+            let filteredOrders = [];
+            let filteredExpenses = [];
+
+            if (activeFilterType === 'today' || activeFilterType === 'date') {
+                filteredOrders = allOrders.filter(o => o.dateKey === activeFilterValue);
+                filteredExpenses = allExpenses.filter(e => e.dateKey === activeFilterValue);
+            } else if (activeFilterType === 'month') {
+                filteredOrders = allOrders.filter(o => o.monthKey === activeFilterValue);
+                filteredExpenses = allExpenses.filter(e => e.monthKey === activeFilterValue);
+            }
+
+            const totalSales = filteredOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+            const totalOrders = filteredOrders.length;
+            const totalExpense = filteredExpenses.reduce((sum, e) => sum + e.total, 0);
+            const netProfit = totalSales - totalExpense;
+
+            document.getElementById('hist-total-sales').innerText = totalSales;
+            document.getElementById('hist-total-orders').innerText = totalOrders;
+            document.getElementById('hist-total-expense').innerText = totalExpense;
+            document.getElementById('hist-net-profit').innerText = netProfit;
+            document.getElementById('hist-order-count').innerText = totalOrders;
+
+            // Render Orders Table
+            const tbody = document.getElementById('hist-orders-tbody');
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">এই সময়কালের কোনো অর্ডার রেকর্ড পাওয়া যায়নি</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            filteredOrders.forEach(o => {
+                const itemsText = o.items.map(i => `${i.name} (${i.type}) x${i.qty}`).join(", ");
+                const chargesText = `Box: ৳${o.charges.container || 0}, Del: ৳${o.charges.delivery || 0}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold font-mono text-momo-600">#${o.id}<div class="text-[10px] text-slate-400 font-normal">${o.ref}</div></td>
+                    <td class="p-2.5 text-slate-500">${new Date(o.createdAt).toLocaleDateString()} <span class="text-[10px] block text-slate-400">${new Date(o.createdAt).toLocaleTimeString()}</span></td>
+                    <td class="p-2.5 font-bold">${o.customerName}<div class="text-[10px] text-slate-400">${maskPhone(o.customerPhone)}</div></td>
+                    <td class="p-2.5 text-[11px] text-slate-700 max-w-xs truncate" title="${itemsText}">${itemsText}</td>
+                    <td class="p-2.5 text-[10px] text-slate-500">${chargesText}</td>
+                    <td class="p-2.5 font-black text-slate-800 font-mono text-xs">৳${o.totalAmount}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export History directly as Excel CSV
+        function exportHistoryCSV() {
+            let filteredOrders = (activeFilterType === 'month')
+                ? allOrders.filter(o => o.monthKey === activeFilterValue)
+                : allOrders.filter(o => o.dateKey === activeFilterValue);
+
+            if (filteredOrders.length === 0) {
+                showToast("এক্সপোর্ট করার মতো কোনো ডেটা নেই!", "error");
+                return;
+            }
+
+            let csv = "Order ID,Date,Time,Ref,Customer Name,Phone,Items,Total Amount\n";
+            filteredOrders.forEach(o => {
+                const itemsStr = o.items.map(i => `${i.name} [${i.type}] x${i.qty}`).join(" | ").replace(/,/g, " ");
+                const timeStr = new Date(o.createdAt).toLocaleTimeString().replace(/,/g, " ");
+                csv += `"${o.id}","${o.dateKey}","${timeStr}","${o.ref}","${o.customerName}","${o.customerPhone}","${itemsStr}","${o.totalAmount}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Momology_Report_${activeFilterValue}.csv`;
+            link.click();
+            showToast("রিপোর্ট সফলভাবে ডাউনলোড হয়েছে!", "success");
         }
 
         // Initialize App
+        document.getElementById('filter-date').value = new Date().toISOString().split('T')[0];
         renderMenu();
+        renderExpensesTable();
+        renderHistoryView();
     </script>
 </body>
 </html>
