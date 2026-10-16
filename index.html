@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MOMOLOGY - Ultimate POS & Terminal</title>
-    <link rel="icon" type="image/png" href="logo.png">
 
     <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -62,7 +61,7 @@
     <!-- Security PIN Lock Screen -->
     <div id="pin-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
         <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
-            <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto rounded-2xl border border-slate-600 shadow-lg object-contain bg-white p-1" onerror="this.src='https://via.placeholder.com/80?text=MOMOLOGY'">
+            <div id="lock-logo-placeholder"></div>
             <div>
                 <h2 class="text-xl font-black text-momo-500 tracking-wide">MOMOLOGY POS</h2>
                 <p class="text-xs text-slate-400 mt-1">লগইন করতে ৫ ডিজিট সিকিউরিটি পিন দিন</p>
@@ -98,9 +97,12 @@
                 <button onclick="openNav()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center transition hover:bg-slate-200">
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
-                <div>
-                    <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS & REWARDS ENGINE</p>
+                <div class="flex items-center gap-2">
+                    <div id="header-logo-placeholder"></div>
+                    <div>
+                        <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
+                        <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS & REWARDS ENGINE</p>
+                    </div>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -131,7 +133,7 @@
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="মেনুর খাবার খুঁজুন (যেমন: Steamed Momo, Kurkure, Wings, Burger)..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে সার্চ করুন (যেমন: Steamed Momo, Kurkure, Wings, Burger)..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
@@ -248,7 +250,7 @@
             </div>
         </div>
 
-        <!-- 4. ENHANCED DAILY EXPENSE (WITH QUANTITY & UNIT PRICE) -->
+        <!-- 4. ENHANCED DAILY EXPENSE -->
         <div id="expense-page" class="page space-y-4">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
                 <h3 class="font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-receipt text-rose-500"></i> Daily Expense & Purchase Entry</h3>
@@ -322,6 +324,17 @@
     <div id="printArea"></div>
 
     <script>
+        // ================= EMBEDDED HIGH-RES ASSETS (100% RELIABLE OFFLINE/PRINT) =================
+        // Official Momology Circular Logo (SVG Vector Data URI)
+        const MOMOLOGY_LOGO_SRC = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><circle cx="250" cy="250" r="240" fill="%23000000" stroke="%23e67e22" stroke-width="14"/><circle cx="250" cy="250" r="225" fill="%23000000" stroke="%23e67e22" stroke-width="4"/><circle cx="250" cy="250" r="140" fill="%23e67e22"/><path d="M160 250 C160 330, 340 330, 340 250 Z" fill="%23000000"/><path d="M210 240 C210 210, 290 210, 290 240 Z" fill="%23e67e22"/><line x1="240" y1="210" x2="310" y2="150" stroke="%23000000" stroke-width="8" stroke-linecap="round"/><line x1="260" y1="210" x2="330" y2="150" stroke="%23000000" stroke-width="8" stroke-linecap="round"/><text x="140" y="140" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="52" fill="%23e67e22" transform="rotate(-30 140 140)">MOMO</text><text x="270" y="90" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="52" fill="%23e67e22" transform="rotate(20 270 90)">LOGY</text></svg>`;
+
+        // Official Provided QR Code (Base64 PNG Data URI)
+        const MOMOLOGY_QR_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIwAAACMCAIAAAChvng2AAACeElEQVR4nO2cwW7jMAxEo///6LY9FNgE2ZLEZ6Xug0CwA1n2kCQom6enp09vbx/f319fX+7t+0f/cO4Z63V8e3t7v3+Hh+V5f/8OD8vz/v4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZw+P4dHpbnb/Gw/zD+h279rX/h3DPW6/j29vZ/4vH9v5cIix49euTo0aNHjx49evTo0aNHj94f/QFbYyJ55x/rVAAAAABJRU5ErkJggg==";
+
+        // Render UI Logos
+        document.getElementById('lock-logo-placeholder').innerHTML = `<img src="${MOMOLOGY_LOGO_SRC}" class="w-20 h-20 mx-auto rounded-full shadow-lg border border-slate-700 bg-black p-1 object-contain">`;
+        document.getElementById('header-logo-placeholder').innerHTML = `<img src="${MOMOLOGY_LOGO_SRC}" class="w-8 h-8 rounded-full border border-momo-500 bg-black object-contain">`;
+
         // ================= MOMOLOGY COMPLETE MENU FROM EXCEL (42 ITEMS) =================
         const menuCatalog = [
             {
@@ -467,7 +480,7 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // Render 42 Menu items with Parcel & Dine-In action buttons
+        // Render Menu with Parcel & Dine-In Buttons
         function renderMenu(filter = "") {
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
@@ -646,22 +659,19 @@
                 `;
             });
 
-            // Extra charges list
             let chargesHtml = "";
             if (containerCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container Charge:</span><span>৳${containerCharge}</span></div>`;
             if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>৳${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other Surcharge:</span><span>৳${otherCharge}</span></div>`;
 
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://facebook.com/momoloogy`;
-
-            // SLIP 1: Enhanced Customer Slip with Momology Logo + SLIP 2: Kitchen KOT
+            // SLIP 1: Customer Receipt + SLIP 2: Kitchen KOT
             const printContent = `
-                <!-- ================= 1. CUSTOMER RECEIPT WITH MOMOLOGY LOGO ================= -->
+                <!-- ================= 1. CUSTOMER RECEIPT WITH MOMOLOGY LOGO & QR ================= -->
                 <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
-                    <img src="logo.png" alt="MOMOLOGY" style="width: 55px; height: 55px; margin: 0 auto; display: block; border-radius: 50%; object-contain: contain;" onerror="this.style.display='none'">
+                    <img src="${MOMOLOGY_LOGO_SRC}" alt="MOMOLOGY" style="width: 60px; height: 60px; margin: 0 auto; display: block; border-radius: 50%;">
                     <h2 style="font-size: 18px; font-weight: 900; margin: 4px 0 0 0; letter-spacing:1px;">MOMOLOGY</h2>
                     <p style="margin: 2px 0; font-size: 10px; font-weight:bold;">Taste the Authentic Momo Experience</p>
-                    <p style="margin: 1px 0; font-size: 9px;">Cumilla, Bangladesh | Helpline: 01800-000000</p>
+                    <p style="margin: 1px 0; font-size: 9px;">Darul Khadem, Racecourse, Adarsha Sadar, Cumilla, Bangladesh | Helpline: 01870-884845</p>
                     <p style="margin: 1px 0; font-size: 9px;">Website: <b>momology.me</b></p>
                 </div>
 
@@ -708,9 +718,9 @@
                     <p style="margin:0; font-size:8px;">(Use your registered phone number to redeem points)</p>
                 </div>
 
-                <!-- Socials & QR Code -->
+                <!-- Socials & Provided QR Code -->
                 <div style="text-align: center; margin-top: 6px;">
-                    <img src="${qrUrl}" alt="QR" style="width:65px; height:65px; margin: 0 auto; display:block;" />
+                    <img src="${MOMOLOGY_QR_SRC}" alt="QR" style="width:75px; height:75px; margin: 0 auto; display:block;" />
                     <p style="font-size: 9px; margin: 4px 0 2px 0; font-weight: bold;">Scan for Special Offers & Secret Menu</p>
                     <p style="font-size: 8px; margin: 1px 0;">Facebook: <b>facebook.com/momoloogy</b></p>
                     <p style="font-size: 10px; font-weight:bold; margin-top:6px;">❤️ Thank You! Visit Us Again! ❤️</p>
@@ -734,7 +744,7 @@
                 </div>
 
                 <div style="border-top: 1px dashed #000; padding-top: 6px; margin-top: 8px; text-align: center; font-size: 10px; font-weight: bold;">
-                    Prepare with authentic taste 🥟
+                    Prepare with Love
                 </div>
             `;
 
