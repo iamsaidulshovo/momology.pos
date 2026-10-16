@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MOMOLOGY - Smart POS & Terminal</title>
+    <title>MOMOLOGY - Ultimate POS & Terminal</title>
     <link rel="icon" type="image/png" href="logo.png">
 
-    <!-- Tailwind CSS & FontAwesome -->
+    <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -16,7 +16,7 @@
             theme: {
                 extend: {
                     colors: {
-                        momo: { 50: '#fffdf5', 500: '#e67e22', 600: '#d35400', navy: '#1e2b37', panda: '#d70f64', foodi: '#ff5200' }
+                        momo: { 50: '#fffdf5', 500: '#e67e22', 600: '#d35400', navy: '#1e2b37', panda: '#d70f64' }
                     }
                 }
             }
@@ -39,8 +39,11 @@
         .page.active { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        .menu-section-title { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; margin: 14px 0 6px 0; }
-        .menu-item-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .menu-section-title { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; margin: 12px 0 6px 0; }
+        .menu-item-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; transition: 0.15s; }
+        .menu-item-card:hover { border-color: #fed7aa; }
+
+        .stat-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
 
         #printArea { display: none; }
         @media print {
@@ -80,10 +83,10 @@
             <button onclick="closeNav()" class="text-slate-400 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <nav class="mt-4 space-y-1">
-            <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active"><i class="fa-solid fa-cash-register"></i> All-In-One POS</a>
+            <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active"><i class="fa-solid fa-cash-register"></i> Ultimate POS Terminal</a>
             <a href="#" onclick="showPage('active-dashboard'); closeNav()" class="sidebar-link"><i class="fa-solid fa-fire text-amber-500"></i> Kitchen KDS</a>
             <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-chart-line text-emerald-400"></i> Sales & Analytics</a>
-            <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Cash Flow</a>
+            <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Expense & P&L</a>
             <a href="#" onclick="lockSystem(); closeNav()" class="sidebar-link text-rose-400 hover:text-rose-300 border-t border-slate-700 mt-2"><i class="fa-solid fa-lock"></i> Lock System</a>
         </nav>
     </div>
@@ -97,7 +100,7 @@
                 </button>
                 <div>
                     <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">POS & REWARDS ENGINE</p>
+                    <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS & REWARDS ENGINE</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -116,56 +119,46 @@
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Order Terminal</button>
             <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> Kitchen KDS</button>
-            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-chart-pie mr-1"></i> Sales & Analytics</button>
+            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-chart-pie mr-1"></i> Sales Analytics</button>
             <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> Daily Expenses</button>
         </div>
 
-        <!-- 1. UNIFIED POS ORDER PAGE -->
+        <!-- 1. UNIFIED ULTIMATE POS TERMINAL -->
         <div id="order-page" class="page active space-y-4">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 
-                <!-- Menu Selection Panel -->
+                <!-- Complete 42-Item Menu Catalog -->
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে সার্চ করুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="মেনুর খাবার খুঁজুন (যেমন: Steamed Momo, Kurkure, Wings, Burger)..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- Single Cart & Billing Terminal -->
+                <!-- Unified Cart, Customer, Charges & Billing -->
                 <div class="lg:col-span-5 space-y-3">
                     <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-xl space-y-3">
                         
-                        <!-- Order Channel & Source Selection -->
-                        <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 flex flex-col gap-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-300"><i class="fa-solid fa-satellite-dish text-momo-500 mr-1"></i> Order Channel:</span>
-                                <select id="order-channel" onchange="handleChannelChange()" class="bg-slate-900 text-xs font-bold text-amber-400 border border-slate-600 rounded-lg px-2.5 py-1 outline-none">
-                                    <option value="Direct">Direct Store / Walk-in</option>
-                                    <option value="Foodpanda">Foodpanda Delivery</option>
-                                    <option value="Foodi">Foodi Online</option>
-                                </select>
-                            </div>
-                            <div id="external-order-wrapper" class="hidden flex items-center gap-2 pt-1 border-t border-slate-700">
-                                <span class="text-[11px] text-slate-400">Order ID:</span>
-                                <input type="text" id="external-order-id" placeholder="Ex: FP-8492 / FD-210" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2 py-0.5 text-xs text-white outline-none">
-                            </div>
+                        <!-- Order Note / Reference -->
+                        <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-hashtag mr-1"></i> Order Ref/Note:</span>
+                            <input type="text" id="order-ref-input" placeholder="e.g. Table-04 / FP-9812 / Foodi" class="bg-slate-900 border border-slate-600 rounded px-2.5 py-1 text-xs text-white outline-none flex-1 font-bold">
                         </div>
 
                         <!-- Customer Details (Loyalty Sync) -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
                             <div class="flex justify-between items-center text-xs">
-                                <span class="font-bold text-emerald-400"><i class="fa-solid fa-user-tag mr-1"></i> Customer (10% Rewards)</span>
-                                <span class="text-[10px] text-slate-400">Phone to sync</span>
+                                <span class="font-bold text-emerald-400"><i class="fa-solid fa-user mr-1"></i> Customer Info (10% Rewards)</span>
+                                <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-300">Auto Cashback</span>
                             </div>
                             <div class="flex gap-2">
-                                <input type="text" id="customer-phone" placeholder="Mobile (017...)" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-momo-500">
+                                <input type="text" id="customer-phone" placeholder="Phone (017...)" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-momo-500">
                                 <input type="text" id="customer-name" placeholder="Name (Optional)" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-momo-500">
                             </div>
                         </div>
 
-                        <!-- Cart Items with Independent Dine-in / Parcel config -->
+                        <!-- Cart Items with Independent Dine-in & Parcel Options -->
                         <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                             <div class="text-[11px] font-bold text-slate-400 mb-1 flex justify-between border-b border-slate-800 pb-1">
                                 <span>আইটেম ও সার্ভিস টাইপ</span>
@@ -176,20 +169,20 @@
                             </div>
                         </div>
 
-                        <!-- Extra Charges (Container, Delivery, Custom) -->
+                        <!-- Fixed 3 Extra Charges: Container, Delivery, Other -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-2">
-                            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-circle-plus mr-1"></i> অতিরিক্ত চার্জ (Extra Charges)</span>
+                            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-receipt mr-1"></i> অতিরিক্ত চার্জ (Extra Charges)</span>
                             <div class="grid grid-cols-3 gap-2">
                                 <div>
-                                    <label class="block text-[10px] text-slate-400">Container/Box (৳)</label>
-                                    <input type="number" id="charge-box" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Container (৳)</label>
+                                    <input type="number" id="charge-container" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] text-slate-400">Delivery Fee (৳)</label>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Delivery (৳)</label>
                                     <input type="number" id="charge-delivery" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] text-slate-400">Other Charge (৳)</label>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Other (৳)</label>
                                     <input type="number" id="charge-other" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
                                 </div>
                             </div>
@@ -209,13 +202,13 @@
                             </div>
                         </div>
 
-                        <!-- Grand Total Bar -->
+                        <!-- Grand Total Display -->
                         <div class="bg-momo-600 rounded-xl p-2.5 text-center shadow-md">
-                            <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট প্রদেয় বিল</div>
+                            <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট প্রদেয় বিল</div>
                             <div class="text-3xl font-black font-mono"><span id="total">0</span> TK</div>
                         </div>
 
-                        <!-- Confirm Order Button -->
+                        <!-- Confirm & Dual Print Button -->
                         <button onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
                             <i class="fa-solid fa-print"></i> CONFIRM & PRINT 2 SLIPS
                         </button>
@@ -245,8 +238,8 @@
                     <h3 class="text-2xl font-black text-slate-800"><span id="perf-today-orders">0</span></h3>
                 </div>
                 <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Online (FP/Foodi)</p>
-                    <h3 class="text-2xl font-black text-momo-panda">৳<span id="perf-fp-sales">0</span></h3>
+                    <p class="text-xs text-slate-500 font-bold mb-1">Total Expenses Today</p>
+                    <h3 class="text-2xl font-black text-rose-500">৳<span id="perf-today-expense">0</span></h3>
                 </div>
                 <div class="stat-card border-emerald-200 bg-emerald-50">
                     <p class="text-xs text-emerald-700 font-bold mb-1">Net Cash in Drawer</p>
@@ -255,99 +248,188 @@
             </div>
         </div>
 
-        <!-- 4. DAILY CASH FLOW -->
+        <!-- 4. ENHANCED DAILY EXPENSE (WITH QUANTITY & UNIT PRICE) -->
         <div id="expense-page" class="page space-y-4">
-            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 max-w-xl mx-auto space-y-3">
-                <h3 class="font-extrabold text-slate-800"><i class="fa-solid fa-receipt text-rose-500"></i> Daily Expense Logging</h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <input type="text" id="exp-title" placeholder="খরচের বিবরণ (যেমন: কাঁচাবাজার)" class="bg-slate-50 border p-2 text-sm rounded-lg outline-none">
-                    <input type="number" id="exp-amount" placeholder="পরিমাণ (টাকা)" class="bg-slate-50 border p-2 text-sm rounded-lg outline-none">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-receipt text-rose-500"></i> Daily Expense & Purchase Entry</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">খরচের বিবরণ / আইটেম</label>
+                        <input type="text" id="exp-name" placeholder="যেমন: চিকেন, ময়দা, তেল, গ্যাস..." class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">ক্যাটাগরি</label>
+                        <select id="exp-category" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none font-bold">
+                            <option value="Raw Materials">Raw Materials (বাজার)</option>
+                            <option value="Packaging">Packaging (বক্স/ব্যাগ)</option>
+                            <option value="Utilities">Utilities (গ্যাস/বিদ্যুৎ)</option>
+                            <option value="Salary">Staff / Labor</option>
+                            <option value="Other">Other Expenses</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">পরিমাণ (Quantity)</label>
+                        <input type="number" id="exp-qty" oninput="calcExpenseTotal()" placeholder="যেমন: 5" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">একক (Unit)</label>
+                        <input type="text" id="exp-unit" placeholder="kg / pcs / ltr" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">দর (Unit Price ৳)</label>
+                        <input type="number" id="exp-unit-price" oninput="calcExpenseTotal()" placeholder="যেমন: 180" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
                 </div>
-                <button onclick="logExpense()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded-lg text-sm transition">Save Expense</button>
+
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div class="text-sm font-bold text-slate-700">
+                        মোট খরচ: <span class="text-lg font-black text-rose-600 font-mono">৳ <span id="exp-calculated-total">0</span></span>
+                    </div>
+                    <button onclick="saveExpenseItem()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> খরচ যুক্ত করুন
+                    </button>
+                </div>
+            </div>
+
+            <!-- Today's Expenses Table -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 text-sm mb-3">আজকের খরচের তালিকা</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 uppercase border-b">
+                            <tr>
+                                <th class="p-2.5">আইটেম</th>
+                                <th class="p-2.5">ক্যাটাগরি</th>
+                                <th class="p-2.5">পরিমাণ ও একক</th>
+                                <th class="p-2.5">দর (Rate)</th>
+                                <th class="p-2.5">মোট টাকা</th>
+                                <th class="p-2.5 text-right">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expense-list-tbody" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-slate-400">আজকে এখনো কোনো খরচ এন্ট্রি করা হয়নি</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
 
-    <!-- PRINT SLIP TEMPLATES -->
+    <!-- PRINT SLIP TEMPLATES (CUSTOMER & KITCHEN KOT) -->
     <div id="printArea"></div>
 
     <script>
-        // ================= MOMOLOGY COMPLETE MENU =================
+        // ================= MOMOLOGY COMPLETE MENU FROM EXCEL (42 ITEMS) =================
         const menuCatalog = [
-            { 
-                category: "🥟 Steamed Momo Series (6 pcs)", 
+            {
+                category: "STEAM MOMO (5 Pcs)",
                 items: [
-                    { id: "sm-01", name: "Classic Chicken Steamed Momo", price: 150 },
-                    { id: "sm-02", name: "Naga Spicy Steamed Momo", price: 170 },
-                    { id: "sm-03", name: "Cheese Burst Steamed Momo", price: 200 },
-                    { id: "sm-04", name: "BBQ Glazed Steamed Momo", price: 180 },
-                    { id: "sm-05", name: "Garlic Pepper Steamed Momo", price: 170 }
+                    { id: "item_1", name: "Classic Steam Momo", price: 100 },
+                    { id: "item_2", name: "Spicy Naga Fire Momo", price: 110 },
+                    { id: "item_3", name: "Sausage Carnival Momo", price: 130 }
                 ]
             },
-            { 
-                category: "🔥 Crispy & Fried Momo (6 pcs)", 
+            {
+                category: "SPECIAL CHEESE MOMO (5 Pcs)",
                 items: [
-                    { id: "fm-01", name: "Crispy Deep Fried Momo", price: 170 },
-                    { id: "fm-02", name: "Kurkure Crunchy Momo", price: 210 },
-                    { id: "fm-03", name: "Pan Fried Kothey Momo", price: 190 },
-                    { id: "fm-04", name: "Spicy Naga Fried Momo", price: 190 },
-                    { id: "fm-05", name: "Cheese Topped Fried Momo", price: 220 }
+                    { id: "item_4", name: "Steamed Cheesy Melt Momo", price: 140 },
+                    { id: "item_5", name: "Crispy Fried Cheesy Blast", price: 140 },
+                    { id: "item_6", name: "Crunch-X Kurkure Cheesy Burst", price: 160 },
+                    { id: "item_7", name: "Smoky BBQ Cheesy Melt", price: 160 },
+                    { id: "item_8", name: "Spicy Naga BBQ Cheesy Fusion", price: 170 },
+                    { id: "item_9", name: "The Ultimate Motka Cheesy Bake", price: 170 }
                 ]
             },
-            { 
-                category: "🧀 Gravy, Sizzler & Cheesy Momo", 
+            {
+                category: "FRIED MOMO (5 Pcs)",
                 items: [
-                    { id: "gm-01", name: "Momo in Hot Garlic Gravy", price: 220 },
-                    { id: "gm-02", name: "Schezwan Gravy Momo", price: 230 },
-                    { id: "gm-03", name: "Baked Cheesy Momo Delight", price: 250 },
-                    { id: "gm-04", name: "Butter Cream Momo Special", price: 240 }
+                    { id: "item_10", name: "Crispy Fried Momo", price: 100 },
+                    { id: "item_11", name: "Naga Fire Fried Momo", price: 110 },
+                    { id: "item_12", name: "Kurkure Crunch Momo", price: 120 }
                 ]
             },
-            { 
-                category: "📦 Loaded Meatbox & Platters", 
+            {
+                category: "GRAVY MOMO (5 Pcs)",
                 items: [
-                    { id: "mb-01", name: "Momo Loaded Meatbox (Regular)", price: 240 },
-                    { id: "mb-02", name: "Sausage & Momo Meatbox", price: 270 },
-                    { id: "mb-03", name: "Naga Fiery Meatbox", price: 260 },
-                    { id: "mb-04", name: "Momology Grand Platter (12 pcs Mixed)", price: 420 },
-                    { id: "mb-05", name: "Party Feast Box (20 pcs Mixed)", price: 650 }
+                    { id: "item_13", name: "Masala Blast Momo", price: 110 }
                 ]
             },
-            { 
-                category: "🍜 Ramen & Momo Bowls", 
+            {
+                category: "GRAVY MOMO (3 Pcs)",
                 items: [
-                    { id: "rm-01", name: "Classic Chicken Broth Ramen + Momo", price: 280 },
-                    { id: "rm-02", name: "Spicy Korean Style Ramen + Momo", price: 310 },
-                    { id: "rm-03", name: "Naga Volcano Ramen Bowl", price: 320 }
+                    { id: "item_14", name: "Soup Momo", price: 199 }
                 ]
             },
-            { 
-                category: "🍔 Burgers & Sandwiches", 
+            {
+                category: "BBQ MOMO (5 Pcs)",
                 items: [
-                    { id: "bg-01", name: "Crispy Chicken Patty Burger", price: 160 },
-                    { id: "bg-02", name: "Cheese Blast Chicken Burger", price: 200 },
-                    { id: "bg-03", name: "Club Sandwich (4 Triangle)", price: 180 },
-                    { id: "bg-04", name: "Grilled Smoky Chicken Sandwich", price: 190 }
+                    { id: "item_15", name: "Smoky BBQ Momo", price: 120 },
+                    { id: "item_16", name: "Spicy Naga BBQ Fusion", price: 130 }
                 ]
             },
-            { 
-                category: "🥤 Beverages & Add-ons", 
+            {
+                category: "PLATTERS & CHEESEY PLATTERS (10 Pcs)",
                 items: [
-                    { id: "bv-01", name: "Extra Momo Spicy Dip", price: 30 },
-                    { id: "bv-02", name: "Extra Cheese Dip", price: 50 },
-                    { id: "bv-03", name: "Lemon Mint Mojito", price: 90 },
-                    { id: "bv-04", name: "Cold Coffee", price: 110 },
-                    { id: "bv-05", name: "Soft Drinks (Can)", price: 45 },
-                    { id: "bv-06", name: "Mineral Water (500ml)", price: 20 }
+                    { id: "item_17", name: "Twin-Fire Fried Platter", price: 220 },
+                    { id: "item_18", name: "Twin-Cheese Fried Platter", price: 290 },
+                    { id: "item_19", name: "The Ultimate Kurkure Crunch Platter", price: 240 },
+                    { id: "item_20", name: "The Grand Cheesy Steamed Platter", price: 310 },
+                    { id: "item_21", name: "Mega 5-Flavor Platter", price: 240 },
+                    { id: "item_22", name: "The Ultimate Kurkure Cheese Platter", price: 330 }
+                ]
+            },
+            {
+                category: "BURGER & SUB STATION",
+                items: [
+                    { id: "item_23", name: "Twin-Tower Cheesy Burger", price: 339 },
+                    { id: "item_24", name: "Grilled Cheesy Burger", price: 249 },
+                    { id: "item_25", name: "Crispy Cheesy Burger", price: 239 },
+                    { id: "item_26", name: "Sub Burger", price: 160 },
+                    { id: "item_27", name: "Sub Sandwich", price: 160 }
+                ]
+            },
+            {
+                category: "CRISPY CORNER",
+                items: [
+                    { id: "item_28", name: "Crispy Fried Chicken (1pcs)", price: 129 },
+                    { id: "item_29", name: "Crispy Wings", price: 199 },
+                    { id: "item_30", name: "BBQ Wings", price: 249 },
+                    { id: "item_31", name: "Naga Wings", price: 259 },
+                    { id: "item_32", name: "Crispy Chicken Finger", price: 149 }
+                ]
+            },
+            {
+                category: "MAINS & SIDES",
+                items: [
+                    { id: "item_33", name: "Ramen", price: 190 },
+                    { id: "item_34", name: "Cheesy Baked Pasta", price: 190 },
+                    { id: "item_35", name: "Meatbox", price: 159 },
+                    { id: "item_36", name: "Crispy Golden Fries", price: 90 },
+                    { id: "item_37", name: "Loaded Cheesy Fries", price: 199 }
+                ]
+            },
+            {
+                category: "COMBO PLATTERS",
+                items: [
+                    { id: "item_38", name: "Solo Crispy Combo", price: 259 },
+                    { id: "item_39", name: "Momo & Wings Craze Platter", price: 299 },
+                    { id: "item_40", name: "The Ultimate Crispy Feast", price: 449 },
+                    { id: "item_41", name: "Momology Mega Fusion Platter", price: 449 },
+                    { id: "item_42", name: "The Big Brother Feast", price: 679 }
                 ]
             }
         ];
 
-        // Cart items keyed by: `${itemId}_${type}` (e.g. sm-01_Parcel and sm-01_Dine-In can coexist)
-        let cart = {}; 
+        let cart = {}; // Key: `${itemId}_${type}`
+        let expenses = []; // List of logged expenses
         let pinCode = '12345';
+        let todaySales = 0;
+        let todayOrders = 0;
 
-        // Unlock PIN
+        // PIN Lock Management
         function unlockSystem() {
             const val = document.getElementById('admin-pin-input').value;
             if (val === pinCode || val === '00000') {
@@ -385,18 +467,7 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // Handle Channel Selector
-        function handleChannelChange() {
-            const ch = document.getElementById('order-channel').value;
-            const wrap = document.getElementById('external-order-wrapper');
-            if (ch === 'Foodpanda' || ch === 'Foodi') {
-                wrap.classList.remove('hidden');
-            } else {
-                wrap.classList.add('hidden');
-            }
-        }
-
-        // Render Menu Catalog
+        // Render 42 Menu items with Parcel & Dine-In action buttons
         function renderMenu(filter = "") {
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
@@ -413,7 +484,6 @@
                 filteredItems.forEach(item => {
                     const parcelQty = cart[`${item.id}_Parcel`] ? cart[`${item.id}_Parcel`].qty : 0;
                     const dineInQty = cart[`${item.id}_Dine-In`] ? cart[`${item.id}_Dine-In`].qty : 0;
-                    const totalQty = parcelQty + dineInQty;
 
                     const card = document.createElement('div');
                     card.className = "menu-item-card";
@@ -423,11 +493,9 @@
                             <p class="text-xs font-black text-momo-600">৳ ${item.price}</p>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <!-- Quick Parcel Add Button -->
                             <button onclick="addItemToCart('${item.id}', 'Parcel')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[11px] font-bold shadow-sm transition">
                                 <i class="fa-solid fa-box mr-0.5"></i> +Parcel ${parcelQty > 0 ? `(${parcelQty})` : ''}
                             </button>
-                            <!-- Quick Dine-in Add Button -->
                             <button onclick="addItemToCart('${item.id}', 'Dine-In')" class="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded text-[11px] font-bold shadow-sm transition">
                                 <i class="fa-solid fa-utensils mr-0.5"></i> +Dine-in ${dineInQty > 0 ? `(${dineInQty})` : ''}
                             </button>
@@ -443,19 +511,18 @@
             renderMenu(txt);
         }
 
-        // Add or modify specific item by mode
+        // Add to Cart
         function addItemToCart(itemId, type) {
-            let foundItem = null;
+            let found = null;
             menuCatalog.forEach(cat => {
                 const it = cat.items.find(i => i.id === itemId);
-                if (it) foundItem = it;
+                if (it) found = it;
             });
-
-            if (!foundItem) return;
+            if (!found) return;
 
             const key = `${itemId}_${type}`;
             if (!cart[key]) {
-                cart[key] = { itemId: itemId, name: foundItem.name, price: foundItem.price, qty: 1, type: type };
+                cart[key] = { itemId, name: found.name, price: found.price, qty: 1, type };
             } else {
                 cart[key].qty += 1;
             }
@@ -475,7 +542,7 @@
             updateTotal();
         }
 
-        // Render Cart with Type Switch option inside Cart
+        // Render Cart Rows
         function renderCartRows() {
             const container = document.getElementById('cart-rows');
             const keys = Object.keys(cart);
@@ -510,16 +577,16 @@
             });
         }
 
-        // Calculate Grand Total (Items + Container Charge + Delivery + Other)
+        // Grand Total (Items + Fixed 3 Extra Charges)
         function updateTotal() {
             let subtotal = 0;
             Object.values(cart).forEach(it => subtotal += (it.price * it.qty));
 
-            const box = parseFloat(document.getElementById('charge-box').value || 0);
-            const delivery = parseFloat(document.getElementById('charge-delivery').value || 0);
-            const other = parseFloat(document.getElementById('charge-other').value || 0);
+            const containerCharge = parseFloat(document.getElementById('charge-container').value || 0);
+            const deliveryCharge = parseFloat(document.getElementById('charge-delivery').value || 0);
+            const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
 
-            const total = subtotal + box + delivery + other;
+            const total = subtotal + containerCharge + deliveryCharge + otherCharge;
             document.getElementById('total').innerText = total;
             calcChangeReturn();
         }
@@ -538,38 +605,36 @@
             return `${start}******${end}`;
         }
 
-        // ================= SAVE & DUAL SLIPS PRINT =================
+        // ================= DUAL PRINT SLIPS (CUSTOMER + KDS KOT) =================
         function saveMasterOrder() {
             const total = parseFloat(document.getElementById('total').innerText || 0);
             if (total <= 0) {
-                showToast("কার্টে অন্তত একটি খাবার যোগ করুন!", "error");
+                showToast("কার্টে খাবার যোগ করুন!", "error");
                 return;
             }
 
-            const channel = document.getElementById('order-channel').value;
-            const extId = document.getElementById('external-order-id').value.trim();
+            const refNote = document.getElementById('order-ref-input').value.trim() || "Store Walk-in";
             const phone = document.getElementById('customer-phone').value.trim();
             const name = document.getElementById('customer-name').value.trim() || "Foodie Guest";
             const cashGiven = parseFloat(document.getElementById('cash-given').value || total);
             const cashChange = cashGiven >= total ? (cashGiven - total) : 0;
-            
-            const boxCharge = parseFloat(document.getElementById('charge-box').value || 0);
+
+            const containerCharge = parseFloat(document.getElementById('charge-container').value || 0);
             const deliveryCharge = parseFloat(document.getElementById('charge-delivery').value || 0);
             const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
 
-            const autoId = extId ? extId : `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
-            const rewardPoints = Math.floor(total * 0.10); // 10% instant rewards
+            const orderId = `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
+            const rewardPoints = Math.floor(total * 0.10);
 
-            // Render Item rows for Customer Receipt & Kitchen KOT
             let customerItemsHtml = "";
             let kitchenItemsHtml = "";
-            let totalItemsCount = 0;
+            let totalCount = 0;
 
             Object.values(cart).forEach(it => {
-                totalItemsCount += it.qty;
+                totalCount += it.qty;
                 customerItemsHtml += `
                     <div style="display:flex; justify-content:space-between; margin: 3px 0; font-size:11px;">
-                        <span>${it.name} <b style="font-size:9px; background:#eee; padding:1px 3px;">[${it.type}]</b> x${it.qty}</span>
+                        <span>${it.name} <b style="font-size:9px; background:#f0f0f0; padding:1px 3px;">[${it.type}]</b> x${it.qty}</span>
                         <span>৳${it.price * it.qty}</span>
                     </div>
                 `;
@@ -581,29 +646,29 @@
                 `;
             });
 
-            // Extra charges row if any
+            // Extra charges list
             let chargesHtml = "";
-            if (boxCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container / Box Charge:</span><span>৳${boxCharge}</span></div>`;
+            if (containerCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container Charge:</span><span>৳${containerCharge}</span></div>`;
             if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>৳${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other Surcharge:</span><span>৳${otherCharge}</span></div>`;
 
-            // QR Code for Facebook / Social Page
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://facebook.com/momoloogy`;
 
-            // Thermal Slip HTML (Customer + KOT)
+            // SLIP 1: Enhanced Customer Slip with Momology Logo + SLIP 2: Kitchen KOT
             const printContent = `
-                <!-- ================= 1. ENHANCED CUSTOMER SLIP ================= -->
+                <!-- ================= 1. CUSTOMER RECEIPT WITH MOMOLOGY LOGO ================= -->
                 <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
-                    <h2 style="font-size: 18px; font-weight: 900; margin: 0; letter-spacing:1px;">🥟 MOMOLOGY</h2>
+                    <img src="logo.png" alt="MOMOLOGY" style="width: 55px; height: 55px; margin: 0 auto; display: block; border-radius: 50%; object-contain: contain;" onerror="this.style.display='none'">
+                    <h2 style="font-size: 18px; font-weight: 900; margin: 4px 0 0 0; letter-spacing:1px;">MOMOLOGY</h2>
                     <p style="margin: 2px 0; font-size: 10px; font-weight:bold;">Taste the Authentic Momo Experience</p>
                     <p style="margin: 1px 0; font-size: 9px;">Cumilla, Bangladesh | Helpline: 01800-000000</p>
-                    <p style="margin: 1px 0; font-size: 9px;">Web: <b>momology.me</b></p>
+                    <p style="margin: 1px 0; font-size: 9px;">Website: <b>momology.me</b></p>
                 </div>
 
                 <div style="font-size: 10px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 6px;">
                     <div style="display:flex; justify-content:space-between;">
-                        <span>Order ID: <b>#${autoId}</b></span>
-                        <span style="font-weight:bold; text-transform:uppercase;">[ ${channel} ]</span>
+                        <span>Order ID: <b>#${orderId}</b></span>
+                        <span>Ref: <b>${refNote}</b></span>
                     </div>
                     <div style="display:flex; justify-content:space-between; margin-top:3px;">
                         <span>Customer: <b>${name}</b></span>
@@ -614,13 +679,12 @@
 
                 <div style="margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 6px;">
                     <div style="font-size:10px; font-weight:bold; margin-bottom:4px; display:flex; justify-content:space-between;">
-                        <span>ITEMS ORDERED (${totalItemsCount})</span>
+                        <span>ITEMS (${totalCount})</span>
                         <span>PRICE</span>
                     </div>
                     ${customerItemsHtml}
                 </div>
 
-                <!-- Financial Calculation & Charges -->
                 <div style="font-size: 10px; margin-bottom: 8px; border-bottom: 2px dashed #000; padding-bottom: 6px;">
                     ${chargesHtml}
                     <div style="display:flex; justify-content:space-between; font-weight:900; font-size:14px; margin-top:4px; border-top:1px solid #000; padding-top:4px;">
@@ -646,9 +710,9 @@
 
                 <!-- Socials & QR Code -->
                 <div style="text-align: center; margin-top: 6px;">
-                    <img src="${qrUrl}" alt="QR" style="width:70px; height:70px; margin: 0 auto; display:block;" />
+                    <img src="${qrUrl}" alt="QR" style="width:65px; height:65px; margin: 0 auto; display:block;" />
                     <p style="font-size: 9px; margin: 4px 0 2px 0; font-weight: bold;">Scan for Special Offers & Secret Menu</p>
-                    <p style="font-size: 8px; margin: 1px 0;">Facebook & Instagram: <b>facebook.com/momoloogy</b></p>
+                    <p style="font-size: 8px; margin: 1px 0;">Facebook: <b>facebook.com/momoloogy</b></p>
                     <p style="font-size: 10px; font-weight:bold; margin-top:6px;">❤️ Thank You! Visit Us Again! ❤️</p>
                 </div>
 
@@ -658,9 +722,9 @@
                 <!-- ================= 2. KITCHEN KOT SLIP ================= -->
                 <div style="text-align: center; padding-top: 10px; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px;">
                     <h2 style="font-size: 18px; font-weight: 900; margin: 0;">🔥 KITCHEN KOT 🔥</h2>
-                    <h3 style="font-size: 15px; font-weight: bold; margin: 3px 0;">ORDER #${autoId}</h3>
+                    <h3 style="font-size: 15px; font-weight: bold; margin: 3px 0;">ORDER #${orderId}</h3>
                     <div style="display:inline-block; border: 2px solid #000; padding: 2px 8px; font-weight:900; font-size: 12px; border-radius:4px; margin-top:2px;">
-                        SOURCE: ${channel.toUpperCase()}
+                        REF: ${refNote}
                     </div>
                     <p style="font-size: 9px; margin: 4px 0 0 0;">Time: ${new Date().toLocaleTimeString()}</p>
                 </div>
@@ -678,24 +742,108 @@
             printArea.innerHTML = printContent;
             window.print();
 
+            // Analytics update
+            todaySales += total;
+            todayOrders += 1;
+            document.getElementById('perf-today-sales').innerText = todaySales;
+            document.getElementById('perf-today-orders').innerText = todayOrders;
+            updateNetDrawer();
+
             // Reset after printing
             cart = {};
-            document.getElementById('external-order-id').value = "";
+            document.getElementById('order-ref-input').value = "";
             document.getElementById('customer-phone').value = "";
             document.getElementById('customer-name').value = "";
-            document.getElementById('charge-box').value = "";
+            document.getElementById('charge-container').value = "";
             document.getElementById('charge-delivery').value = "";
             document.getElementById('charge-other').value = "";
             document.getElementById('cash-given').value = "";
             document.getElementById('cash-change').innerText = "0";
-            
+
             renderMenu();
             renderCartRows();
             updateTotal();
             showToast("অর্ডার সফলভাবে সেভ ও প্রিন্ট হয়েছে!", "success");
         }
 
-        // Init App
+        // ================= EXPENSE CALCULATION & MANAGEMENT =================
+        function calcExpenseTotal() {
+            const qty = parseFloat(document.getElementById('exp-qty').value || 0);
+            const rate = parseFloat(document.getElementById('exp-unit-price').value || 0);
+            const total = qty * rate;
+            document.getElementById('exp-calculated-total').innerText = total;
+        }
+
+        function saveExpenseItem() {
+            const name = document.getElementById('exp-name').value.trim();
+            const cat = document.getElementById('exp-category').value;
+            const qty = parseFloat(document.getElementById('exp-qty').value || 0);
+            const unit = document.getElementById('exp-unit').value.trim() || "pcs";
+            const rate = parseFloat(document.getElementById('exp-unit-price').value || 0);
+            const total = qty * rate;
+
+            if (!name || total <= 0) {
+                showToast("খরচের নাম, পরিমাণ এবং দর সঠিকভাবে দিন!", "error");
+                return;
+            }
+
+            expenses.push({ id: Date.now(), name, cat, qty, unit, rate, total });
+
+            // Clear inputs
+            document.getElementById('exp-name').value = "";
+            document.getElementById('exp-qty').value = "";
+            document.getElementById('exp-unit').value = "";
+            document.getElementById('exp-unit-price').value = "";
+            document.getElementById('exp-calculated-total').innerText = "0";
+
+            renderExpensesTable();
+            showToast("খরচ যোগ করা হয়েছে!", "success");
+        }
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(e => e.id !== id);
+            renderExpensesTable();
+            showToast("খরচ মুছে ফেলা হয়েছে!", "info");
+        }
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById('expense-list-tbody');
+            if (expenses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">আজকে এখনো কোনো খরচ এন্ট্রি করা হয়নি</td></tr>`;
+                document.getElementById('perf-today-expense').innerText = "0";
+                updateNetDrawer();
+                return;
+            }
+
+            tbody.innerHTML = "";
+            let totalExp = 0;
+            expenses.forEach(e => {
+                totalExp += e.total;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold text-slate-800">${e.name}</td>
+                    <td class="p-2.5 text-slate-500">${e.cat}</td>
+                    <td class="p-2.5 font-bold">${e.qty} ${e.unit}</td>
+                    <td class="p-2.5">৳ ${e.rate}</td>
+                    <td class="p-2.5 font-black text-rose-600 font-mono">৳ ${e.total}</td>
+                    <td class="p-2.5 text-right">
+                        <button onclick="deleteExpense(${e.id})" class="text-rose-500 hover:text-rose-700 font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('perf-today-expense').innerText = totalExp;
+            updateNetDrawer();
+        }
+
+        function updateNetDrawer() {
+            const totalExp = expenses.reduce((acc, curr) => acc + curr.total, 0);
+            const netProfit = todaySales - totalExp;
+            document.getElementById('perf-net-profit').innerText = netProfit;
+        }
+
+        // Initialize App
         renderMenu();
     </script>
 </body>
