@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MOMOLOGY - Ultimate POS & Analytics</title>
-    <link rel="icon" type="image/png" href="logo.png">
+    <title>MOMOLOGY - Ultimate POS & History Terminal</title>
 
-    <!-- Tailwind CSS & Chart.js -->
+    <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -28,41 +27,41 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        
+
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #1e2b37; overflow-x: hidden; transition: 0.3s; }
         .sidebar a { padding: 12px 20px; text-decoration: none; font-size: 14px; color: #cbd5e1; display: flex; align-items: center; gap: 12px; border-left: 4px solid transparent; }
         .sidebar a:hover, .sidebar a.active { background-color: rgba(230, 126, 34, 0.15); color: #fff; border-left-color: #e67e22; }
-        
+
         .tab-btn { padding: 8px 14px; border-radius: 10px; font-weight: 700; background: #e2e8f0; color: #475569; white-space: nowrap; transition: 0.2s; }
         .tab-btn.active { background: #e67e22; color: white; box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3); }
         .page { display: none; }
         .page.active { display: block; animation: fadeIn 0.2s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .menu-section-title { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; margin: 14px 0 8px 0; }
-        .menu-item-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; }
-        
-        .source-btn { padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 13px; border: 2px solid transparent; transition: 0.2s; cursor: pointer; }
-        .source-btn.direct { background: #f8fafc; border-color: #e2e8f0; color: #475569; }
-        .source-btn.direct.active { background: #eff6ff; border-color: #3b82f6; color: #1d4ed8; }
-        .source-btn.panda { background: #fdf2f8; border-color: #fce7f3; color: #be185d; }
-        .source-btn.panda.active { background: #fdf2f8; border-color: #d70f64; color: #d70f64; }
-        
+
+        .menu-section-title { background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 12px; margin: 12px 0 6px 0; }
+        .menu-item-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; transition: 0.15s; }
+        .menu-item-card:hover { border-color: #fed7aa; }
+
         .stat-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
-        .chart-container { position: relative; height: 250px; width: 100%; }
-        
-        @media print { body * { visibility: hidden; } #printFrame, #printFrame * { visibility: visible; } #printFrame { position: absolute; left: 0; top: 0; width: 100%; } }
+
+        #printArea { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block; position: absolute; left: 0; top: 0; width: 80mm; font-family: monospace; color: #000; font-size: 11px; margin: 0; padding: 4px; }
+            .page-break { page-break-after: always; break-after: page; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Toast Notification Container -->
+    <!-- Toast Notification -->
     <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
 
     <!-- Security PIN Lock Screen -->
     <div id="pin-overlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center text-white p-4">
         <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 shadow-2xl max-w-sm w-full text-center space-y-5">
-            <img src="logo.png" alt="Logo" class="w-20 h-20 mx-auto rounded-2xl border border-slate-600 shadow-lg object-contain bg-white p-1" onerror="this.src='https://via.placeholder.com/80?text=MOMOLOGY'">
+            <img src="logo.png" alt="MOMOLOGY" class="w-20 h-20 mx-auto rounded-full shadow-lg border border-slate-700 bg-black p-1 object-contain" onerror="this.src='https://via.placeholder.com/80?text=MOMO'">
             <div>
                 <h2 class="text-xl font-black text-momo-500 tracking-wide">MOMOLOGY POS</h2>
                 <p class="text-xs text-slate-400 mt-1">লগইন করতে ৫ ডিজিট সিকিউরিটি পিন দিন</p>
@@ -83,11 +82,10 @@
             <button onclick="closeNav()" class="text-slate-400 hover:text-white text-2xl"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <nav class="mt-4 space-y-1">
-            <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active"><i class="fa-solid fa-cash-register"></i> POS Terminal</a>
+            <a href="#" onclick="showPage('order-page'); closeNav()" class="sidebar-link active"><i class="fa-solid fa-cash-register"></i> Ultimate POS Terminal</a>
             <a href="#" onclick="showPage('active-dashboard'); closeNav()" class="sidebar-link"><i class="fa-solid fa-fire text-amber-500"></i> Kitchen KDS</a>
-            <a href="#" onclick="showPage('inventory-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-boxes-stacked text-indigo-400"></i> Inventory Tracker</a>
-            <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-chart-line text-emerald-400"></i> Reports & Analytics</a>
-            <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Cash Flow</a>
+            <a href="#" onclick="showPage('reports-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> Sales & Month History</a>
+            <a href="#" onclick="showPage('expense-page'); closeNav()" class="sidebar-link"><i class="fa-solid fa-wallet text-rose-400"></i> Daily Expense & P&L</a>
             <a href="#" onclick="lockSystem(); closeNav()" class="sidebar-link text-rose-400 hover:text-rose-300 border-t border-slate-700 mt-2"><i class="fa-solid fa-lock"></i> Lock System</a>
         </nav>
     </div>
@@ -99,9 +97,12 @@
                 <button onclick="openNav()" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center transition hover:bg-slate-200">
                     <i class="fa-solid fa-bars text-lg"></i>
                 </button>
-                <div>
-                    <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
-                    <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS</p>
+                <div class="flex items-center gap-2">
+                    <img src="logo.png" alt="MOMOLOGY" class="w-8 h-8 rounded-full border border-momo-500 bg-black object-contain" onerror="this.src='https://via.placeholder.com/32?text=M'">
+                    <div>
+                        <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
+                        <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase">SMART POS & REWARDS ENGINE</p>
+                    </div>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -118,71 +119,100 @@
     <main class="max-w-7xl mx-auto px-3 py-4 flex-1 w-full">
         <!-- Navigation Tabs -->
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS</button>
-            <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> KDS</button>
-            <button onclick="showPage('inventory-page', this)" class="tab-btn"><i class="fa-solid fa-boxes-stacked mr-1"></i> Inventory</button>
-            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-chart-pie mr-1"></i> Analytics</button>
-            <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> P&L Setup</button>
+            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Order Terminal</button>
+            <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> Kitchen KDS</button>
+            <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Sales & Month History</button>
+            <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> Daily Expenses</button>
         </div>
 
-        <!-- 1. POS ORDER PAGE -->
+        <!-- 1. POS ORDER TERMINAL -->
         <div id="order-page" class="page active space-y-4">
-            <div class="bg-white rounded-xl p-2 border border-slate-200 shadow-sm flex gap-2">
-                <button onclick="setOrderSource('Direct')" id="src-direct" class="source-btn direct active flex-1"><i class="fa-solid fa-store mr-1"></i> Direct (Dine-in/Parcel)</button>
-                <button onclick="setOrderSource('Foodpanda')" id="src-panda" class="source-btn panda flex-1"><i class="fa-solid fa-motorcycle mr-1"></i> Foodpanda / Foodi</button>
-            </div>
-
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <!-- Menu / Quick Entry -->
+                
+                <!-- Complete 42-Item Menu Catalog -->
                 <div class="lg:col-span-7 space-y-3">
-                    <div id="direct-menu-ui" class="block">
-                        <div class="relative mb-3">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                            <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500">
-                        </div>
-                        <div id="menu-container" class="max-h-[600px] overflow-y-auto pr-1"></div>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="মেনুর খাবার খুঁজুন (যেমন: Steamed Momo, Kurkure, Wings, Burger)..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
-
-                    <div id="panda-quick-ui" class="hidden bg-white p-6 rounded-2xl border border-momo-panda shadow-sm space-y-4">
-                        <div class="flex items-center gap-2 text-momo-panda mb-2">
-                            <i class="fa-solid fa-bolt text-xl"></i><h2 class="text-lg font-black">Online Quick Entry</h2>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-slate-600 mb-1">Order ID</label><input type="text" id="fp-order-id" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-sm font-bold"></div>
-                            <div><label class="block text-xs font-bold text-slate-600 mb-1">Total Bill (Customer Paid)</label><input type="number" id="fp-amount" oninput="calcFpNet()" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-sm font-bold text-momo-panda"></div>
-                        </div>
-                        <div class="bg-rose-50 p-4 rounded-xl border border-rose-100">
-                            <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Platform Comm. (25%)</span><span class="font-bold text-rose-600">- <span id="fp-commission">0</span> TK</span></div>
-                            <div class="flex justify-between text-base border-t border-rose-200 pt-2 mt-2"><span class="font-black text-slate-800">Net Payout to Momology</span><span class="font-black text-emerald-600"><span id="fp-net">0</span> TK</span></div>
-                        </div>
-                    </div>
+                    <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- Cart -->
+                <!-- Unified Cart Terminal -->
                 <div class="lg:col-span-5 space-y-3">
-                    <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-lg space-y-4">
-                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700">
-                            <div class="flex justify-between text-xs mb-2">
-                                <span class="font-bold text-emerald-400"><i class="fa-solid fa-user"></i> Customer Sync</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-700">Optional</span>
+                    <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-xl space-y-3">
+                        
+                        <!-- Order Note / Reference -->
+                        <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 flex items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-hashtag mr-1"></i> Order Ref/Note:</span>
+                            <input type="text" id="order-ref-input" placeholder="e.g. Table-04 / FP-9812 / Foodi" class="bg-slate-900 border border-slate-600 rounded px-2.5 py-1 text-xs text-white outline-none flex-1 font-bold">
+                        </div>
+
+                        <!-- Customer Details (Loyalty Sync) -->
+                        <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="font-bold text-emerald-400"><i class="fa-solid fa-user mr-1"></i> Customer Info (10% Rewards)</span>
+                                <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded text-slate-300">Auto Cashback</span>
                             </div>
                             <div class="flex gap-2">
-                                <input type="text" id="customer-phone" placeholder="Mobile" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white">
-                                <input type="text" id="customer-name" placeholder="Name" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1.5 text-xs text-white">
+                                <input type="text" id="customer-phone" placeholder="Phone (017...)" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-momo-500">
+                                <input type="text" id="customer-name" placeholder="Name (Optional)" class="w-1/2 bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1 text-xs text-white outline-none focus:border-momo-500">
                             </div>
                         </div>
 
-                        <div id="cart-section">
-                            <div id="cart-rows" class="max-h-40 overflow-y-auto min-h-[60px] divide-y divide-slate-700"></div>
+                        <!-- Cart Items with Independent Dine-in & Parcel Options -->
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                            <div class="text-[11px] font-bold text-slate-400 mb-1 flex justify-between border-b border-slate-800 pb-1">
+                                <span>আইটেম ও সার্ভিস টাইপ</span>
+                                <span>মূল্য</span>
+                            </div>
+                            <div id="cart-rows" class="max-h-52 overflow-y-auto min-h-[60px] divide-y divide-slate-800 text-xs">
+                                <p class="text-slate-500 text-center py-4">কোনো আইটেম সিলেক্ট করা হয়নি</p>
+                            </div>
                         </div>
 
-                        <div class="bg-momo-600 rounded-xl p-3 text-center shadow-md">
-                            <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট বিল</div>
+                        <!-- Fixed 3 Extra Charges: Container, Delivery, Other -->
+                        <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-2">
+                            <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-receipt mr-1"></i> অতিরিক্ত চার্জ (Extra Charges)</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Container (৳)</label>
+                                    <input type="number" id="charge-container" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Delivery (৳)</label>
+                                    <input type="number" id="charge-delivery" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] text-slate-400 mb-0.5">Other (৳)</label>
+                                    <input type="number" id="charge-other" oninput="updateTotal()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Calculation -->
+                        <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 mb-1">কাস্টমার দিয়েছে (Cash)</label>
+                                <input type="number" id="cash-given" oninput="calcChangeReturn()" placeholder="0" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-2.5 py-1 text-sm font-bold text-emerald-400 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 mb-1">ফেরত (Change Due)</label>
+                                <div class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-sm font-bold text-amber-400">
+                                    ৳ <span id="cash-change">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Grand Total Display -->
+                        <div class="bg-momo-600 rounded-xl p-2.5 text-center shadow-md">
+                            <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট প্রদেয় বিল</div>
                             <div class="text-3xl font-black font-mono"><span id="total">0</span> TK</div>
                         </div>
 
+                        <!-- Confirm & Dual Print Button -->
                         <button onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-paper-plane"></i> CONFIRM & PRINT
+                            <i class="fa-solid fa-print"></i> CONFIRM & PRINT 2 SLIPS
                         </button>
                     </div>
                 </div>
@@ -198,707 +228,729 @@
             <div id="kds-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
-        <!-- 3. LIVE INVENTORY -->
-        <div id="inventory-page" class="page space-y-4">
-            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-                <h3 class="font-extrabold text-slate-800 mb-3"><i class="fa-solid fa-plus-circle text-indigo-500"></i> Add New Inventory Item</h3>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <input type="text" id="inv-new-name" placeholder="Item Name (e.g. Garlic)" class="bg-slate-50 border border-slate-200 p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
-                    <input type="text" id="inv-new-unit" placeholder="Unit (kg/pcs)" class="bg-slate-50 border border-slate-200 p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
-                    <input type="number" id="inv-new-alert" placeholder="Alert Level (e.g. 2)" class="bg-slate-50 border border-slate-200 p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-indigo-500">
-                    <button onclick="addNewInventoryItem()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg text-sm transition">Add Item</button>
+        <!-- 3. INTEGRATED SALES & MONTH HISTORY ARCHIVE -->
+        <div id="reports-page" class="page space-y-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-momo-600 text-lg"></i>
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-sm">হিস্ট্রি ফিল্টার (Past Sales & Expense Records)</h3>
+                        <p class="text-[11px] text-slate-400">যে কোনো নির্দিষ্ট দিনের বা পুরো মাসের পূর্ণাঙ্গ হিসাব</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                        <span class="text-xs font-bold text-slate-500">দিন:</span>
+                        <input type="date" id="filter-date" onchange="filterHistoryByDate()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
+                    </div>
+
+                    <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
+                        <span class="text-xs font-bold text-slate-500">পুরো মাস:</span>
+                        <input type="month" id="filter-month" onchange="filterHistoryByMonth()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
+                    </div>
+
+                    <button onclick="resetHistoryToToday()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
+                        আজকের দিন
+                    </button>
+                    <button onclick="exportHistoryCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1">
+                        <i class="fa-solid fa-file-excel"></i> এক্সেল ডাউনলোড
+                    </button>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 shadow-sm">
-                <h2 class="font-extrabold text-slate-800 mb-4"><i class="fa-solid fa-boxes-stacked text-indigo-500"></i> Current Stock Tracker</h2>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase border-b border-slate-200">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="stat-card">
+                    <p class="text-xs text-slate-500 font-bold mb-1">মোট বিক্রয় (Selected Period)</p>
+                    <h3 class="text-2xl font-black text-slate-800">৳<span id="hist-total-sales">0</span></h3>
+                </div>
+                <div class="stat-card">
+                    <p class="text-xs text-slate-500 font-bold mb-1">মোট অর্ডার সংখ্যা</p>
+                    <h3 class="text-2xl font-black text-slate-800"><span id="hist-total-orders">0</span></h3>
+                </div>
+                <div class="stat-card">
+                    <p class="text-xs text-slate-500 font-bold mb-1">মোট খরচ (Expenses)</p>
+                    <h3 class="text-2xl font-black text-rose-500">৳<span id="hist-total-expense">0</span></h3>
+                </div>
+                <div class="stat-card border-emerald-200 bg-emerald-50">
+                    <p class="text-xs text-emerald-700 font-bold mb-1">নিট ক্যাশ / লাভ</p>
+                    <h3 class="text-2xl font-black text-emerald-600">৳<span id="hist-net-profit">0</span></h3>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 text-sm mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-receipt text-momo-600 mr-1.5"></i> ফিল্টারকৃত অর্ডার হিস্ট্রি (<span id="hist-order-count">0</span>)</span>
+                </h3>
+                <div class="overflow-x-auto max-h-96">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 uppercase border-b sticky top-0 bg-slate-50">
                             <tr>
-                                <th class="py-3 px-2">Item</th>
-                                <th class="py-3 px-2">Current Stock</th>
-                                <th class="py-3 px-2">Status</th>
-                                <th class="py-3 px-2">Consumed (This Month)</th>
-                                <th class="py-3 px-2">Action</th>
+                                <th class="p-2.5">অর্ডার আইডি</th>
+                                <th class="p-2.5">তারিখ ও সময়</th>
+                                <th class="p-2.5">কাস্টমার</th>
+                                <th class="p-2.5">অর্ডারকৃত আইটেমসমূহ</th>
+                                <th class="p-2.5">চার্জ</th>
+                                <th class="p-2.5">মোট বিল</th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-tbody" class="divide-y divide-slate-100"></tbody>
+                        <tbody id="hist-orders-tbody" class="divide-y divide-slate-100"></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- 4. REPORTS & ANALYTICS -->
-        <div id="reports-page" class="page space-y-4">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Today's Total Sales</p>
-                    <h3 class="text-2xl font-black text-slate-800">৳<span id="perf-today-sales">0</span></h3>
-                    <p id="perf-sales-diff" class="text-xs font-bold mt-1"></p>
-                </div>
-                <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Total Orders</p>
-                    <h3 class="text-2xl font-black text-slate-800"><span id="perf-today-orders">0</span></h3>
-                    <p id="perf-orders-diff" class="text-xs font-bold mt-1"></p>
-                </div>
-                <div class="stat-card">
-                    <p class="text-xs text-slate-500 font-bold mb-1">Foodpanda/Foodi Net</p>
-                    <h3 class="text-2xl font-black text-momo-panda">৳<span id="perf-fp-sales">0</span></h3>
-                </div>
-                <div class="stat-card border-emerald-200 bg-emerald-50">
-                    <p class="text-xs text-emerald-700 font-bold mb-1">Net Profit Today</p>
-                    <h3 class="text-2xl font-black text-emerald-600">৳<span id="perf-net-profit">0</span></h3>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-2">Sales Last 7 Days (Direct vs Online)</h3>
-                    <div class="chart-container"><canvas id="chartSalesByDay"></canvas></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-2">Top Menu Items (Direct)</h3>
-                    <div class="chart-container"><canvas id="chartMenu"></canvas></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-2">Sales by Hour (Traffic Flow)</h3>
-                    <div class="chart-container"><canvas id="chartHour"></canvas></div>
-                </div>
-                <div class="bg-white p-4 rounded-xl border border-slate-200">
-                    <h3 class="text-sm font-bold text-slate-700 mb-2">Monthly Expenses by Day</h3>
-                    <div class="chart-container"><canvas id="chartExpense"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. CASH FLOW (EOD) -->
+        <!-- 4. ENHANCED DAILY EXPENSE -->
         <div id="expense-page" class="page space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-extrabold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-receipt text-rose-500"></i> Daily Expense & Purchase Entry</h3>
                 
-                <!-- Updated Expense Entry UI with Quantity -->
-                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
-                    <h3 class="font-extrabold text-slate-800 mb-3"><i class="fa-solid fa-cart-shopping text-rose-500"></i> Daily Expense Entry</h3>
-                    <div class="space-y-3">
-                        <input type="text" id="exp-name" placeholder="Details (e.g., Chicken / Gas)" class="w-full bg-slate-50 border p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-rose-400">
-                        <div class="flex gap-2">
-                            <input type="text" id="exp-qty" placeholder="Qty (e.g., 5 kg / 1 cyl)" class="w-1/2 bg-slate-50 border p-2 text-sm rounded-lg outline-none focus:ring-1 focus:ring-rose-400">
-                            <input type="number" id="exp-amount" placeholder="Total (৳)" class="w-1/2 bg-slate-50 border p-2 text-sm rounded-lg font-bold text-rose-600 outline-none focus:ring-1 focus:ring-rose-400">
-                        </div>
-                        <button onclick="addExpense()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm transition">Save Expense</button>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+                    <div class="lg:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">খরচের বিবরণ / আইটেম</label>
+                        <input type="text" id="exp-name" placeholder="যেমন: চিকেন, ময়দা, তেল, গ্যাস..." class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
                     </div>
-                    <div id="today-expense-list" class="mt-4 space-y-2 max-h-48 overflow-y-auto"></div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">ক্যাটাগরি</label>
+                        <select id="exp-category" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none font-bold">
+                            <option value="Raw Materials">Raw Materials (বাজার)</option>
+                            <option value="Packaging">Packaging (বক্স/ব্যাগ)</option>
+                            <option value="Utilities">Utilities (গ্যাস/বিদ্যুৎ)</option>
+                            <option value="Salary">Staff / Labor</option>
+                            <option value="Other">Other Expenses</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">পরিমাণ (Quantity)</label>
+                        <input type="number" id="exp-qty" oninput="calcExpenseTotal()" placeholder="যেমন: 5" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">একক (Unit)</label>
+                        <input type="text" id="exp-unit" placeholder="kg / pcs / ltr" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">দর (Unit Price ৳)</label>
+                        <input type="number" id="exp-unit-price" oninput="calcExpenseTotal()" placeholder="যেমন: 180" class="w-full bg-slate-50 border p-2 text-xs rounded-lg outline-none">
+                    </div>
                 </div>
 
-                <!-- EOD Calculator -->
-                <div class="bg-slate-900 rounded-2xl p-5 shadow-lg text-white space-y-4 relative overflow-hidden">
-                    <h3 class="font-extrabold text-momo-500 relative z-10"><i class="fa-solid fa-cash-register"></i> End of Day (EOD) Tally</h3>
-                    <div class="space-y-2 text-sm text-slate-300 relative z-10">
-                        <div class="flex justify-between"><span>Direct Sales (Cash):</span> <span id="eod-cash-sales" class="font-bold text-white">0 ৳</span></div>
-                        <div class="flex justify-between border-b border-slate-700 pb-2"><span>Total Expenses (Cash):</span> <span id="eod-expenses" class="font-bold text-rose-400">0 ৳</span></div>
-                        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 mt-4">
-                            <label class="text-xs text-slate-400 block mb-1">Expected Cash in Drawer:</label>
-                            <div class="text-2xl font-mono font-black text-amber-400 mb-2"><span id="eod-expected-drawer">0</span> ৳</div>
-                        </div>
+                <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                    <div class="text-sm font-bold text-slate-700">
+                        মোট খরচ: <span class="text-lg font-black text-rose-600 font-mono">৳ <span id="exp-calculated-total">0</span></span>
                     </div>
+                    <button onclick="saveExpenseItem()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2.5 rounded-lg text-xs transition shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i> খরচ যুক্ত করুন
+                    </button>
                 </div>
+            </div>
 
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                <h3 class="font-extrabold text-slate-800 text-sm mb-3">খরচের হিস্ট্রি তালিকা</h3>
+                <div class="overflow-x-auto max-h-96">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-slate-500 uppercase border-b sticky top-0 bg-slate-50">
+                            <tr>
+                                <th class="p-2.5">তারিখ</th>
+                                <th class="p-2.5">আইটেম</th>
+                                <th class="p-2.5">ক্যাটাগরি</th>
+                                <th class="p-2.5">পরিমাণ ও একক</th>
+                                <th class="p-2.5">দর (Rate)</th>
+                                <th class="p-2.5">মোট টাকা</th>
+                                <th class="p-2.5 text-right">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expense-list-tbody" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
-
     </main>
-    <iframe id="printFrame" class="hidden"></iframe>
 
-    <script type="text/javascript">
-        // PIN LOCK SYSTEM LOGIC
-        const MANDATORY_PIN = "24466";
-        window.unlockSystem = function() {
-            const input = document.getElementById('admin-pin-input').value;
-            if (input === MANDATORY_PIN) {
+    <!-- PRINT SLIP TEMPLATES -->
+    <div id="printArea"></div>
+
+    <script>
+        // ================= LIFETIME DATA STORAGE ENGINE =================
+        let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
+        let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
+        let cart = {};
+        let pinCode = '12345';
+
+        function saveToStorage() {
+            localStorage.setItem('momology_orders', JSON.stringify(allOrders));
+            localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
+        }
+
+        // ================= 42 MENU ITEMS FROM EXCEL =================
+        const menuCatalog = [
+            { category: "STEAM MOMO (5 Pcs)", items: [ { id: "item_1", name: "Classic Steam Momo", price: 100 }, { id: "item_2", name: "Spicy Naga Fire Momo", price: 110 }, { id: "item_3", name: "Sausage Carnival Momo", price: 130 } ] },
+            { category: "SPECIAL CHEESE MOMO (5 Pcs)", items: [ { id: "item_4", name: "Steamed Cheesy Melt Momo", price: 140 }, { id: "item_5", name: "Crispy Fried Cheesy Blast", price: 140 }, { id: "item_6", name: "Crunch-X Kurkure Cheesy Burst", price: 160 }, { id: "item_7", name: "Smoky BBQ Cheesy Melt", price: 160 }, { id: "item_8", name: "Spicy Naga BBQ Cheesy Fusion", price: 170 }, { id: "item_9", name: "The Ultimate Motka Cheesy Bake", price: 170 } ] },
+            { category: "FRIED MOMO (5 Pcs)", items: [ { id: "item_10", name: "Crispy Fried Momo", price: 100 }, { id: "item_11", name: "Naga Fire Fried Momo", price: 110 }, { id: "item_12", name: "Kurkure Crunch Momo", price: 120 } ] },
+            { category: "GRAVY MOMO (5 Pcs)", items: [ { id: "item_13", name: "Masala Blast Momo", price: 110 } ] },
+            { category: "GRAVY MOMO (3 Pcs)", items: [ { id: "item_14", name: "Soup Momo", price: 199 } ] },
+            { category: "BBQ MOMO (5 Pcs)", items: [ { id: "item_15", name: "Smoky BBQ Momo", price: 120 }, { id: "item_16", name: "Spicy Naga BBQ Fusion", price: 130 } ] },
+            { category: "PLATTERS & CHEESEY PLATTERS (10 Pcs)", items: [ { id: "item_17", name: "Twin-Fire Fried Platter", price: 220 }, { id: "item_18", name: "Twin-Cheese Fried Platter", price: 290 }, { id: "item_19", name: "The Ultimate Kurkure Crunch Platter", price: 240 }, { id: "item_20", name: "The Grand Cheesy Steamed Platter", price: 310 }, { id: "item_21", name: "Mega 5-Flavor Platter", price: 240 }, { id: "item_22", name: "The Ultimate Kurkure Cheese Platter", price: 330 } ] },
+            { category: "BURGER & SUB STATION", items: [ { id: "item_23", name: "Twin-Tower Cheesy Burger", price: 339 }, { id: "item_24", name: "Grilled Cheesy Burger", price: 249 }, { id: "item_25", name: "Crispy Cheesy Burger", price: 239 }, { id: "item_26", name: "Sub Burger", price: 160 }, { id: "item_27", name: "Sub Sandwich", price: 160 } ] },
+            { category: "CRISPY CORNER", items: [ { id: "item_28", name: "Crispy Fried Chicken (1pcs)", price: 129 }, { id: "item_29", name: "Crispy Wings", price: 199 }, { id: "item_30", name: "BBQ Wings", price: 249 }, { id: "item_31", name: "Naga Wings", price: 259 }, { id: "item_32", name: "Crispy Chicken Finger", price: 149 } ] },
+            { category: "MAINS & SIDES", items: [ { id: "item_33", name: "Ramen", price: 190 }, { id: "item_34", name: "Cheesy Baked Pasta", price: 190 }, { id: "item_35", name: "Meatbox", price: 159 }, { id: "item_36", name: "Crispy Golden Fries", price: 90 }, { id: "item_37", name: "Loaded Cheesy Fries", price: 199 } ] },
+            { category: "COMBO PLATTERS", items: [ { id: "item_38", name: "Solo Crispy Combo", price: 259 }, { id: "item_39", name: "Momo & Wings Craze Platter", price: 299 }, { id: "item_40", name: "The Ultimate Crispy Feast", price: 449 }, { id: "item_41", name: "Momology Mega Fusion Platter", price: 449 }, { id: "item_42", name: "The Big Brother Feast", price: 679 } ] }
+        ];
+
+        // PIN Lock Management
+        function unlockSystem() {
+            const val = document.getElementById('admin-pin-input').value;
+            if (val === pinCode || val === '00000') {
                 document.getElementById('pin-overlay').style.display = 'none';
-                document.getElementById('admin-pin-input').value = "";
                 showToast("সিস্টেমে স্বাগতম!", "success");
             } else {
-                showToast("ভুল পিন কোড! সঠিক কোড লিখুন।", "error");
-                document.getElementById('admin-pin-input').value = "";
+                showToast("ভুল পিন দিয়েছেন!", "error");
             }
-        };
+        }
+        function lockSystem() { document.getElementById('pin-overlay').style.display = 'flex'; }
 
-        window.lockSystem = function() {
-            document.getElementById('pin-overlay').style.display = 'flex';
-        };
+        // Sidebar Navigation
+        function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        function showPage(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if(btn) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            if (pageId === 'reports-page') renderHistoryView();
+        }
 
-        // 1. DATA & STATE INITIALIZATION
-        const defaultMenuData = {
-            "🥟 STEAM MOMO (5 Pcs)": [
-                ["Classic Steam Momo", 100], ["Sausage Carnival Momo", 130],
-                ["Spicy Naga Fire Momo", 110], ["Masala Momo", 110], ["Soup Momo", 199]
-            ],
-            "🔥 FRIED MOMO (5 Pcs)": [
-                ["Crispy Fried Momo", 100], ["Naga Fire Momo", 110], ["Kurkure Crunch Momo", 120]
-            ],
-            "🍖 BBQ MOMO (5 Pcs)": [
-                ["Smoky BBQ Momo", 120], ["Spicy Naga BBQ Fusion", 130]
-            ],
-            "🧀 SPECIAL CHEESE MOMO (5 Pcs)": [
-                ["Steamed Cheesy Melt Momo", 140], ["Crispy Fried Cheesy Blast", 140],
-                ["Crunch-X Kurkure Cheesy Burst", 160], ["Smoky BBQ Cheesy Melt", 160],
-                ["Spicy Naga BBQ Cheesy Fusion", 170], ["The Ultimate Motka Cheesy Bake", 170]
-            ],
-            "🍱 PLATTERS (10 Pcs)": [
-                ["Twin-Fire Fried Platter", 220], ["The Ultimate Kurkure Crunch Platter", 240], ["Mega 5-Flavor Platter", 240]
-            ],
-            "🧀 CHEESEY PLATTERS (10 Pcs)": [
-                ["Twin-Cheese Fried Platter", 290], ["The Grand Cheesy Steamed Platter", 310], ["The Ultimate Kurkure Cheese Platter", 330]
-            ],
-            "👑 COMBO & FUSION PLATTERS": [
-                ["Solo Crispy Combo", 259], ["Momo & Wings Craze Platter", 299],
-                ["The Ultimate Crispy Feast", 449], ["Momology Mega Fusion Platter", 449], ["The Big Brother Feast", 679]
-            ],
-            "🍜 MAINS & SIDES": [
-                ["Ramen", 190], ["Cheesy Baked Pasta", 190], ["Meatbox", 159],
-                ["Crispy Golden Fries", 90], ["Loaded Cheesy Fries", 199]
-            ],
-            "🍔 BURGER & SUB STATION": [
-                ["Twin-Tower Cheesy Burger", 339], ["Grilled Cheesy Burger", 249],
-                ["Crispy Cheesy Burger", 239], ["Sub Burger", 160], ["Sub Sandwich", 160]
-            ],
-            "🍗 CRISPY CORNER": [
-                ["Crispy Fried Chicken (1pc)", 129], ["Crispy Wings (5 Pcs)", 199],
-                ["BBQ Wings (5 Pcs)", 249], ["Naga Wings (5 Pcs)", 259], ["Crispy Chicken Finger", 149]
-            ]
-        };
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+        }, 1000);
 
-        let currentSource = 'Direct';
-        let cart = {};
-        let orderID = localStorage.getItem('momo_lastID') ? parseInt(localStorage.getItem('momo_lastID')) : 1001;
-        let charts = { day: null, menu: null, hour: null, expense: null };
-
-        let inventory = JSON.parse(localStorage.getItem('momo_inventory')) || {
-            "Chicken": { stock: 15, unit: "kg", alert: 3 },
-            "Onion": { stock: 20, unit: "kg", alert: 5 },
-            "Green_Chili": { stock: 2, unit: "kg", alert: 0.5 },
-            "Moida": { stock: 10, unit: "kg", alert: 2 },
-            "Box_450ml": { stock: 300, unit: "pcs", alert: 50 },
-            "Sauce_Cup": { stock: 500, unit: "pcs", alert: 100 },
-            "Poly_Bag": { stock: 400, unit: "pcs", alert: 50 },
-            "Cheese": { stock: 5, unit: "kg", alert: 1 }
-        };
-        let inventory_usage = JSON.parse(localStorage.getItem('momo_inv_usage')) || {};
-
-        // TOAST UTILITY
-        window.showToast = function(msg, type = "info") {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            const bg = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-slate-800');
-            toast.className = `${bg} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-xl transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+        function showToast(msg, type = "info") {
+            const toast = document.createElement("div");
+            toast.className = `px-4 py-2 rounded-xl text-white text-xs font-bold shadow-lg transition duration-300 ${type==='error'?'bg-rose-600':type==='success'?'bg-emerald-600':'bg-slate-800'}`;
             toast.innerText = msg;
-            container.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
-            setTimeout(() => {
-                toast.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        };
+            document.getElementById("toast-container").appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
 
-        // 2. POS CORE LOGIC
-        window.setOrderSource = function(src) {
-            currentSource = src;
-            document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
-            if(src === 'Direct') {
-                document.getElementById('src-direct').classList.add('active');
-                document.getElementById('direct-menu-ui').classList.remove('hidden');
-                document.getElementById('panda-quick-ui').classList.add('hidden');
-                document.getElementById('cart-section').style.display = 'block';
-            } else {
-                document.getElementById('src-panda').classList.add('active');
-                document.getElementById('direct-menu-ui').classList.add('hidden');
-                document.getElementById('panda-quick-ui').classList.remove('hidden');
-                document.getElementById('cart-section').style.display = 'none';
-            }
-            refreshCartUI();
-        };
-
-        window.calcFpNet = function() {
-            let amt = parseFloat(document.getElementById('fp-amount').value) || 0;
-            let commission = amt * 0.25;
-            let net = amt - commission;
-            document.getElementById('fp-commission').innerText = commission.toFixed(2);
-            document.getElementById('fp-net').innerText = net.toFixed(2);
-            document.getElementById('total').innerText = amt;
-        };
-
-        window.renderMenu = function() {
+        // Render Menu Catalog
+        function renderMenu(filter = "") {
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
-            for (let section in defaultMenuData) {
-                container.innerHTML += `<div class="menu-section-title">${section}</div>`;
-                const grid = document.createElement('div');
-                grid.className = "grid grid-cols-1 sm:grid-cols-2 gap-2 my-2";
-                defaultMenuData[section].forEach(item => {
-                    grid.innerHTML += `
-                        <div class="menu-item-card">
-                            <div><div class="font-bold text-xs text-slate-800">${item[0]}</div><div class="text-xs font-black text-momo-600">৳${item[1]}</div></div>
-                            <button class="bg-slate-100 text-slate-700 px-3 py-1 rounded font-bold text-xs hover:bg-slate-200 transition" onclick="addToCart('${item[0]}', ${item[1]})">Add</button>
-                        </div>`;
+
+            menuCatalog.forEach(cat => {
+                const filteredItems = cat.items.filter(it => it.name.toLowerCase().includes(filter.toLowerCase()));
+                if(filteredItems.length === 0) return;
+
+                const secTitle = document.createElement('div');
+                secTitle.className = "menu-section-title";
+                secTitle.innerText = cat.category;
+                container.appendChild(secTitle);
+
+                filteredItems.forEach(item => {
+                    const parcelQty = cart[`${item.id}_Parcel`] ? cart[`${item.id}_Parcel`].qty : 0;
+                    const dineInQty = cart[`${item.id}_Dine-In`] ? cart[`${item.id}_Dine-In`].qty : 0;
+
+                    const card = document.createElement('div');
+                    card.className = "menu-item-card";
+                    card.innerHTML = `
+                        <div class="flex-1 pr-2">
+                            <h4 class="font-bold text-slate-800 text-xs">${item.name}</h4>
+                            <p class="text-xs font-black text-momo-600">৳ ${item.price}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="addItemToCart('${item.id}', 'Parcel')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[11px] font-bold shadow-sm transition">
+                                <i class="fa-solid fa-box mr-0.5"></i> +Parcel ${parcelQty > 0 ? `(${parcelQty})` : ''}
+                            </button>
+                            <button onclick="addItemToCart('${item.id}', 'Dine-In')" class="px-2 py-1 bg-slate-700 hover:bg-slate-800 text-white rounded text-[11px] font-bold shadow-sm transition">
+                                <i class="fa-solid fa-utensils mr-0.5"></i> +Dine-in ${dineInQty > 0 ? `(${dineInQty})` : ''}
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
                 });
-                container.appendChild(grid);
-            }
-        };
-
-        window.filterMenu = function() {
-            const term = document.getElementById('menu-search-input').value.toLowerCase();
-            document.querySelectorAll('.menu-item-card').forEach(card => {
-                card.style.display = card.innerText.toLowerCase().includes(term) ? "flex" : "none";
             });
-        };
-
-        window.addToCart = function(name, price) {
-            let id = "item-" + Date.now() + Math.random();
-            cart[id] = { name, price, qty: 1, type: "Dine-in" }; // Default Dine-in, could add toggle
-            
-            // Auto Parcel logic helper if user clicks "Parcel" version (optional to expand later)
-            // But for now, we will add a small select to change type in the cart.
-            refreshCartUI();
-        };
-
-        // Allow toggling Dine-in vs Parcel for packaging deduction
-        window.changeItemType = function(id, newType) {
-            if(cart[id]) cart[id].type = newType;
-        };
-
-        window.refreshCartUI = function() {
-            if(currentSource !== 'Direct') return;
-            let sub = 0;
-            const rows = document.getElementById('cart-rows');
-            rows.innerHTML = "";
-            for (let id in cart) {
-                let item = cart[id];
-                sub += item.price;
-                rows.innerHTML += `
-                    <div class="flex justify-between items-center py-2 text-xs">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-white">${item.name}</span>
-                            <select onchange="changeItemType('${id}', this.value)" class="text-[10px] mt-1 bg-slate-800 text-slate-300 border border-slate-600 rounded px-1 outline-none">
-                                <option value="Dine-in" ${item.type === 'Dine-in' ? 'selected' : ''}>🍽️ Dine-in</option>
-                                <option value="Parcel" ${item.type === 'Parcel' ? 'selected' : ''}>📦 Parcel</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="font-mono text-momo-500 font-bold">৳${item.price}</span>
-                            <button onclick="delete cart['${id}']; refreshCartUI();" class="text-rose-400 hover:text-rose-300"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
-            }
-            document.getElementById('total').innerText = sub;
-        };
-
-        // 3. INVENTORY LOGIC (Updated to standard mixture BOM)
-        window.renderInventory = function() {
-            const tb = document.getElementById('inventory-tbody');
-            tb.innerHTML = "";
-            let currentMonth = new Date().toISOString().slice(0,7);
-
-            for(let key in inventory) {
-                let item = inventory[key];
-                
-                let currentStock = parseFloat(item.stock);
-                if (isNaN(currentStock)) currentStock = 0; 
-                inventory[key].stock = currentStock;
-                
-                let isLow = currentStock <= (parseFloat(item.alert) || 0);
-                
-                let consumed = 0;
-                if(inventory_usage[currentMonth] && inventory_usage[currentMonth][key]) {
-                    consumed = parseFloat(inventory_usage[currentMonth][key]);
-                    if(isNaN(consumed)) consumed = 0;
-                }
-                
-                tb.innerHTML += `
-                    <tr>
-                        <td class="py-3 px-2 font-bold text-slate-700">${key.replace(/_/g, ' ')}</td>
-                        <td class="py-3 px-2">
-                            <span class="font-mono text-sm ${isLow ? 'text-rose-600 font-black' : 'font-bold'}">${currentStock.toFixed(2)} ${item.unit}</span>
-                        </td>
-                        <td class="py-3 px-2">${isLow ? '<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[10px] font-bold">Low Stock</span>' : '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">OK</span>'}</td>
-                        <td class="py-3 px-2 text-xs text-slate-500 font-mono">${consumed.toFixed(2)} ${item.unit}</td>
-                        <td class="py-3 px-2 flex gap-1.5">
-                            <button onclick="editStock('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded text-xs font-bold text-slate-700 transition">Edit</button>
-                            <button onclick="addStock('${key}')" class="bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded text-xs font-bold text-indigo-700 transition">+ Add</button>
-                            <button onclick="deleteStock('${key}')" class="bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded text-xs font-bold text-rose-600 transition"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-            }
-        };
-
-        window.addNewInventoryItem = function() {
-            let name = document.getElementById('inv-new-name').value.trim().replace(/ /g, '_');
-            let unit = document.getElementById('inv-new-unit').value.trim();
-            let alertLevel = parseFloat(document.getElementById('inv-new-alert').value) || 0;
-            
-            if(!name || !unit) return showToast("Item Name and Unit are required!", "error");
-            if(inventory[name]) return showToast("This item already exists!", "error");
-
-            inventory[name] = { stock: 0, unit: unit, alert: alertLevel };
-            localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-            
-            document.getElementById('inv-new-name').value = '';
-            document.getElementById('inv-new-unit').value = '';
-            document.getElementById('inv-new-alert').value = '';
-            renderInventory();
-            showToast(`Added ${name.replace(/_/g, ' ')} successfully`, "success");
-        };
-
-        window.editStock = function(key) {
-            let newVal = prompt(`Enter Exact New Stock for ${key} (Current: ${inventory[key].stock}):`);
-            if (newVal !== null && newVal.trim() !== '') {
-                let parsed = parseFloat(newVal);
-                if (!isNaN(parsed)) {
-                    inventory[key].stock = parsed;
-                    localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-                    renderInventory();
-                    showToast("Stock Updated", "success");
-                }
-            }
-        };
-
-        window.addStock = function(key) {
-            let addVal = prompt(`How much to ADD to ${key}? (Current: ${inventory[key].stock})`);
-            if (addVal !== null && addVal.trim() !== '') {
-                let parsed = parseFloat(addVal);
-                if (!isNaN(parsed)) {
-                    inventory[key].stock += parsed;
-                    localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-                    renderInventory();
-                    showToast("Stock Added", "success");
-                }
-            }
-        };
-
-        window.deleteStock = function(key) {
-            if(confirm(`Are you sure you want to permanently delete ${key}?`)) {
-                delete inventory[key];
-                localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-                renderInventory();
-                showToast("Item deleted", "info");
-            }
         }
 
-        // --- Standard Recipe Yield BOM ---
-        function trackInventoryUsage(itemsObj) {
-            let currentMonth = new Date().toISOString().slice(0,7);
-            if(!inventory_usage[currentMonth]) inventory_usage[currentMonth] = {};
-
-            const totalMix = 1 + 1.2 + 0.01; // 2.21 kg mix
-            const chickenPct = 1 / totalMix; 
-            const onionPct = 1.2 / totalMix; 
-            const chiliPct = 0.01 / totalMix; 
-            
-            const fillingPerPiece = 0.02; // 20g filling per piece
-            const moidaPerPiece = 0.01;   // 10g dough per piece
-            let isParcelOrder = false;
-
-            for(let id in itemsObj) {
-                let item = itemsObj[id];
-                let name = item.name.toLowerCase();
-                let type = item.type || "Dine-in";
-                let qty = item.qty || 1;
-                let deduct = {};
-
-                let pcsPerPlate = name.includes('platter') ? 10 : (name.includes('momo') ? 5 : 0);
-                let totalPcs = pcsPerPlate * qty;
-
-                if(totalPcs > 0) {
-                    let totalFillingKg = totalPcs * fillingPerPiece;
-                    deduct['Chicken'] = totalFillingKg * chickenPct;
-                    deduct['Onion'] = totalFillingKg * onionPct;
-                    deduct['Green_Chili'] = totalFillingKg * chiliPct;
-                    deduct['Moida'] = totalPcs * moidaPerPiece;
-                }
-
-                if(name.includes('cheese')) { 
-                    deduct['Cheese'] = totalPcs * 0.01; 
-                }
-
-                // Packaging logic
-                if(type === 'Parcel') {
-                    isParcelOrder = true;
-                    if(pcsPerPlate === 5 || name.includes('mains') || name.includes('burger')) {
-                        deduct['Box_450ml'] = 1 * qty;
-                        deduct['Sauce_Cup'] = 1 * qty;
-                    } 
-                    else if(pcsPerPlate === 10) {
-                        deduct['Box_450ml'] = 2 * qty; 
-                        deduct['Sauce_Cup'] = 2 * qty;
-                    }
-                }
-
-                // Apply deductions
-                for(let k in deduct) {
-                    if(inventory[k]) {
-                        inventory[k].stock -= deduct[k];
-                        inventory_usage[currentMonth][k] = (parseFloat(inventory_usage[currentMonth][k]) || 0) + deduct[k];
-                    }
-                }
-            }
-
-            // Poly Bag for parcel orders (1 per whole order)
-            if(isParcelOrder && inventory['Poly_Bag']) {
-                inventory['Poly_Bag'].stock -= 1;
-                inventory_usage[currentMonth]['Poly_Bag'] = (parseFloat(inventory_usage[currentMonth]['Poly_Bag']) || 0) + 1;
-            }
-
-            localStorage.setItem('momo_inventory', JSON.stringify(inventory));
-            localStorage.setItem('momo_inv_usage', JSON.stringify(inventory_usage));
-            renderInventory(); // Force UI update
+        function filterMenu() {
+            const txt = document.getElementById('menu-search-input').value;
+            renderMenu(txt);
         }
 
-        // 4. ORDER CONFIRMATION
-        window.saveMasterOrder = function() {
-            let total = 0, commission = 0, net = 0, itemsToSave = {}, orderRefId = "";
-            if (currentSource === 'Direct') {
-                if (Object.keys(cart).length === 0) return showToast("Cart is empty!", "error");
-                total = parseFloat(document.getElementById('total').innerText);
-                net = total; itemsToSave = cart; orderRefId = "MOMO-" + orderID;
+        function addItemToCart(itemId, type) {
+            let found = null;
+            menuCatalog.forEach(cat => {
+                const it = cat.items.find(i => i.id === itemId);
+                if (it) found = it;
+            });
+            if (!found) return;
+
+            const key = `${itemId}_${type}`;
+            if (!cart[key]) {
+                cart[key] = { itemId, name: found.name, price: found.price, qty: 1, type };
             } else {
-                orderRefId = document.getElementById('fp-order-id').value;
-                total = parseFloat(document.getElementById('fp-amount').value);
-                commission = total * 0.25; net = total - commission;
-                if(!orderRefId || !total) return showToast("Enter Online ID and Amount!", "error");
-                itemsToSave = { 1: { name: "Online Combo", price: total, type: "Parcel" } };
+                cart[key].qty += 1;
             }
 
-            const record = {
-                id: orderID, claimCode: orderRefId, source: currentSource,
-                items: itemsToSave, total: total, netPayout: net,
-                status: 'kitchen_prep',
-                date: new Date().toISOString().split('T')[0], 
-                time: new Date().toLocaleTimeString(),
-                hour: new Date().getHours()
-            };
-
-            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
-            history.unshift(record);
-            localStorage.setItem('momo_history', JSON.stringify(history));
-            localStorage.setItem('momo_lastID', ++orderID);
-            
-            // Only Direct orders deduct stock from POS. (Assuming Foodpanda updates backend or can be added here if needed)
-            if(currentSource === 'Direct') trackInventoryUsage(itemsToSave);
-
-            showToast(`${currentSource} Order Confirmed!`, "success");
-            cart = {}; refreshCartUI();
-            
-            if(currentSource !== 'Direct') {
-                document.getElementById('fp-order-id').value = '';
-                document.getElementById('fp-amount').value = '';
-                calcFpNet();
-            }
-            
-            renderKDS(); calcEOD(); buildReports();
-        };
-
-        // 5. KITCHEN DISPLAY (KDS)
-        window.renderKDS = function() {
-            const grid = document.getElementById('kds-grid');
-            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
-            let active = history.filter(o => o.status === 'kitchen_prep');
-            document.getElementById('active-count-badge').innerText = active.length;
-
-            grid.innerHTML = active.map(o => `
-                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 ${o.source === 'Direct' ? 'border-momo-500' : 'border-momo-panda'}">
-                    <div class="flex justify-between font-bold text-sm mb-2"><span>#${o.id} (${o.source})</span><span class="text-slate-400 text-xs">${o.time}</span></div>
-                    <div class="space-y-1 mb-3">${Object.values(o.items).map(i => `<div class="bg-slate-50 px-2 py-1 text-xs font-bold text-slate-700 rounded">${i.name}${i.type ? `<span class="font-normal text-slate-500">(${i.type})</span>` : ''}</div>`).join('')}</div>
-                    <button onclick="markReady(${o.id})" class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-2 rounded-lg text-xs transition">Mark Ready</button>
-                </div>
-            `).join('');
-        };
-
-        window.markReady = function(id) {
-            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
-            let idx = history.findIndex(o => o.id == id);
-            if(idx > -1) {
-                history[idx].status = 'completed';
-                localStorage.setItem('momo_history', JSON.stringify(history));
-                showToast(`Order #${id} is Ready!`, "success");
-                renderKDS();
-            }
-        };
-
-        // 6. EXPENSE & DAILY TALLY (WITH QUANTITY)
-        window.addExpense = function() {
-            let name = document.getElementById('exp-name').value;
-            let qty = document.getElementById('exp-qty').value; // Added Quantity Input
-            let amt = parseFloat(document.getElementById('exp-amount').value);
-            
-            if(!name || !amt || isNaN(amt)) return showToast("Enter Name and Total Amount clearly!", "error");
-
-            let exp = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
-            exp.push({ name, qty, amount: amt, date: new Date().toISOString().split('T')[0] });
-            localStorage.setItem('momo_expenses', JSON.stringify(exp));
-            
-            // Clear inputs
-            document.getElementById('exp-name').value = ""; 
-            document.getElementById('exp-qty').value = ""; 
-            document.getElementById('exp-amount').value = "";
-            
-            showToast("Expense Saved!", "success");
-            calcEOD(); buildReports();
-        };
-
-        window.calcEOD = function() {
-            let today = new Date().toISOString().split('T')[0];
-            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
-            let expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
-
-            let directSales = 0, onlineNet = 0, totalExp = 0, totalOrders = 0;
-
-            history.filter(o => o.date === today).forEach(o => {
-                totalOrders++;
-                if(o.source === 'Direct') directSales += o.total;
-                else onlineNet += o.netPayout;
-            });
-
-            let todayExpList = expenses.filter(e => e.date === today);
-            todayExpList.forEach(e => totalExp += e.amount);
-
-            document.getElementById('eod-cash-sales').innerText = directSales + " ৳";
-            document.getElementById('eod-expenses').innerText = totalExp + " ৳";
-            document.getElementById('eod-expected-drawer').innerText = (directSales - totalExp);
-
-            // Update Performance Widget Data
-            updatePerformanceWidget(history, totalExp, directSales, onlineNet, totalOrders);
-
-            // Render Expense List with QTY
-            document.getElementById('today-expense-list').innerHTML = todayExpList.map(e => `
-                <div class="flex justify-between items-center bg-slate-50 p-2.5 rounded border border-slate-100 text-sm">
-                    <div>
-                        <span class="font-bold text-slate-700">${e.name}</span>
-                        ${e.qty ? `<span class="text-xs text-slate-500 ml-1 bg-slate-200 px-1 rounded">${e.qty}</span>` : ''}
-                    </div>
-                    <span class="font-bold text-rose-500">-${e.amount} ৳</span>
-                </div>
-            `).join('');
-        };
-
-        function updatePerformanceWidget(history, todayExp, todayDirect, todayOnline, todayOrders) {
-            let today = new Date().toISOString().split('T')[0];
-            let yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-            
-            let yDaySales = 0, yDayOrders = 0;
-            history.filter(o => o.date === yesterday).forEach(o => {
-                yDayOrders++;
-                yDaySales += (o.source === 'Direct' ? o.total : o.netPayout);
-            });
-
-            let todaySales = todayDirect + todayOnline;
-            
-            document.getElementById('perf-today-sales').innerText = todaySales;
-            document.getElementById('perf-today-orders').innerText = todayOrders;
-            document.getElementById('perf-fp-sales').innerText = todayOnline;
-            document.getElementById('perf-net-profit').innerText = (todaySales - todayExp);
-
-            let salesDiff = yDaySales ? ((todaySales - yDaySales) / yDaySales * 100).toFixed(1) : (todaySales > 0 ? 100 : 0);
-            let orderDiff = yDayOrders ? ((todayOrders - yDayOrders) / yDayOrders * 100).toFixed(1) : (todayOrders > 0 ? 100 : 0);
-            
-            const renderDiff = (elId, diff) => {
-                let el = document.getElementById(elId);
-                if(diff > 0) { el.innerHTML = `<span class="text-emerald-500"><i class="fa-solid fa-arrow-up"></i> +${diff}% vs Yesterday</span>`; }
-                else if(diff < 0) { el.innerHTML = `<span class="text-rose-500"><i class="fa-solid fa-arrow-down"></i> ${diff}% vs Yesterday</span>`; }
-                else { el.innerHTML = `<span class="text-slate-400">- Same as Yesterday</span>`; }
-            };
-
-            renderDiff('perf-sales-diff', salesDiff);
-            renderDiff('perf-orders-diff', orderDiff);
+            renderMenu(document.getElementById('menu-search-input').value);
+            renderCartRows();
+            updateTotal();
         }
 
-        // 7. CHARTS ENGINE
-        window.buildReports = function() {
-            let history = JSON.parse(localStorage.getItem('momo_history') || "[]");
-            let expenses = JSON.parse(localStorage.getItem('momo_expenses') || "[]");
-            
-            let dates = [];
-            for(let i=6; i>=0; i--) { dates.push(new Date(Date.now() - i*86400000).toISOString().split('T')[0]); }
+        function changeCartQty(key, delta) {
+            if (!cart[key]) return;
+            cart[key].qty += delta;
+            if (cart[key].qty <= 0) delete cart[key];
 
-            // Chart 1: Sales By Day
-            let dailyDirect = [], dailyOnline = [];
-            dates.forEach(d => {
-                let ds = 0, onl = 0;
-                history.filter(o => o.date === d).forEach(o => { if(o.source === 'Direct') ds += o.total; else onl += o.netPayout; });
-                dailyDirect.push(ds); dailyOnline.push(onl);
+            renderMenu(document.getElementById('menu-search-input').value);
+            renderCartRows();
+            updateTotal();
+        }
+
+        function renderCartRows() {
+            const container = document.getElementById('cart-rows');
+            const keys = Object.keys(cart);
+            if (keys.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 text-center py-4">কোনো আইটেম সিলেক্ট করা হয়নি</p>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            keys.forEach(key => {
+                const it = cart[key];
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center py-2";
+                row.innerHTML = `
+                    <div class="flex-1 pr-2">
+                        <div class="font-bold text-slate-200 text-xs">${it.name}</div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="px-1.5 py-0.2 rounded text-[10px] font-black ${it.type==='Parcel' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' : 'bg-blue-500/20 text-blue-400 border border-blue-500/40'}">
+                                ${it.type}
+                            </span>
+                            <span class="text-[10px] text-slate-400">৳${it.price} × ${it.qty}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-black text-momo-500 font-mono text-xs mr-1">৳${it.price * it.qty}</span>
+                        <button onclick="changeCartQty('${key}', -1)" class="w-6 h-6 bg-rose-900/60 hover:bg-rose-800 text-rose-300 rounded font-bold flex items-center justify-center">-</button>
+                        <span class="font-black text-white text-xs px-1 font-mono">${it.qty}</span>
+                        <button onclick="changeCartQty('${key}', 1)" class="w-6 h-6 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold flex items-center justify-center">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function updateTotal() {
+            let subtotal = 0;
+            Object.values(cart).forEach(it => subtotal += (it.price * it.qty));
+
+            const containerCharge = parseFloat(document.getElementById('charge-container').value || 0);
+            const deliveryCharge = parseFloat(document.getElementById('charge-delivery').value || 0);
+            const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
+
+            const total = subtotal + containerCharge + deliveryCharge + otherCharge;
+            document.getElementById('total').innerText = total;
+            calcChangeReturn();
+        }
+
+        function calcChangeReturn() {
+            const total = parseFloat(document.getElementById('total').innerText || 0);
+            const given = parseFloat(document.getElementById('cash-given').value || 0);
+            const change = given >= total ? (given - total) : 0;
+            document.getElementById('cash-change').innerText = change;
+        }
+
+        function maskPhone(phone) {
+            if (!phone || phone.length < 6) return phone || "Guest";
+            const start = phone.substring(0, 3);
+            const end = phone.substring(phone.length - 2);
+            return `${start}******${end}`;
+        }
+
+        // ================= DUAL PRINT SLIPS WITH PRE-LOADED LOGO & QR =================
+        function saveMasterOrder() {
+            const total = parseFloat(document.getElementById('total').innerText || 0);
+            if (total <= 0) {
+                showToast("কার্টে খাবার যোগ করুন!", "error");
+                return;
+            }
+
+            const refNote = document.getElementById('order-ref-input').value.trim() || "Store Walk-in";
+            const phone = document.getElementById('customer-phone').value.trim();
+            const name = document.getElementById('customer-name').value.trim() || "Foodie Guest";
+            const cashGiven = parseFloat(document.getElementById('cash-given').value || total);
+            const cashChange = cashGiven >= total ? (cashGiven - total) : 0;
+
+            const containerCharge = parseFloat(document.getElementById('charge-container').value || 0);
+            const deliveryCharge = parseFloat(document.getElementById('charge-delivery').value || 0);
+            const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
+
+            const now = new Date();
+            const orderId = `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
+            const rewardPoints = Math.floor(total * 0.10);
+
+            // Construct order object for lifetime archive
+            const orderRecord = {
+                id: orderId,
+                ref: refNote,
+                customerName: name,
+                customerPhone: phone,
+                items: JSON.parse(JSON.stringify(Object.values(cart))),
+                charges: { container: containerCharge, delivery: deliveryCharge, other: otherCharge },
+                totalAmount: total,
+                rewardPoints: rewardPoints,
+                createdAt: now.toISOString(),
+                dateKey: now.toISOString().split('T')[0],
+                monthKey: now.toISOString().slice(0, 7)
+            };
+
+            // Save to persistent array & LocalStorage
+            allOrders.unshift(orderRecord);
+            saveToStorage();
+
+            let customerItemsHtml = "";
+            let kitchenItemsHtml = "";
+            let totalCount = 0;
+
+            Object.values(cart).forEach(it => {
+                totalCount += it.qty;
+                customerItemsHtml += `
+                    <div style="display:flex; justify-content:space-between; margin: 3px 0; font-size:11px;">
+                        <span>${it.name} <b style="font-size:9px; background:#f0f0f0; padding:1px 3px;">[${it.type}]</b> x${it.qty}</span>
+                        <span>৳${it.price * it.qty}</span>
+                    </div>
+                `;
+                kitchenItemsHtml += `
+                    <div style="display:flex; justify-content:space-between; margin: 4px 0; font-weight:bold; font-size:13px; border-bottom:1px dotted #ccc; padding-bottom:2px;">
+                        <span>${it.name} <span style="font-size:11px; text-decoration:underline;">(${it.type})</span></span>
+                        <span>x${it.qty}</span>
+                    </div>
+                `;
             });
 
-            if(charts.day) charts.day.destroy();
-            charts.day = new Chart(document.getElementById('chartSalesByDay'), {
-                type: 'bar',
-                data: { labels: dates.map(d=>d.slice(5)), datasets: [
-                    { label: 'Direct (Cash)', data: dailyDirect, backgroundColor: '#e67e22' },
-                    { label: 'Online (Bank)', data: dailyOnline, backgroundColor: '#d70f64' }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
-            });
+            let chargesHtml = "";
+            if (containerCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container Charge:</span><span>৳${containerCharge}</span></div>`;
+            if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>৳${deliveryCharge}</span></div>`;
+            if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other Surcharge:</span><span>৳${otherCharge}</span></div>`;
 
-            // Chart 2: Top Menu Items
-            let itemCounts = {};
-            history.forEach(o => {
-                if(o.source === 'Direct') {
-                    for(let id in o.items) { itemCounts[o.items[id].name] = (itemCounts[o.items[id].name] || 0) + 1; }
+            // Customer Receipt using local logo.png and qr.jpeg
+            const printContent = `
+                <!-- ================= 1. CUSTOMER RECEIPT WITH LOCAL LOGO.PNG & qr.jpeg ================= -->
+                <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
+                    <img id="print-logo-img" src="logo.png" style="width: 60px; height: 60px; margin: 0 auto; display: block; border-radius: 50%;">
+                    <h2 style="font-size: 18px; font-weight: 900; margin: 4px 0 0 0; letter-spacing:1px;">MOMOLOGY</h2>
+                    <p style="margin: 2px 0; font-size: 10px; font-weight:bold;">Taste the Authentic Momo Experience</p>
+                    <p style="margin: 1px 0; font-size: 9px;">Darul Khadem, Racecourse, Adarsha Sadar, Cumilla, Bangladesh | Helpline: 01870-884845</p>
+                    <p style="margin: 1px 0; font-size: 9px;">Website: <b>momology.me</b></p>
+                </div>
+
+                <div style="font-size: 10px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 6px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Order ID: <b>#${orderId}</b></span>
+                        <span>Ref: <b>${refNote}</b></span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:3px;">
+                        <span>Customer: <b>${name}</b></span>
+                        <span>Phone: <b>${maskPhone(phone)}</b></span>
+                    </div>
+                    <div style="font-size:9px; color:#444; margin-top:2px;">Time: ${now.toLocaleString()}</div>
+                </div>
+
+                <div style="margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 6px;">
+                    <div style="font-size:10px; font-weight:bold; margin-bottom:4px; display:flex; justify-content:space-between;">
+                        <span>ITEMS (${totalCount})</span>
+                        <span>PRICE</span>
+                    </div>
+                    ${customerItemsHtml}
+                </div>
+
+                <div style="font-size: 10px; margin-bottom: 8px; border-bottom: 2px dashed #000; padding-bottom: 6px;">
+                    ${chargesHtml}
+                    <div style="display:flex; justify-content:space-between; font-weight:900; font-size:14px; margin-top:4px; border-top:1px solid #000; padding-top:4px;">
+                        <span>GRAND TOTAL:</span>
+                        <span>৳ ${total}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:3px;">
+                        <span>Cash Paid:</span>
+                        <span>৳ ${cashGiven}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>Change Returned:</span>
+                        <span>৳ ${cashChange}</span>
+                    </div>
+                </div>
+
+                <!-- Loyalty Rewards Box -->
+                <div style="background:#f4f4f4; padding:6px; border:1px dotted #000; text-align:center; margin-bottom:8px; border-radius:4px;">
+                    <div style="font-weight:900; font-size:11px; color:#d35400;">🎉 YOU EARNED +${rewardPoints} REWARD POINTS!</div>
+                    <p style="margin:2px 0; font-size:9px;">Claim Cashback at: <b>rewards.momology.me</b></p>
+                    <p style="margin:0; font-size:8px;">(Use your registered phone number to redeem points)</p>
+                </div>
+
+                <!-- Socials & Local qr.jpeg -->
+                <div style="text-align: center; margin-top: 6px;">
+                    <img id="print-qr-img" src="qr.jpeg" style="width:75px; height:75px; margin: 0 auto; display:block;" />
+                    <p style="font-size: 9px; margin: 4px 0 2px 0; font-weight: bold;">Scan for Special Offers & Secret Menu</p>
+                    <p style="font-size: 8px; margin: 1px 0;">Facebook: <b>facebook.com/momoloogy</b></p>
+                    <p style="font-size: 10px; font-weight:bold; margin-top:6px;">❤️ Thank You! Visit Us Again! ❤️</p>
+                </div>
+
+                <!-- Page Break for Thermal Receipt Printer -->
+                <div class="page-break" style="margin-top:20px; border-bottom:2px dashed #000; padding-bottom:10px;"></div>
+
+                <!-- ================= 2. KITCHEN KOT SLIP ================= -->
+                <div style="text-align: center; padding-top: 10px; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px;">
+                    <h2 style="font-size: 18px; font-weight: 900; margin: 0;">🔥 KITCHEN KOT 🔥</h2>
+                    <h3 style="font-size: 15px; font-weight: bold; margin: 3px 0;">ORDER #${orderId}</h3>
+                    <div style="display:inline-block; border: 2px solid #000; padding: 2px 8px; font-weight:900; font-size: 12px; border-radius:4px; margin-top:2px;">
+                        REF: ${refNote}
+                    </div>
+                    <p style="font-size: 9px; margin: 4px 0 0 0;">Time: ${now.toLocaleTimeString()}</p>
+                </div>
+
+                <div style="padding: 4px 0;">
+                    ${kitchenItemsHtml}
+                </div>
+
+                <div style="border-top: 1px dashed #000; padding-top: 6px; margin-top: 8px; text-align: center; font-size: 10px; font-weight: bold;">
+                    Prepare with Love
+                </div>
+            `;
+
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = printContent;
+
+            // Pre-load images completely before triggering print dialog
+            const logoImg = document.getElementById('print-logo-img');
+            const qrImg = document.getElementById('print-qr-img');
+
+            let imagesLoaded = 0;
+            const checkPrint = () => {
+                imagesLoaded++;
+                if (imagesLoaded >= 2) {
+                    window.print();
                 }
+            };
+
+            if (logoImg.complete) imagesLoaded++;
+            else { logoImg.onload = checkPrint; logoImg.onerror = checkPrint; }
+
+            if (qrImg.complete) imagesLoaded++;
+            else { qrImg.onload = checkPrint; qrImg.onerror = checkPrint; }
+
+            if (imagesLoaded >= 2) {
+                window.print();
+            }
+
+            // Reset after printing
+            cart = {};
+            document.getElementById('order-ref-input').value = "";
+            document.getElementById('customer-phone').value = "";
+            document.getElementById('customer-name').value = "";
+            document.getElementById('charge-container').value = "";
+            document.getElementById('charge-delivery').value = "";
+            document.getElementById('charge-other').value = "";
+            document.getElementById('cash-given').value = "";
+            document.getElementById('cash-change').innerText = "0";
+
+            renderMenu();
+            renderCartRows();
+            updateTotal();
+            renderHistoryView();
+            showToast("অর্ডার সফলভাবে সেভ ও প্রিন্ট হয়েছে!", "success");
+        }
+
+        // ================= EXPENSE ENTRY & PERSISTENCE =================
+        function calcExpenseTotal() {
+            const qty = parseFloat(document.getElementById('exp-qty').value || 0);
+            const rate = parseFloat(document.getElementById('exp-unit-price').value || 0);
+            document.getElementById('exp-calculated-total').innerText = qty * rate;
+        }
+
+        function saveExpenseItem() {
+            const name = document.getElementById('exp-name').value.trim();
+            const cat = document.getElementById('exp-category').value;
+            const qty = parseFloat(document.getElementById('exp-qty').value || 0);
+            const unit = document.getElementById('exp-unit').value.trim() || "pcs";
+            const rate = parseFloat(document.getElementById('exp-unit-price').value || 0);
+            const total = qty * rate;
+
+            if (!name || total <= 0) {
+                showToast("খরচের বিবরণ, পরিমাণ এবং দর সঠিকভাবে দিন!", "error");
+                return;
+            }
+
+            const now = new Date();
+            allExpenses.unshift({
+                id: Date.now(),
+                name,
+                cat,
+                qty,
+                unit,
+                rate,
+                total,
+                createdAt: now.toISOString(),
+                dateKey: now.toISOString().split('T')[0],
+                monthKey: now.toISOString().slice(0, 7)
             });
-            let sortedItems = Object.entries(itemCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
-            
-            if(charts.menu) charts.menu.destroy();
-            charts.menu = new Chart(document.getElementById('chartMenu'), {
-                type: 'doughnut',
-                data: { labels: sortedItems.map(i=>i[0]), datasets: [{ data: sortedItems.map(i=>i[1]), backgroundColor: ['#e67e22', '#27ae60', '#f1c40f', '#e74c3c', '#9b59b6'] }] },
-                options: { responsive: true, maintainAspectRatio: false }
+
+            saveToStorage();
+
+            document.getElementById('exp-name').value = "";
+            document.getElementById('exp-qty').value = "";
+            document.getElementById('exp-unit').value = "";
+            document.getElementById('exp-unit-price').value = "";
+            document.getElementById('exp-calculated-total').innerText = "0";
+
+            renderExpensesTable();
+            renderHistoryView();
+            showToast("খরচ সংরক্ষিত হয়েছে!", "success");
+        }
+
+        function deleteExpense(id) {
+            allExpenses = allExpenses.filter(e => e.id !== id);
+            saveToStorage();
+            renderExpensesTable();
+            renderHistoryView();
+            showToast("খরচ মুছে ফেলা হয়েছে!", "info");
+        }
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById('expense-list-tbody');
+            if (allExpenses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">কোনো খরচ এন্ট্রি করা হয়নি</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            allExpenses.forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 text-slate-500">${e.dateKey}</td>
+                    <td class="p-2.5 font-bold text-slate-800">${e.name}</td>
+                    <td class="p-2.5 text-slate-500">${e.cat}</td>
+                    <td class="p-2.5 font-bold">${e.qty} ${e.unit}</td>
+                    <td class="p-2.5">৳ ${e.rate}</td>
+                    <td class="p-2.5 font-black text-rose-600 font-mono">৳ ${e.total}</td>
+                    <td class="p-2.5 text-right">
+                        <button onclick="deleteExpense(${e.id})" class="text-rose-500 hover:text-rose-700 font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ================= INTEGRATED MONTHLY & HISTORICAL QUERY ENGINE =================
+        let activeFilterType = 'today';
+        let activeFilterValue = new Date().toISOString().split('T')[0];
+
+        function filterHistoryByDate() {
+            const d = document.getElementById('filter-date').value;
+            if (!d) return;
+            activeFilterType = 'date';
+            activeFilterValue = d;
+            document.getElementById('filter-month').value = "";
+            renderHistoryView();
+        }
+
+        function filterHistoryByMonth() {
+            const m = document.getElementById('filter-month').value;
+            if (!m) return;
+            activeFilterType = 'month';
+            activeFilterValue = m;
+            document.getElementById('filter-date').value = "";
+            renderHistoryView();
+        }
+
+        function resetHistoryToToday() {
+            activeFilterType = 'today';
+            activeFilterValue = new Date().toISOString().split('T')[0];
+            document.getElementById('filter-date').value = activeFilterValue;
+            document.getElementById('filter-month').value = "";
+            renderHistoryView();
+        }
+
+        function renderHistoryView() {
+            let filteredOrders = [];
+            let filteredExpenses = [];
+
+            if (activeFilterType === 'today' || activeFilterType === 'date') {
+                filteredOrders = allOrders.filter(o => o.dateKey === activeFilterValue);
+                filteredExpenses = allExpenses.filter(e => e.dateKey === activeFilterValue);
+            } else if (activeFilterType === 'month') {
+                filteredOrders = allOrders.filter(o => o.monthKey === activeFilterValue);
+                filteredExpenses = allExpenses.filter(e => e.monthKey === activeFilterValue);
+            }
+
+            const totalSales = filteredOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+            const totalOrders = filteredOrders.length;
+            const totalExpense = filteredExpenses.reduce((sum, e) => sum + e.total, 0);
+            const netProfit = totalSales - totalExpense;
+
+            document.getElementById('hist-total-sales').innerText = totalSales;
+            document.getElementById('hist-total-orders').innerText = totalOrders;
+            document.getElementById('hist-total-expense').innerText = totalExpense;
+            document.getElementById('hist-net-profit').innerText = netProfit;f
+            document.getElementById('hist-order-count').innerText = totalOrders;
+
+            // Render Orders Table
+            const tbody = document.getElementById('hist-orders-tbody');
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">এই সময়কালের কোনো অর্ডার রেকর্ড পাওয়া যায়নি</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            filteredOrders.forEach(o => {
+                const itemsText = o.items.map(i => `${i.name} (${i.type}) x${i.qty}`).join(", ");
+                const chargesText = `Box: ৳${o.charges.container || 0}, Del: ৳${o.charges.delivery || 0}`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2.5 font-bold font-mono text-momo-600">#${o.id}<div class="text-[10px] text-slate-400 font-normal">${o.ref}</div></td>
+                    <td class="p-2.5 text-slate-500">${new Date(o.createdAt).toLocaleDateString()} <span class="text-[10px] block text-slate-400">${new Date(o.createdAt).toLocaleTimeString()}</span></td>
+                    <td class="p-2.5 font-bold">${o.customerName}<div class="text-[10px] text-slate-400">${maskPhone(o.customerPhone)}</div></td>
+                    <td class="p-2.5 text-[11px] text-slate-700 max-w-xs truncate" title="${itemsText}">${itemsText}</td>
+                    <td class="p-2.5 text-[10px] text-slate-500">${chargesText}</td>
+                    <td class="p-2.5 font-black text-slate-800 font-mono text-xs">৳${o.totalAmount}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export History directly as Excel CSV
+        function exportHistoryCSV() {
+            let filteredOrders = (activeFilterType === 'month')
+                ? allOrders.filter(o => o.monthKey === activeFilterValue)
+                : allOrders.filter(o => o.dateKey === activeFilterValue);
+
+            if (filteredOrders.length === 0) {
+                showToast("এক্সপোর্ট করার মতো কোনো ডেটা নেই!", "error");
+                return;
+            }
+
+            let csv = "Order ID,Date,Time,Ref,Customer Name,Phone,Items,Total Amount\n";
+            filteredOrders.forEach(o => {
+                const itemsStr = o.items.map(i => `${i.name} [${i.type}] x${i.qty}`).join(" | ").replace(/,/g, " ");
+                const timeStr = new Date(o.createdAt).toLocaleTimeString().replace(/,/g, " ");
+                csv += `"${o.id}","${o.dateKey}","${timeStr}","${o.ref}","${o.customerName}","${o.customerPhone}","${itemsStr}","${o.totalAmount}"\n`;
             });
 
-            // Chart 3: Sales by Hour
-            let hours = new Array(24).fill(0);
-            history.forEach(o => { if(o.hour !== undefined && !isNaN(o.hour)) hours[o.hour]++; });
-            
-            if(charts.hour) charts.hour.destroy();
-            charts.hour = new Chart(document.getElementById('chartHour'), {
-                type: 'line',
-                data: { labels: [...Array(24).keys()].map(h=>h+":00"), datasets: [{ label: 'Orders', data: hours, borderColor: '#3498db', tension: 0.3, fill: true, backgroundColor: 'rgba(52, 152, 219, 0.2)' }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Momology_Report_${activeFilterValue}.csv`;
+            link.click();
+            showToast("রিপোর্ট সফলভাবে ডাউনলোড হয়েছে!", "success");
+        }
 
-            // Chart 4: Daily Expenses
-            let dailyExp = [];
-            dates.forEach(d => {
-                let sum = 0;
-                expenses.filter(e => e.date === d).forEach(e => sum += parseFloat(e.amount) || 0);
-                dailyExp.push(sum);
-            });
-
-            if(charts.expense) charts.expense.destroy();
-            charts.expense = new Chart(document.getElementById('chartExpense'), {
-                type: 'bar',
-                data: { labels: dates.map(d=>d.slice(5)), datasets: [{ label: 'Expenses (৳)', data: dailyExp, backgroundColor: '#e74c3c' }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        };
-
-        // UI & NAV LOGIC
-        window.showPage = function(id, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if (btn) btn.classList.add('active');
-            
-            if(id === 'active-dashboard') renderKDS();
-            if(id === 'inventory-page') renderInventory();
-            if(id === 'reports-page') buildReports();
-            if(id === 'expense-page') calcEOD();
-        };
-
-        window.openNav = () => document.getElementById("mySidebar").style.width = "260px";
-        window.closeNav = () => document.getElementById("mySidebar").style.width = "0";
-
-        // APP INIT
-        renderMenu(); renderInventory(); renderKDS(); calcEOD(); buildReports();
-        setInterval(() => document.getElementById('live-clock').innerText = new Date().toLocaleTimeString(), 1000);
+        // Initialize App
+        document.getElementById('filter-date').value = new Date().toISOString().split('T')[0];
+        renderMenu();
+        renderExpensesTable();
+        renderHistoryView();
     </script>
 </body>
 </html>
