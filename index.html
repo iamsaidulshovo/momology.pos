@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MOMOLOGY - 58mm POS Terminal</title>
+    <title>MOMOLOGY - 58mm POS & Order Engine</title>
 
     <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -65,12 +65,12 @@
                 top: 0;
                 width: 48mm;
                 margin: 0;
-                padding: 1mm 2mm 5mm 2mm;
+                padding: 1mm 2mm 3mm 2mm;
                 font-family: monospace;
                 color: #000;
                 background: #fff;
                 font-size: 10px;
-                line-height: 1.2;
+                line-height: 1.25;
             }
         }
     </style>
@@ -123,7 +123,7 @@
                     <div>
                         <h1 class="font-extrabold text-momo-600 leading-none text-base">MOMOLOGY</h1>
                         <p class="text-[10px] text-slate-400 font-semibold tracking-widest uppercase flex items-center gap-1.5">
-                            58MM PRINTER READY
+                            58MM POS ENGINE
                             <span id="sync-indicator" class="inline-flex items-center gap-1 font-bold text-slate-400">
                                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Connecting...
                             </span>
@@ -136,7 +136,7 @@
                     <i class="fa-regular fa-clock text-momo-500"></i> <span id="live-clock">--:--:--</span>
                 </div>
                 <button onclick="showPage('active-dashboard')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-fire"></i> Orders (<span id="active-count-badge">0</span>)
+                    <i class="fa-solid fa-fire"></i> Active (<span id="active-count-badge">0</span>)
                 </button>
             </div>
         </div>
@@ -144,7 +144,7 @@
 
     <main class="max-w-7xl mx-auto px-3 py-4 flex-1 w-full">
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Order Terminal</button>
+            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Terminal</button>
             <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> Active Orders</button>
             <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Sales & Month History</button>
             <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> Daily Expenses</button>
@@ -156,7 +156,7 @@
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
@@ -250,10 +250,13 @@
             </div>
         </div>
 
-        <!-- 2. ACTIVE ORDERS DASHBOARD -->
+        <!-- 2. ACTIVE ORDERS DASHBOARD (WITH COMPLETE BUTTON) -->
         <div id="active-dashboard" class="page space-y-4">
             <div class="bg-white rounded-2xl p-4 shadow-sm flex items-center justify-between">
-                <h2 class="font-extrabold text-slate-800"><i class="fa-solid fa-fire text-momo-600"></i> Active Orders</h2>
+                <div>
+                    <h2 class="font-extrabold text-slate-800"><i class="fa-solid fa-fire text-momo-600"></i> Active Kitchen Orders</h2>
+                    <p class="text-xs text-slate-400">খাবার প্রস্তুত ও ডেলিভারি হলে 'Complete' চাপুন</p>
+                </div>
                 <button onclick="renderActiveOrders()" class="text-xs bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg font-bold"><i class="fa-solid fa-rotate"></i> Refresh</button>
             </div>
             <div id="active-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -401,8 +404,11 @@
     <div id="printArea"></div>
 
     <script>
-        // High-Resolution 1-bit Monochrome Logo (No Quote Bug, No Ink Bleed)
-        const PURE_MONO_LOGO_B64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAAAAABVicqIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHHSURBVHja7ZoxTsNAEIUfEIqCiioKGlpQ0NAgUaCiQUEDRUEBBSVFIaGgoqCipKSmA1VUSCgoKKgoaKCiQEEDRUUFhYIKCgqKgoKCQkFBQUFBUUFBoUFBUf6yvWvveG17vfbm7a53d3dnv/x/Z2fHtpP7q6e31zf3j09q710/PL38fHlTN5+e337ePzypb+8f1fPn13f1/PXd08vr28f7B/Xw8fn1/f1DPX98eX1/96T23v5cPV9f/15fXf/uH57v71TPH1/e3t8/qYefX97f398/1PNPb/X85U09fX55e3t7e1dPn1/eXl7f1NPrq7r55/fr6+vr62v9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19ff3n+v716/v3799/f/8D1kYpE75mPjUAAAAASUVORK5CYII=";
+        // Crystal Clear 1-bit Monochrome Thermal Logo (Custom designed for 58mm without dithering smudge)
+        const CLEAR_THERMAL_LOGO = `data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20240%20240%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%22120%22%20r%3D%22112%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%227%22/%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%22120%22%20r%3D%22102%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22/%3E%3Cpath%20id%3D%22textArc%22%20d%3D%22M%2040%20120%20A%2080%2080%200%200%201%20200%20120%22%20fill%3D%22none%22%20stroke%3D%22none%22/%3E%3Ctext%20font-family%3D%22Arial%20Black%2C%20Impact%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2224%22%20fill%3D%22%23000%22%20letter-spacing%3D%223%22%3E%3CtextPath%20href%3D%22%23textArc%22%20startOffset%3D%2250%25%22%20text-anchor%3D%22middle%22%3EMOMOLOGY%3C/textPath%3E%3C/text%3E%3Cline%20x1%3D%22125%22%20y1%3D%22105%22%20x2%3D%22185%22%20y2%3D%2255%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22/%3E%3Cline%20x1%3D%22135%22%20y1%3D%22105%22%20x2%3D%22195%22%20y2%3D%2260%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M%2090%20125%20C%2090%2095%2C%20150%2095%2C%20150%20125%20Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22/%3E%3Cpath%20d%3D%22M%20115%20102%20Q%20120%2092%20125%20102%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22/%3E%3Ccircle%20cx%3D%22108%22%20cy%3D%22115%22%20r%3D%223%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%22132%22%20cy%3D%22115%22%20r%3D%223%22%20fill%3D%22%23000%22/%3E%3Cpath%20d%3D%22M%20114%20122%20Q%20120%20128%20126%20122%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M%2068%20125%20Q%20120%20125%20172%20125%20Q%20160%20170%20120%20170%20Q%2080%20170%2068%20125%20Z%22%20fill%3D%22%23000%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M%2066%20125%20L%20174%20125%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22/%3E%3Cline%20x1%3D%2295%22%20y1%3D%22170%22%20x2%3D%22145%22%20y2%3D%22170%22%20stroke%3D%22%23000%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20id%3D%22bottomArc%22%20d%3D%22M%2050%20135%20A%2082%2082%200%200%200%20190%20135%22%20fill%3D%22none%22%20stroke%3D%22none%22/%3E%3Ctext%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22bold%22%20font-size%3D%2210%22%20fill%3D%22%23000%22%20letter-spacing%3D%222%22%3E%3CtextPath%20href%3D%22%23bottomArc%22%20startOffset%3D%2250%25%22%20text-anchor%3D%22middle%22%3ECRAVE%20%26amp%3B%20CHEMISTRY%3C/textPath%3E%3C/text%3E%3C/svg%3E`;
+
+        // Direct Provided High-Resolution QR (Base64)
+        const PURE_QR_B64 = "data:image/png;base64,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";
 
         // Firebase Config
         const firebaseConfig = {
@@ -719,16 +725,17 @@
                 charges: { container: containerCharge, delivery: deliveryCharge, other: otherCharge },
                 totalAmount: total,
                 rewardPoints: rewardPoints,
+                status: "active", // Active kitchen status
                 createdAt: now.toISOString(),
                 dateKey: now.toISOString().split('T')[0],
                 monthKey: now.toISOString().slice(0, 7)
             };
 
-            // Save to LocalStorage
+            // 1. Save locally
             allOrders.unshift(orderRecord);
             saveToStorage();
 
-            // Direct Firestore Cloud Sync
+            // 2. Direct Firestore Sync
             if (db) {
                 try {
                     await db.collection("orders").doc(orderId).set(orderRecord);
@@ -757,13 +764,13 @@
 
             let chargesHtml = "";
             if (containerCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container:</span><span>${containerCharge}</span></div>`;
-            if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery:</span><span>${deliveryCharge}</span></div>`;
+            if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other:</span><span>${otherCharge}</span></div>`;
 
-            // Clean 58mm Receipt Template with Embedded Safe Image Tags
+            // Ultra-Clean 58mm Thermal Receipt Template
             const printContent = `
                 <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
-                    <img id="print-logo-img" src="logo.png" style="width: 28mm; height: 28mm; margin: 0 auto; display: block;" onerror="this.src='${PURE_MONO_LOGO_B64}'" />
+                    <img id="print-logo-img" src="${CLEAR_THERMAL_LOGO}" style="width: 26mm; height: 26mm; margin: 0 auto; display: block;" />
                     <h2 style="font-size: 15px; font-weight: 900; margin: 2px 0 0 0; letter-spacing: 0.5px;">MOMOLOGY</h2>
                     <p style="margin: 1px 0; font-size: 8px; font-weight:bold;">Authentic Momo Experience</p>
                     <p style="margin: 1px 0; font-size: 8px;">Racecourse, Cumilla | 01870-884845</p>
@@ -814,36 +821,19 @@
                 </div>
 
                 <div style="text-align: center;">
-                    <img id="print-qr-img" src="qr.jpeg" onerror="this.src='qr.png'" style="width: 24mm; height: 24mm; margin: 0 auto; display: block;" />
+                    <img id="print-qr-img" src="${PURE_QR_B64}" style="width: 25mm; height: 25mm; margin: 0 auto; display: block;" />
                     <p style="font-size: 7.5px; margin: 3px 0 1px 0; font-weight: bold;">Scan for Deals & Menu</p>
                     <p style="font-size: 7.5px; margin: 0;">FB: facebook.com/momoloogy</p>
                     <p style="font-size: 8px; font-weight:bold; margin-top:4px;">*** Thank You ***</p>
                 </div>
-                <div style="height: 6mm;"></div>
+                <div style="height: 8mm;"></div>
             `;
 
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = printContent;
+            window.print();
 
-            // Pre-load images completely before triggering print dialog
-            const logoImg = document.getElementById('print-logo-img');
-            const qrImg = document.getElementById('print-qr-img');
-
-            let imagesLoaded = 0;
-            const checkPrint = () => {
-                imagesLoaded++;
-                if (imagesLoaded >= 2) window.print();
-            };
-
-            if (logoImg.complete) imagesLoaded++;
-            else { logoImg.onload = checkPrint; logoImg.onerror = checkPrint; }
-
-            if (qrImg.complete) imagesLoaded++;
-            else { qrImg.onload = checkPrint; qrImg.onerror = checkPrint; }
-
-            if (imagesLoaded >= 2) window.print();
-
-            // Reset cart & inputs
+            // Reset cart
             cart = {};
             document.getElementById('order-ref-input').value = "";
             document.getElementById('customer-phone').value = "";
@@ -864,20 +854,42 @@
             showToast("অর্ডার ক্লাউডে সেভ ও 58mm প্রিন্ট সম্পন্ন!", "success");
         }
 
+        // ================= ACTIVE ORDERS SCREEN WITH "COMPLETE" OPTION =================
+        async function markOrderComplete(orderId) {
+            const ord = allOrders.find(o => o.id === orderId);
+            if (ord) {
+                ord.status = "completed";
+                saveToStorage();
+
+                if (db) {
+                    try {
+                        await db.collection("orders").doc(orderId).update({ status: "completed" });
+                    } catch(e) {
+                        console.error("Firestore update failed:", e);
+                    }
+                }
+
+                renderActiveOrders();
+                showToast(`অর্ডার #${orderId} সম্পূর্ণ হয়েছে!`, "success");
+            }
+        }
+
         function renderActiveOrders() {
             const grid = document.getElementById('active-orders-grid');
             const todayStr = new Date().toISOString().split('T')[0];
-            const todayOrders = allOrders.filter(o => o.dateKey === todayStr);
+            
+            // Only show active / running orders
+            const activeOrders = allOrders.filter(o => o.dateKey === todayStr && o.status !== "completed");
 
-            document.getElementById('active-count-badge').innerText = todayOrders.length;
+            document.getElementById('active-count-badge').innerText = activeOrders.length;
 
-            if (todayOrders.length === 0) {
-                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-2xl border text-center text-slate-400 font-bold">আজকের কোনো রানিং অর্ডার নেই</div>`;
+            if (activeOrders.length === 0) {
+                grid.innerHTML = `<div class="col-span-full bg-white p-8 rounded-2xl border text-center text-slate-400 font-bold">বর্তমানে কোনো রানিং অর্ডার নেই। সব অর্ডার ডেলিভার্ড! 🎉</div>`;
                 return;
             }
 
             grid.innerHTML = "";
-            todayOrders.slice(0, 12).forEach(o => {
+            activeOrders.forEach(o => {
                 const itemsHtml = o.items.map(it => `
                     <div class="flex justify-between text-xs py-0.5">
                         <span class="font-bold text-slate-700">${it.name} <b class="text-momo-600">[${it.type}]</b></span>
@@ -899,9 +911,18 @@
                         ${itemsHtml}
                     </div>
                     <div class="border-t pt-2 flex justify-between items-center text-xs">
-                        <span class="text-slate-500 font-bold">${o.customerName}</span>
-                        <span class="font-black text-emerald-600 font-mono text-sm">৳ ${o.totalAmount}</span>
+                        <div>
+                            <div class="text-slate-700 font-bold">${o.customerName}</div>
+                            <div class="text-[10px] text-slate-400 font-mono">${maskPhone(o.customerPhone)}</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-black text-emerald-600 font-mono text-sm block">৳ ${o.totalAmount}</span>
+                        </div>
                     </div>
+                    <!-- Order Complete Action Button -->
+                    <button onclick="markOrderComplete('${o.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5 mt-2">
+                        <i class="fa-solid fa-circle-check"></i> Mark as Delivered / Complete
+                    </button>
                 `;
                 grid.appendChild(card);
             });
@@ -1113,6 +1134,7 @@
         renderMenu();
         renderExpensesTable();
         renderHistoryView();
+        renderActiveOrders();
     </script>
 </body>
 </html>
