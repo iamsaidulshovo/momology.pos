@@ -65,7 +65,7 @@
                 top: 0;
                 width: 48mm;
                 margin: 0;
-                padding: 1mm 2mm 3mm 2mm;
+                padding: 1mm 2mm 4mm 2mm;
                 font-family: monospace;
                 color: #000;
                 background: #fff;
@@ -144,7 +144,7 @@
 
     <main class="max-w-7xl mx-auto px-3 py-4 flex-1 w-full">
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
-            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Terminal</button>
+            <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Order Terminal</button>
             <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> Active Orders</button>
             <button onclick="showPage('reports-page', this)" class="tab-btn"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Sales & Month History</button>
             <button onclick="showPage('expense-page', this)" class="tab-btn"><i class="fa-solid fa-wallet mr-1"></i> Daily Expenses</button>
@@ -156,7 +156,7 @@
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
@@ -404,13 +404,7 @@
     <div id="printArea"></div>
 
     <script>
-        // Crystal Clear 1-bit Monochrome Thermal Logo (Custom designed for 58mm without dithering smudge)
-        const CLEAR_THERMAL_LOGO = `data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20240%20240%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%22120%22%20r%3D%22112%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%227%22/%3E%3Ccircle%20cx%3D%22120%22%20cy%3D%22120%22%20r%3D%22102%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222%22/%3E%3Cpath%20id%3D%22textArc%22%20d%3D%22M%2040%20120%20A%2080%2080%200%200%201%20200%20120%22%20fill%3D%22none%22%20stroke%3D%22none%22/%3E%3Ctext%20font-family%3D%22Arial%20Black%2C%20Impact%2C%20sans-serif%22%20font-weight%3D%22900%22%20font-size%3D%2224%22%20fill%3D%22%23000%22%20letter-spacing%3D%223%22%3E%3CtextPath%20href%3D%22%23textArc%22%20startOffset%3D%2250%25%22%20text-anchor%3D%22middle%22%3EMOMOLOGY%3C/textPath%3E%3C/text%3E%3Cline%20x1%3D%22125%22%20y1%3D%22105%22%20x2%3D%22185%22%20y2%3D%2255%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22/%3E%3Cline%20x1%3D%22135%22%20y1%3D%22105%22%20x2%3D%22195%22%20y2%3D%2260%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M%2090%20125%20C%2090%2095%2C%20150%2095%2C%20150%20125%20Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%23000%22%20stroke-width%3D%225%22/%3E%3Cpath%20d%3D%22M%20115%20102%20Q%20120%2092%20125%20102%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%224%22/%3E%3Ccircle%20cx%3D%22108%22%20cy%3D%22115%22%20r%3D%223%22%20fill%3D%22%23000%22/%3E%3Ccircle%20cx%3D%22132%22%20cy%3D%22115%22%20r%3D%223%22%20fill%3D%22%23000%22/%3E%3Cpath%20d%3D%22M%20114%20122%20Q%20120%20128%20126%20122%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M%2068%20125%20Q%20120%20125%20172%20125%20Q%20160%20170%20120%20170%20Q%2080%20170%2068%20125%20Z%22%20fill%3D%22%23000%22%20stroke%3D%22%23000%22%20stroke-width%3D%223%22/%3E%3Cpath%20d%3D%22M%2066%20125%20L%20174%20125%22%20stroke%3D%22%23fff%22%20stroke-width%3D%224%22/%3E%3Cline%20x1%3D%2295%22%20y1%3D%22170%22%20x2%3D%22145%22%20y2%3D%22170%22%20stroke%3D%22%23000%22%20stroke-width%3D%227%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20id%3D%22bottomArc%22%20d%3D%22M%2050%20135%20A%2082%2082%200%200%200%20190%20135%22%20fill%3D%22none%22%20stroke%3D%22none%22/%3E%3Ctext%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22bold%22%20font-size%3D%2210%22%20fill%3D%22%23000%22%20letter-spacing%3D%222%22%3E%3CtextPath%20href%3D%22%23bottomArc%22%20startOffset%3D%2250%25%22%20text-anchor%3D%22middle%22%3ECRAVE%20%26amp%3B%20CHEMISTRY%3C/textPath%3E%3C/text%3E%3C/svg%3E`;
-
-        // Direct Provided High-Resolution QR (Base64)
-        const PURE_QR_B64 = "data:image/png;base64,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";
-
-        // Firebase Config
+        // ================= DIRECT FIREBASE FIRESTORE CONFIG =================
         const firebaseConfig = {
             apiKey: "AIzaSyD40JCimr2YbXOMDXw_87abCPYG0aS5bOQ",
             authDomain: "momology-loyalty.firebaseapp.com",
@@ -446,7 +440,7 @@
             updateSyncStatus(false);
         }
 
-        // Persistent Storage
+        // ================= PERSISTENT STORAGE ENGINE =================
         let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
         let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
         let cart = {};
@@ -457,7 +451,6 @@
             localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
         }
 
-        // Realtime Multi-Device Listeners
         if (db) {
             db.collection("orders").orderBy("createdAt", "desc").limit(300)
               .onSnapshot((snapshot) => {
@@ -685,7 +678,7 @@
             return `${start}******${end}`;
         }
 
-        // ================= CONFIRM & DIRECT 58MM PRINT (NO KOT) =================
+        // ================= CONFIRM & DIRECT 58MM PRINT WITH ORIGINAL LOGO & QR =================
         async function saveMasterOrder() {
             const total = parseFloat(document.getElementById('total').innerText || 0);
             if (total <= 0) {
@@ -725,7 +718,7 @@
                 charges: { container: containerCharge, delivery: deliveryCharge, other: otherCharge },
                 totalAmount: total,
                 rewardPoints: rewardPoints,
-                status: "active", // Active kitchen status
+                status: "active",
                 createdAt: now.toISOString(),
                 dateKey: now.toISOString().split('T')[0],
                 monthKey: now.toISOString().slice(0, 7)
@@ -767,10 +760,10 @@
             if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other:</span><span>${otherCharge}</span></div>`;
 
-            // Ultra-Clean 58mm Thermal Receipt Template
+            // Clean 58mm Thermal Receipt Template referencing logo.png directly!
             const printContent = `
                 <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
-                    <img id="print-logo-img" src="${CLEAR_THERMAL_LOGO}" style="width: 26mm; height: 26mm; margin: 0 auto; display: block;" />
+                    <img id="print-logo-img" src="logo.png" style="width: 28mm; height: 28mm; margin: 0 auto; display: block; border-radius: 50%;" />
                     <h2 style="font-size: 15px; font-weight: 900; margin: 2px 0 0 0; letter-spacing: 0.5px;">MOMOLOGY</h2>
                     <p style="margin: 1px 0; font-size: 8px; font-weight:bold;">Authentic Momo Experience</p>
                     <p style="margin: 1px 0; font-size: 8px;">Racecourse, Cumilla | 01870-884845</p>
@@ -821,17 +814,34 @@
                 </div>
 
                 <div style="text-align: center;">
-                    <img id="print-qr-img" src="${PURE_QR_B64}" style="width: 25mm; height: 25mm; margin: 0 auto; display: block;" />
+                    <img id="print-qr-img" src="qr.png" onerror="this.src='qr.jpeg'" style="width: 25mm; height: 25mm; margin: 0 auto; display: block;" />
                     <p style="font-size: 7.5px; margin: 3px 0 1px 0; font-weight: bold;">Scan for Deals & Menu</p>
                     <p style="font-size: 7.5px; margin: 0;">FB: facebook.com/momoloogy</p>
                     <p style="font-size: 8px; font-weight:bold; margin-top:4px;">*** Thank You ***</p>
                 </div>
-                <div style="height: 8mm;"></div>
+                <div style="height: 10mm;"></div>
             `;
 
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = printContent;
-            window.print();
+
+            // Pre-load images completely before triggering print dialog
+            const logoImg = document.getElementById('print-logo-img');
+            const qrImg = document.getElementById('print-qr-img');
+
+            let imagesLoaded = 0;
+            const checkPrint = () => {
+                imagesLoaded++;
+                if (imagesLoaded >= 2) window.print();
+            };
+
+            if (logoImg.complete) imagesLoaded++;
+            else { logoImg.onload = checkPrint; logoImg.onerror = checkPrint; }
+
+            if (qrImg.complete) imagesLoaded++;
+            else { qrImg.onload = checkPrint; qrImg.onerror = checkPrint; }
+
+            if (imagesLoaded >= 2) window.print();
 
             // Reset cart
             cart = {};
