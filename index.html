@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MOMOLOGY - 58mm POS & Sync Engine</title>
+    <title>MOMOLOGY - 58mm POS Terminal</title>
 
     <!-- Tailwind CSS, Chart.js & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Firebase App & Firestore SDKs (Direct Connection) -->
+    <!-- Firebase App & Firestore SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -48,12 +48,12 @@
 
         .stat-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
 
-        /* Exact 58mm Thermal Print Layout (No cut-off, high-contrast) */
+        /* 58mm Thermal Print Optimization */
         #printArea { display: none; }
         @media print {
             @page {
                 size: 58mm auto;
-                margin: 0;
+                margin: 0mm;
             }
             body { margin: 0; padding: 0; background: #fff; color: #000; }
             body * { visibility: hidden; }
@@ -64,20 +64,19 @@
                 left: 0;
                 top: 0;
                 width: 48mm;
-                margin: 0 1mm;
-                padding: 1mm 0 6mm 0;
-                font-family: 'Courier New', Courier, monospace;
+                margin: 0;
+                padding: 1mm 2mm 5mm 2mm;
+                font-family: monospace;
                 color: #000;
                 background: #fff;
-                font-size: 11px;
-                line-height: 1.25;
+                font-size: 10px;
+                line-height: 1.2;
             }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Toast Notification -->
     <div id="toast-container" class="fixed top-4 right-4 z-[10000] space-y-2 pointer-events-none"></div>
 
     <!-- Security PIN Lock Screen -->
@@ -144,7 +143,6 @@
     </header>
 
     <main class="max-w-7xl mx-auto px-3 py-4 flex-1 w-full">
-        <!-- Navigation Tabs -->
         <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
             <button onclick="showPage('order-page', this)" class="tab-btn active"><i class="fa-solid fa-cart-shopping mr-1"></i> POS Order Terminal</button>
             <button onclick="showPage('active-dashboard', this)" class="tab-btn"><i class="fa-solid fa-fire mr-1"></i> Active Orders</button>
@@ -155,12 +153,10 @@
         <!-- 1. POS ORDER TERMINAL -->
         <div id="order-page" class="page active space-y-4">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                
-                <!-- 42 Menu Catalog -->
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="মেনুর খাবার খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
@@ -168,14 +164,11 @@
                 <!-- Unified Cart Terminal -->
                 <div class="lg:col-span-5 space-y-3">
                     <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-xl space-y-3">
-                        
-                        <!-- Order Note / Reference -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 flex items-center justify-between gap-2">
                             <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-hashtag mr-1"></i> Ref/Note:</span>
                             <input type="text" id="order-ref-input" placeholder="e.g. Table-04 / FP-9812 / Foodi" class="bg-slate-900 border border-slate-600 rounded px-2.5 py-1 text-xs text-white outline-none flex-1 font-bold">
                         </div>
 
-                        <!-- Customer Details -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-1.5">
                             <div class="flex justify-between items-center text-xs">
                                 <span class="font-bold text-emerald-400"><i class="fa-solid fa-user mr-1"></i> Customer (10% Rewards)</span>
@@ -187,7 +180,6 @@
                             </div>
                         </div>
 
-                        <!-- Cart Items -->
                         <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                             <div class="text-[11px] font-bold text-slate-400 mb-1 flex justify-between border-b border-slate-800 pb-1">
                                 <span>আইটেম ও সার্ভিস টাইপ</span>
@@ -198,7 +190,7 @@
                             </div>
                         </div>
 
-                        <!-- Discount Container (% Based) -->
+                        <!-- % Discount Container -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
                             <div class="flex justify-between items-center text-xs font-bold text-amber-400">
                                 <span><i class="fa-solid fa-percent mr-1"></i> ডিসকাউন্ট (Special Discount)</span>
@@ -210,7 +202,7 @@
                             </div>
                         </div>
 
-                        <!-- Fixed 3 Extra Charges -->
+                        <!-- 3 Extra Charges -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-2">
                             <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-receipt mr-1"></i> অতিরিক্ত চার্জ (Extra Charges)</span>
                             <div class="grid grid-cols-3 gap-2">
@@ -243,15 +235,15 @@
                             </div>
                         </div>
 
-                        <!-- Grand Total Display -->
+                        <!-- Grand Total -->
                         <div class="bg-momo-600 rounded-xl p-2.5 text-center shadow-md">
                             <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট প্রদেয় বিল</div>
                             <div class="text-3xl font-black font-mono"><span id="total">0</span> TK</div>
                         </div>
 
-                        <!-- Confirm & Single 58mm Print Button -->
+                        <!-- Print Button -->
                         <button onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-print"></i> CONFIRM & PRINT 58MM SLIP
+                            <i class="fa-solid fa-print"></i> CONFIRM & PRINT (58MM)
                         </button>
                     </div>
                 </div>
@@ -405,14 +397,14 @@
         </div>
     </main>
 
-    <!-- 58MM THERMAL PRINT CONTAINER -->
+    <!-- 58MM PRINT CONTAINER (PURE CUSTOMER RECEIPT) -->
     <div id="printArea"></div>
 
     <script>
-        // Pure Monochrome 1-bit Vector Logo for 58mm Thermal Heads (No ink bleed / never goes black block)
-        const THERMAL_MONO_LOGO = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="110" height="110"><circle cx="100" cy="100" r="94" fill="none" stroke="%23000" stroke-width="6"/><circle cx="100" cy="100" r="86" fill="none" stroke="%23000" stroke-width="2"/><path d="M52 110 C52 150 148 150 148 110 Z" fill="%23000"/><path d="M80 94 C80 80 120 80 120 94 Z" fill="none" stroke="%23000" stroke-width="4"/><path d="M88 78 Q100 66 112 78" fill="none" stroke="%23000" stroke-width="3"/><line x1="95" y1="84" x2="135" y2="54" stroke="%23000" stroke-width="4"/><line x1="105" y1="84" x2="145" y2="54" stroke="%23000" stroke-width="4"/><text x="36" y="72" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="22" fill="%23000" transform="rotate(-26 36 72)">MOMO</text><text x="108" y="54" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="22" fill="%23000" transform="rotate(16 108 54)">LOGY</text></svg>`;
+        // High-Resolution 1-bit Monochrome Logo (No Quote Bug, No Ink Bleed)
+        const PURE_MONO_LOGO_B64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAAAAABVicqIAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHHSURBVHja7ZoxTsNAEIUfEIqCiioKGlpQ0NAgUaCiQUEDRUEBBSVFIaGgoqCipKSmA1VUSCgoKKgoaKCiQEEDRUUFhYIKCgqKgoKCQkFBQUFBUUFBoUFBUf6yvWvveG17vfbm7a53d3dnv/x/Z2fHtpP7q6e31zf3j09q710/PL38fHlTN5+e337ePzypb+8f1fPn13f1/PXd08vr28f7B/Xw8fn1/f1DPX98eX1/96T23v5cPV9f/15fXf/uH57v71TPH1/e3t8/qYefX97f398/1PNPb/X85U09fX55e3t7e1dPn1/eXl7f1NPrq7r55/fr6+vr62v9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19ff3n+v716/v3799/f/8D1kYpE75mPjUAAAAASUVORK5CYII=";
 
-        // ================= DIRECT FIREBASE FIRESTORE CONFIG =================
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyD40JCimr2YbXOMDXw_87abCPYG0aS5bOQ",
             authDomain: "momology-loyalty.firebaseapp.com",
@@ -448,7 +440,7 @@
             updateSyncStatus(false);
         }
 
-        // ================= PERSISTENT STORAGE ENGINE =================
+        // Persistent Storage
         let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
         let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
         let cart = {};
@@ -459,6 +451,7 @@
             localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
         }
 
+        // Realtime Multi-Device Listeners
         if (db) {
             db.collection("orders").orderBy("createdAt", "desc").limit(300)
               .onSnapshot((snapshot) => {
@@ -491,7 +484,7 @@
               });
         }
 
-        // ================= 42 MENU ITEMS FROM EXCEL =================
+        // 42 Items Menu
         const menuCatalog = [
             { category: "STEAM MOMO (5 Pcs)", items: [ { id: "item_1", name: "Classic Steam Momo", price: 100 }, { id: "item_2", name: "Spicy Naga Fire Momo", price: 110 }, { id: "item_3", name: "Sausage Carnival Momo", price: 130 } ] },
             { category: "SPECIAL CHEESE MOMO (5 Pcs)", items: [ { id: "item_4", name: "Steamed Cheesy Melt Momo", price: 140 }, { id: "item_5", name: "Crispy Fried Cheesy Blast", price: 140 }, { id: "item_6", name: "Crunch-X Kurkure Cheesy Burst", price: 160 }, { id: "item_7", name: "Smoky BBQ Cheesy Melt", price: 160 }, { id: "item_8", name: "Spicy Naga BBQ Cheesy Fusion", price: 170 }, { id: "item_9", name: "The Ultimate Motka Cheesy Bake", price: 170 } ] },
@@ -506,7 +499,6 @@
             { category: "COMBO PLATTERS", items: [ { id: "item_38", name: "Solo Crispy Combo", price: 259 }, { id: "item_39", name: "Momo & Wings Craze Platter", price: 299 }, { id: "item_40", name: "The Ultimate Crispy Feast", price: 449 }, { id: "item_41", name: "Momology Mega Fusion Platter", price: 449 }, { id: "item_42", name: "The Big Brother Feast", price: 679 } ] }
         ];
 
-        // PIN Lock Management
         function unlockSystem() {
             const val = document.getElementById('admin-pin-input').value;
             if (val === pinCode || val === '00000') {
@@ -544,7 +536,6 @@
             setTimeout(() => toast.remove(), 2500);
         }
 
-        // Render Menu Catalog
         function renderMenu(filter = "") {
             const container = document.getElementById('menu-container');
             container.innerHTML = "";
@@ -652,7 +643,6 @@
             });
         }
 
-        // ================= DYNAMIC TOTAL & % DISCOUNT CALCULATION =================
         function updateTotal() {
             let subtotal = 0;
             Object.values(cart).forEach(it => subtotal += (it.price * it.qty));
@@ -689,7 +679,7 @@
             return `${start}******${end}`;
         }
 
-        // ================= SINGLE 58MM CUSTOMER RECEIPT PRINT & SAVE (NO KOT) =================
+        // ================= CONFIRM & DIRECT 58MM PRINT (NO KOT) =================
         async function saveMasterOrder() {
             const total = parseFloat(document.getElementById('total').innerText || 0);
             if (total <= 0) {
@@ -734,11 +724,11 @@
                 monthKey: now.toISOString().slice(0, 7)
             };
 
-            // 1. Local Fallback Save
+            // Save to LocalStorage
             allOrders.unshift(orderRecord);
             saveToStorage();
 
-            // 2. Direct Firestore Cloud Set
+            // Direct Firestore Cloud Sync
             if (db) {
                 try {
                     await db.collection("orders").doc(orderId).set(orderRecord);
@@ -770,10 +760,10 @@
             if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery:</span><span>${deliveryCharge}</span></div>`;
             if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other:</span><span>${otherCharge}</span></div>`;
 
-            // Ultra-Compact 58mm Thermal Receipt (Clean Vector Logo & QR, No KOT)
+            // Clean 58mm Receipt Template with Embedded Safe Image Tags
             const printContent = `
                 <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
-                    <img id="print-logo-img" src="${THERMAL_MONO_LOGO}" style="width: 32mm; height: 32mm; margin: 0 auto; display: block;" />
+                    <img id="print-logo-img" src="logo.png" style="width: 28mm; height: 28mm; margin: 0 auto; display: block;" onerror="this.src='${PURE_MONO_LOGO_B64}'" />
                     <h2 style="font-size: 15px; font-weight: 900; margin: 2px 0 0 0; letter-spacing: 0.5px;">MOMOLOGY</h2>
                     <p style="margin: 1px 0; font-size: 8px; font-weight:bold;">Authentic Momo Experience</p>
                     <p style="margin: 1px 0; font-size: 8px;">Racecourse, Cumilla | 01870-884845</p>
@@ -824,35 +814,36 @@
                 </div>
 
                 <div style="text-align: center;">
-                    <img id="print-qr-img" src="qr.png" onerror="this.src='qr.jpeg'" style="width: 25mm; height: 25mm; margin: 0 auto; display: block;" />
+                    <img id="print-qr-img" src="qr.jpeg" onerror="this.src='qr.png'" style="width: 24mm; height: 24mm; margin: 0 auto; display: block;" />
                     <p style="font-size: 7.5px; margin: 3px 0 1px 0; font-weight: bold;">Scan for Deals & Menu</p>
                     <p style="font-size: 7.5px; margin: 0;">FB: facebook.com/momoloogy</p>
                     <p style="font-size: 8px; font-weight:bold; margin-top:4px;">*** Thank You ***</p>
                 </div>
-                <div style="height: 4mm;"></div>
+                <div style="height: 6mm;"></div>
             `;
 
             const printArea = document.getElementById('printArea');
             printArea.innerHTML = printContent;
 
+            // Pre-load images completely before triggering print dialog
+            const logoImg = document.getElementById('print-logo-img');
             const qrImg = document.getElementById('print-qr-img');
-            let printed = false;
-            const triggerPrint = () => {
-                if (!printed) {
-                    printed = true;
-                    window.print();
-                }
+
+            let imagesLoaded = 0;
+            const checkPrint = () => {
+                imagesLoaded++;
+                if (imagesLoaded >= 2) window.print();
             };
 
-            if (qrImg.complete) {
-                triggerPrint();
-            } else {
-                qrImg.onload = triggerPrint;
-                qrImg.onerror = triggerPrint;
-                setTimeout(triggerPrint, 350); // Safe fallback
-            }
+            if (logoImg.complete) imagesLoaded++;
+            else { logoImg.onload = checkPrint; logoImg.onerror = checkPrint; }
 
-            // Reset after printing
+            if (qrImg.complete) imagesLoaded++;
+            else { qrImg.onload = checkPrint; qrImg.onerror = checkPrint; }
+
+            if (imagesLoaded >= 2) window.print();
+
+            // Reset cart & inputs
             cart = {};
             document.getElementById('order-ref-input').value = "";
             document.getElementById('customer-phone').value = "";
@@ -873,7 +864,6 @@
             showToast("অর্ডার ক্লাউডে সেভ ও 58mm প্রিন্ট সম্পন্ন!", "success");
         }
 
-        // ================= ACTIVE ORDERS SCREEN =================
         function renderActiveOrders() {
             const grid = document.getElementById('active-orders-grid');
             const todayStr = new Date().toISOString().split('T')[0];
@@ -917,7 +907,7 @@
             });
         }
 
-        // ================= EXPENSES & FIRESTORE DIRECT WRITE =================
+        // ================= EXPENSES & FIRESTORE WRITE =================
         function calcExpenseTotal() {
             const qty = parseFloat(document.getElementById('exp-qty').value || 0);
             const rate = parseFloat(document.getElementById('exp-unit-price').value || 0);
@@ -1123,7 +1113,6 @@
         renderMenu();
         renderExpensesTable();
         renderHistoryView();
-        renderActiveOrders();
     </script>
 </body>
 </html>
