@@ -156,7 +156,7 @@
                 <div class="lg:col-span-7 space-y-3">
                     <div class="relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-sm"></i>
-                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
+                        <input type="text" id="menu-search-input" oninput="filterMenu()" placeholder="খাবারের নাম দিয়ে খুঁজুন..." class="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-momo-500 outline-none">
                     </div>
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
@@ -164,6 +164,12 @@
                 <!-- Unified Cart Terminal -->
                 <div class="lg:col-span-5 space-y-3">
                     <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-xl space-y-3">
+                        
+                        <div class="flex items-center justify-between">
+                            <span id="cart-mode-badge" class="text-[11px] font-bold bg-slate-800 text-emerald-400 px-2 py-0.5 rounded">New Order</span>
+                            <button id="cancel-edit-btn" onclick="cancelOrderEdit()" class="hidden text-xs text-rose-400 hover:underline font-bold"><i class="fa-solid fa-xmark mr-1"></i> Cancel Edit</button>
+                        </div>
+
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 flex items-center justify-between gap-2">
                             <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-hashtag mr-1"></i> Ref/Note:</span>
                             <input type="text" id="order-ref-input" placeholder="e.g. Table-04 / FP-9812 / Foodi" class="bg-slate-900 border border-slate-600 rounded px-2.5 py-1 text-xs text-white outline-none flex-1 font-bold">
@@ -242,7 +248,7 @@
                         </div>
 
                         <!-- Print Button -->
-                        <button onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
+                        <button id="save-order-btn" onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
                             <i class="fa-solid fa-print"></i> CONFIRM & PRINT (58MM)
                         </button>
                     </div>
@@ -262,7 +268,7 @@
             <div id="active-orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
-        <!-- 3. SALES & MONTH HISTORY ARCHIVE -->
+        <!-- 3. SALES & MONTH HISTORY ARCHIVE (WITH RE-PRINT & EDIT) -->
         <div id="reports-page" class="page space-y-4">
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
@@ -326,6 +332,7 @@
                                 <th class="p-2.5">অর্ডারকৃত আইটেমসমূহ</th>
                                 <th class="p-2.5">ছাড় ও চার্জ</th>
                                 <th class="p-2.5">মোট বিল</th>
+                                <th class="p-2.5 text-center">অ্যাকশন (Print / Edit)</th>
                             </tr>
                         </thead>
                         <tbody id="hist-orders-tbody" class="divide-y divide-slate-100"></tbody>
@@ -404,10 +411,7 @@
     <div id="printArea"></div>
 
     <script>
-        // Official Verified QR Code (Base64 Embedded - 100% Reliable, Never Fails)
-        const EMBEDDED_QR_B64 = "data:image/png;base64,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";
-
-        // Firebase Config
+        // ================= DIRECT FIREBASE FIRESTORE CONFIG =================
         const firebaseConfig = {
             apiKey: "AIzaSyD40JCimr2YbXOMDXw_87abCPYG0aS5bOQ",
             authDomain: "momology-loyalty.firebaseapp.com",
@@ -447,6 +451,7 @@
         let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
         let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
         let cart = {};
+        let editingOrderId = null; // Track editing order
         let pinCode = '12345';
 
         function saveToStorage() {
@@ -454,7 +459,6 @@
             localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
         }
 
-        // Realtime Multi-Device Listeners
         if (db) {
             db.collection("orders").orderBy("createdAt", "desc").limit(300)
               .onSnapshot((snapshot) => {
@@ -682,7 +686,125 @@
             return `${start}******${end}`;
         }
 
-        // ================= CONFIRM & DIRECT 58MM PRINT =================
+        // ================= PRINT ENGINE FUNCTION (USED BY SAVE & RE-PRINT) =================
+        function printReceipt58mm(order) {
+            let customerItemsHtml = "";
+            let totalCount = 0;
+
+            order.items.forEach(it => {
+                totalCount += it.qty;
+                customerItemsHtml += `
+                    <div style="display:flex; justify-content:space-between; margin: 2px 0; font-size:10px;">
+                        <span style="max-width:32mm; word-break:break-word;">${it.name} [${it.type==='Parcel'?'P':'D'}] x${it.qty}</span>
+                        <span style="font-weight:bold;">${it.price * it.qty}</span>
+                    </div>
+                `;
+            });
+
+            let discountHtml = "";
+            if (order.discountAmount > 0) {
+                discountHtml = `<div style="display:flex; justify-content:space-between; font-weight:bold;"><span>DISC (${order.discountPercent}%):</span><span>-${order.discountAmount}</span></div>`;
+            }
+
+            let chargesHtml = "";
+            if (order.charges.container > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container:</span><span>${order.charges.container}</span></div>`;
+            if (order.charges.delivery > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery:</span><span>${order.charges.delivery}</span></div>`;
+            if (order.charges.other > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other:</span><span>${order.charges.other}</span></div>`;
+
+            const printDate = new Date(order.createdAt);
+
+            const printContent = `
+                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
+                    <img id="print-logo-img" src="logo.png" style="width: 28mm; height: 28mm; margin: 0 auto; display: block; border-radius: 50%;" />
+                    <h2 style="font-size: 15px; font-weight: 900; margin: 2px 0 0 0; letter-spacing: 0.5px;">MOMOLOGY</h2>
+                    <p style="margin: 1px 0; font-size: 8px; font-weight:bold;">Authentic Momo Experience</p>
+                    <p style="margin: 1px 0; font-size: 8px;">Racecourse, Cumilla | 01870-884845</p>
+                    <p style="margin: 1px 0; font-size: 8px;">momology.me</p>
+                </div>
+
+                <div style="font-size: 9px; margin-bottom: 4px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Order: <b>#${order.id}</b></span>
+                        <span>[${order.ref}]</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>${order.customerName}</span>
+                        <span>${maskPhone(order.customerPhone)}</span>
+                    </div>
+                    <div style="font-size:8px; margin-top:2px;">${printDate.toLocaleDateString()} ${printDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                </div>
+
+                <div style="margin-bottom: 4px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
+                    <div style="font-size:9px; font-weight:bold; margin-bottom:2px; display:flex; justify-content:space-between;">
+                        <span>ITEMS (${totalCount})</span>
+                        <span>TK</span>
+                    </div>
+                    ${customerItemsHtml}
+                </div>
+
+                <div style="font-size: 9px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span>${order.subtotal || order.totalAmount}</span></div>
+                    ${discountHtml}
+                    ${chargesHtml}
+                    <div style="display:flex; justify-content:space-between; font-weight:900; font-size:13px; margin-top:3px; border-top:1px dashed #000; padding-top:2px;">
+                        <span>TOTAL:</span>
+                        <span>৳ ${order.totalAmount}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>Cash:</span>
+                        <span>${order.cashGiven || order.totalAmount}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                        <span>Change:</span>
+                        <span>${order.cashChange || 0}</span>
+                    </div>
+                </div>
+
+                <div style="padding: 3px; border: 1px dashed #000; text-align: center; margin-bottom: 6px;">
+                    <div style="font-weight:900; font-size:9px;">+${order.rewardPoints} CASHBACK POINTS!</div>
+                    <p style="margin: 1px 0; font-size: 8px;">Claim: <b>rewards.momology.me</b></p>
+                </div>
+
+                <div style="text-align: center;">
+                    <img id="print-qr-img" src="qr.jpeg" onerror="this.src='qr.png'" style="width: 25mm; height: 25mm; margin: 0 auto; display: block;" />
+                    <p style="font-size: 7.5px; margin: 3px 0 1px 0; font-weight: bold;">Scan for Deals & Menu</p>
+                    <p style="font-size: 7.5px; margin: 0;">FB: facebook.com/momoloogy</p>
+                    <p style="font-size: 8px; font-weight:bold; margin-top:4px;">*** Thank You ***</p>
+                </div>
+                <div style="height: 10mm;"></div>
+            `;
+
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = printContent;
+
+            const logoImg = document.getElementById('print-logo-img');
+            const qrImg = document.getElementById('print-qr-img');
+
+            let imagesLoaded = 0;
+            let printed = false;
+            const trigger = () => {
+                if (!printed) {
+                    printed = true;
+                    window.print();
+                }
+            };
+
+            const onImgLoad = () => {
+                imagesLoaded++;
+                if (imagesLoaded >= 2) trigger();
+            };
+
+            if (logoImg.complete) imagesLoaded++;
+            else { logoImg.onload = onImgLoad; logoImg.onerror = onImgLoad; }
+
+            if (qrImg.complete) imagesLoaded++;
+            else { qrImg.onload = onImgLoad; qrImg.onerror = onImgLoad; }
+
+            if (imagesLoaded >= 2) trigger();
+            setTimeout(trigger, 400); // 100% guarantee trigger
+        }
+
+        // ================= CONFIRM & SAVE ORDER =================
         async function saveMasterOrder() {
             const total = parseFloat(document.getElementById('total').innerText || 0);
             if (total <= 0) {
@@ -707,7 +829,7 @@
             const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
 
             const now = new Date();
-            const orderId = `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
+            const orderId = editingOrderId ? editingOrderId : `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
             const rewardPoints = Math.floor(total * 0.10);
 
             const orderRecord = {
@@ -721,18 +843,29 @@
                 discountAmount: discountAmount,
                 charges: { container: containerCharge, delivery: deliveryCharge, other: otherCharge },
                 totalAmount: total,
+                cashGiven: cashGiven,
+                cashChange: cashChange,
                 rewardPoints: rewardPoints,
                 status: "active",
-                createdAt: now.toISOString(),
+                createdAt: editingOrderId ? (allOrders.find(o => o.id === editingOrderId)?.createdAt || now.toISOString()) : now.toISOString(),
                 dateKey: now.toISOString().split('T')[0],
                 monthKey: now.toISOString().slice(0, 7)
             };
 
-            // 1. Save locally
-            allOrders.unshift(orderRecord);
+            // If editing, replace existing
+            if (editingOrderId) {
+                allOrders = allOrders.map(o => o.id === editingOrderId ? orderRecord : o);
+                editingOrderId = null;
+                document.getElementById('cart-mode-badge').innerText = "New Order";
+                document.getElementById('cart-mode-badge').className = "text-[11px] font-bold bg-slate-800 text-emerald-400 px-2 py-0.5 rounded";
+                document.getElementById('cancel-edit-btn').classList.add('hidden');
+                document.getElementById('save-order-btn').innerHTML = `<i class="fa-solid fa-print"></i> CONFIRM & PRINT (58MM)`;
+            } else {
+                allOrders.unshift(orderRecord);
+            }
+
             saveToStorage();
 
-            // 2. Direct Firestore Sync
             if (db) {
                 try {
                     await db.collection("orders").doc(orderId).set(orderRecord);
@@ -741,111 +874,8 @@
                 }
             }
 
-            let customerItemsHtml = "";
-            let totalCount = 0;
-
-            Object.values(cart).forEach(it => {
-                totalCount += it.qty;
-                customerItemsHtml += `
-                    <div style="display:flex; justify-content:space-between; margin: 2px 0; font-size:10px;">
-                        <span style="max-width:32mm; word-break:break-word;">${it.name} [${it.type==='Parcel'?'P':'D'}] x${it.qty}</span>
-                        <span style="font-weight:bold;">${it.price * it.qty}</span>
-                    </div>
-                `;
-            });
-
-            let discountHtml = "";
-            if (discountAmount > 0) {
-                discountHtml = `<div style="display:flex; justify-content:space-between; font-weight:bold;"><span>DISC (${discountPercent}%):</span><span>-${discountAmount}</span></div>`;
-            }
-
-            let chargesHtml = "";
-            if (containerCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Container:</span><span>${containerCharge}</span></div>`;
-            if (deliveryCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Delivery Fee:</span><span>${deliveryCharge}</span></div>`;
-            if (otherCharge > 0) chargesHtml += `<div style="display:flex; justify-content:space-between;"><span>Other:</span><span>${otherCharge}</span></div>`;
-
-            // Clean 58mm Receipt Template with logo.png & EMBEDDED_QR_B64
-            const printContent = `
-                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 4px; margin-bottom: 4px;">
-                    <img id="print-logo-img" src="logo.png" style="width: 28mm; height: 28mm; margin: 0 auto; display: block; border-radius: 50%;" />
-                    <h2 style="font-size: 15px; font-weight: 900; margin: 2px 0 0 0; letter-spacing: 0.5px;">MOMOLOGY</h2>
-                    <p style="margin: 1px 0; font-size: 8px; font-weight:bold;">Authentic Momo Experience</p>
-                    <p style="margin: 1px 0; font-size: 8px;">Racecourse, Cumilla | 01870-884845</p>
-                    <p style="margin: 1px 0; font-size: 8px;">momology.me</p>
-                </div>
-
-                <div style="font-size: 9px; margin-bottom: 4px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>Order: <b>#${orderId}</b></span>
-                        <span>[${refNote}]</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span>${name}</span>
-                        <span>${maskPhone(phone)}</span>
-                    </div>
-                    <div style="font-size:8px; margin-top:2px;">${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                </div>
-
-                <div style="margin-bottom: 4px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
-                    <div style="font-size:9px; font-weight:bold; margin-bottom:2px; display:flex; justify-content:space-between;">
-                        <span>ITEMS (${totalCount})</span>
-                        <span>TK</span>
-                    </div>
-                    ${customerItemsHtml}
-                </div>
-
-                <div style="font-size: 9px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 4px;">
-                    <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span>${subtotal}</span></div>
-                    ${discountHtml}
-                    ${chargesHtml}
-                    <div style="display:flex; justify-content:space-between; font-weight:900; font-size:13px; margin-top:3px; border-top:1px dashed #000; padding-top:2px;">
-                        <span>TOTAL:</span>
-                        <span>৳ ${total}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span>Cash:</span>
-                        <span>${cashGiven}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                        <span>Change:</span>
-                        <span>${cashChange}</span>
-                    </div>
-                </div>
-
-                <div style="padding: 3px; border: 1px dashed #000; text-align: center; margin-bottom: 6px;">
-                    <div style="font-weight:900; font-size:9px;">+${rewardPoints} CASHBACK POINTS!</div>
-                    <p style="margin: 1px 0; font-size: 8px;">Claim: <b>rewards.momology.me</b></p>
-                </div>
-
-                <div style="text-align: center;">
-                    <img id="print-qr-img" src="${EMBEDDED_QR_B64}" style="width: 25mm; height: 25mm; margin: 0 auto; display: block;" />
-                    <p style="font-size: 7.5px; margin: 3px 0 1px 0; font-weight: bold;">Scan for Deals & Menu</p>
-                    <p style="font-size: 7.5px; margin: 0;">FB: facebook.com/momoloogy</p>
-                    <p style="font-size: 8px; font-weight:bold; margin-top:4px;">*** Thank You ***</p>
-                </div>
-                <div style="height: 10mm;"></div>
-            `;
-
-            const printArea = document.getElementById('printArea');
-            printArea.innerHTML = printContent;
-
-            // Trigger Print with Safe Preload
-            const logoImg = document.getElementById('print-logo-img');
-            let printed = false;
-            const triggerPrint = () => {
-                if (!printed) {
-                    printed = true;
-                    window.print();
-                }
-            };
-
-            if (logoImg.complete) {
-                triggerPrint();
-            } else {
-                logoImg.onload = triggerPrint;
-                logoImg.onerror = triggerPrint;
-                setTimeout(triggerPrint, 300);
-            }
+            // Print Receipt
+            printReceipt58mm(orderRecord);
 
             // Reset cart
             cart = {};
@@ -865,10 +895,84 @@
             updateTotal();
             renderHistoryView();
             renderActiveOrders();
-            showToast("অর্ডার ক্লাউডে সেভ ও 58mm প্রিন্ট সম্পন্ন!", "success");
+            showToast("অর্ডার সফলভাবে সেভ ও 58mm প্রিন্ট সম্পন্ন!", "success");
         }
 
-        // ================= ACTIVE ORDERS SCREEN WITH "COMPLETE" OPTION =================
+        // ================= EDIT ORDER FROM HISTORY =================
+        function editOrder(orderId) {
+            const ord = allOrders.find(o => o.id === orderId);
+            if (!ord) return;
+
+            editingOrderId = ord.id;
+            cart = {};
+
+            // Populate cart with existing items
+            ord.items.forEach(it => {
+                cart[`${it.itemId}_${it.type}`] = {
+                    itemId: it.itemId,
+                    name: it.name,
+                    price: it.price,
+                    qty: it.qty,
+                    type: it.type
+                };
+            });
+
+            // Populate input fields
+            document.getElementById('order-ref-input').value = ord.ref || "";
+            document.getElementById('customer-phone').value = ord.customerPhone || "";
+            document.getElementById('customer-name').value = ord.customerName || "";
+            document.getElementById('discount-percent').value = ord.discountPercent || "";
+            document.getElementById('charge-container').value = ord.charges?.container || "";
+            document.getElementById('charge-delivery').value = ord.charges?.delivery || "";
+            document.getElementById('charge-other').value = ord.charges?.other || "";
+            document.getElementById('cash-given').value = ord.cashGiven || ord.totalAmount || "";
+
+            // UI adjustments
+            document.getElementById('cart-mode-badge').innerText = `Editing Order #${ord.id}`;
+            document.getElementById('cart-mode-badge').className = "text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 px-2 py-0.5 rounded";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            document.getElementById('save-order-btn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> UPDATE & RE-PRINT (${ord.id})`;
+
+            showPage('order-page');
+            renderMenu();
+            renderCartRows();
+            updateTotal();
+            showToast(`অর্ডার #${ord.id} এডিট মোডে লোড হয়েছে`, "info");
+        }
+
+        function cancelOrderEdit() {
+            editingOrderId = null;
+            cart = {};
+            document.getElementById('order-ref-input').value = "";
+            document.getElementById('customer-phone').value = "";
+            document.getElementById('customer-name').value = "";
+            document.getElementById('discount-percent').value = "";
+            document.getElementById('charge-container').value = "";
+            document.getElementById('charge-delivery').value = "";
+            document.getElementById('charge-other').value = "";
+            document.getElementById('cash-given').value = "";
+
+            document.getElementById('cart-mode-badge').innerText = "New Order";
+            document.getElementById('cart-mode-badge').className = "text-[11px] font-bold bg-slate-800 text-emerald-400 px-2 py-0.5 rounded";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+            document.getElementById('save-order-btn').innerHTML = `<i class="fa-solid fa-print"></i> CONFIRM & PRINT (58MM)`;
+
+            renderMenu();
+            renderCartRows();
+            updateTotal();
+            showToast("এডিট বাতিল করা হয়েছে", "info");
+        }
+
+        // ================= RE-PRINT RECEIPT FROM HISTORY =================
+        function rePrintOrder(orderId) {
+            const ord = allOrders.find(o => o.id === orderId);
+            if (ord) {
+                printReceipt58mm(ord);
+                showToast(`অর্ডার #${orderId} পুনরায় প্রিন্ট হচ্ছে...`, "success");
+            }
+        }
+
+        // ================= ACTIVE ORDERS SCREEN WITH "COMPLETE" =================
         async function markOrderComplete(orderId) {
             const ord = allOrders.find(o => o.id === orderId);
             if (ord) {
@@ -891,8 +995,6 @@
         function renderActiveOrders() {
             const grid = document.getElementById('active-orders-grid');
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            // Only show active / running orders
             const activeOrders = allOrders.filter(o => o.dateKey === todayStr && o.status !== "completed");
 
             document.getElementById('active-count-badge').innerText = activeOrders.length;
@@ -933,7 +1035,6 @@
                             <span class="font-black text-emerald-600 font-mono text-sm block">৳ ${o.totalAmount}</span>
                         </div>
                     </div>
-                    <!-- Order Complete Action Button -->
                     <button onclick="markOrderComplete('${o.id}')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5 mt-2">
                         <i class="fa-solid fa-circle-check"></i> Mark as Delivered / Complete
                     </button>
@@ -1095,7 +1196,7 @@
 
             const tbody = document.getElementById('hist-orders-tbody');
             if (filteredOrders.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400">এই সময়কালের কোনো অর্ডার রেকর্ড পাওয়া যায়নি</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">এই সময়কালের কোনো অর্ডার রেকর্ড পাওয়া যায়নি</td></tr>`;
                 return;
             }
 
@@ -1103,7 +1204,7 @@
             filteredOrders.forEach(o => {
                 const itemsText = o.items.map(i => `${i.name} (${i.type}) x${i.qty}`).join(", ");
                 let discText = o.discountAmount ? `ছাড়: -৳${o.discountAmount} (${o.discountPercent}%)` : `ছাড়: ৳0`;
-                let chargesText = `Box: ৳${o.charges.container || 0}, Del: ৳${o.charges.delivery || 0}`;
+                let chargesText = `Box: ৳${o.charges?.container || 0}, Del: ৳${o.charges?.delivery || 0}`;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -1113,6 +1214,16 @@
                     <td class="p-2.5 text-[11px] text-slate-700 max-w-xs truncate" title="${itemsText}">${itemsText}</td>
                     <td class="p-2.5 text-[10px] text-slate-500">${discText}<br>${chargesText}</td>
                     <td class="p-2.5 font-black text-slate-800 font-mono text-xs">৳${o.totalAmount}</td>
+                    <td class="p-2.5 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="rePrintOrder('${o.id}')" title="Re-print Receipt" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold transition flex items-center gap-1 text-[11px]">
+                                <i class="fa-solid fa-print"></i> Print
+                            </button>
+                            <button onclick="editOrder('${o.id}')" title="Edit Order" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded font-bold transition flex items-center gap-1 text-[11px]">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
+                        </div>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
