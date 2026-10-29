@@ -52,13 +52,12 @@
         /* SOLID VISIBLE PRINT CONTAINER HIDDEN UNDERNEATH APP */
         #hidden-print-container {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: -9999px;
+            left: -9999px;
             width: 384px !important;
             background: white;
             color: black;
             box-sizing: border-box;
-            z-index: 1; /* Back layer */
             -webkit-font-smoothing: none;
             text-rendering: crispEdges;
         }
@@ -691,19 +690,19 @@
         }
 
         // Persistent Storage
-        let allOrders = JSON.parse(localStorage.getItem('momology_orders') || '[]');
-        let allExpenses = JSON.parse(localStorage.getItem('momology_expenses') || '[]');
+        let allOrders = JSON.parse(localStorage.getItem('momology_orders_live') || '[]');
+        let allExpenses = JSON.parse(localStorage.getItem('momology_expenses_live') || '[]');
         let cart = {};
         let editingOrderId = null;
         let pinCode = '12345';
 
         function saveToStorage() {
-            localStorage.setItem('momology_orders', JSON.stringify(allOrders));
-            localStorage.setItem('momology_expenses', JSON.stringify(allExpenses));
+            localStorage.setItem('momology_orders_live', JSON.stringify(allOrders));
+            localStorage.setItem('momology_expenses_live', JSON.stringify(allExpenses));
         }
 
         if (db) {
-            db.collection("orders").orderBy("createdAt", "desc").limit(300)
+            db.collection("orders_live").orderBy("createdAt", "desc").limit(300)
               .onSnapshot((snapshot) => {
                   const cloudOrders = [];
                   snapshot.forEach(doc => cloudOrders.push(doc.data()));
@@ -719,7 +718,7 @@
                   updateSyncStatus(false);
               });
 
-            db.collection("expenses").orderBy("createdAt", "desc").limit(300)
+            db.collection("expenses_live").orderBy("createdAt", "desc").limit(300)
               .onSnapshot((snapshot) => {
                   const cloudExpenses = [];
                   snapshot.forEach(doc => cloudExpenses.push(doc.data()));
@@ -990,7 +989,7 @@
 
             if (db) {
                 try {
-                    await db.collection("orders").doc(orderId).set(orderRecord);
+                    await db.collection("orders_live").doc(orderId).set(orderRecord);
                 } catch(e) {
                     console.error("Firestore direct order write failed:", e);
                 }
@@ -1098,7 +1097,7 @@
 
                 if (db) {
                     try {
-                        await db.collection("orders").doc(orderId).update({ status: "completed" });
+                        await db.collection("orders_live").doc(orderId).update({ status: "completed" });
                     } catch(e) {
                         console.error("Firestore update failed:", e);
                     }
@@ -1199,7 +1198,7 @@
 
             if (db) {
                 try {
-                    await db.collection("expenses").doc(String(expRecord.id)).set(expRecord);
+                    await db.collection("expenses_live").doc(String(expRecord.id)).set(expRecord);
                 } catch(e) {
                     console.error("Firestore expense write failed:", e);
                 }
@@ -1222,7 +1221,7 @@
 
             if (db) {
                 try {
-                    await db.collection("expenses").doc(String(id)).delete();
+                    await db.collection("expenses_live").doc(String(id)).delete();
                 } catch(e) {
                     console.error("Firestore expense delete failed:", e);
                 }
