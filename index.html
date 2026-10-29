@@ -49,18 +49,23 @@
 
         .stat-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
 
-        /* STRICTLY LOCKED HIDDEN PRINT CONTAINER */
+        /* SCROLL-PROOF 384px CONTAINER FOR 57/58mm PRINTERS */
         #hidden-print-container {
-            position: absolute;
+            position: fixed; /* Fixed prevents mobile scroll compression */
             top: 0;
-            left: -9999px; /* Push off screen, not -top to avoid clipping */
+            left: 0;
             width: 384px !important;
             min-width: 384px !important;
             max-width: 384px !important;
             background: white;
             color: black;
             box-sizing: border-box;
-            z-index: -100;
+            z-index: -9999; /* Kept behind everything */
+            opacity: 0.01; /* Invisible but physically rendered */
+            pointer-events: none;
+            overflow: hidden;
+            -webkit-font-smoothing: none;
+            text-rendering: crispEdges;
         }
     </style>
 </head>
@@ -121,7 +126,6 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <!-- Connect USB Button -->
                 <button id="usb-connect-btn" onclick="connectUSBPrinter()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 transition">
                     <i class="fa-brands fa-usb"></i> Connect USB
                 </button>
@@ -155,10 +159,8 @@
                     <div id="menu-container" class="max-h-[660px] overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- Unified Cart Terminal -->
                 <div class="lg:col-span-5 space-y-3">
                     <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-xl space-y-3">
-                        
                         <div class="flex items-center justify-between">
                             <span id="cart-mode-badge" class="text-[11px] font-bold bg-slate-800 text-emerald-400 px-2 py-0.5 rounded">New Order</span>
                             <button id="cancel-edit-btn" onclick="cancelOrderEdit()" class="hidden text-xs text-rose-400 hover:underline font-bold"><i class="fa-solid fa-xmark mr-1"></i> Cancel Edit</button>
@@ -190,7 +192,6 @@
                             </div>
                         </div>
 
-                        <!-- % Discount Container -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-amber-500/30 space-y-1.5">
                             <div class="flex justify-between items-center text-xs font-bold text-amber-400">
                                 <span><i class="fa-solid fa-percent mr-1"></i> ডিসকাউন্ট (Special Discount)</span>
@@ -202,7 +203,6 @@
                             </div>
                         </div>
 
-                        <!-- 3 Extra Charges -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 space-y-2">
                             <span class="text-xs font-bold text-amber-400"><i class="fa-solid fa-receipt mr-1"></i> অতিরিক্ত চার্জ (Extra Charges)</span>
                             <div class="grid grid-cols-3 gap-2">
@@ -221,7 +221,6 @@
                             </div>
                         </div>
 
-                        <!-- Cash Calculation -->
                         <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-400 mb-1">কাস্টমার দিয়েছে (Cash)</label>
@@ -235,13 +234,11 @@
                             </div>
                         </div>
 
-                        <!-- Grand Total -->
                         <div class="bg-momo-600 rounded-xl p-2.5 text-center shadow-md">
                             <div class="text-[10px] font-semibold text-amber-100 uppercase">সর্বমোট প্রদেয় বিল</div>
                             <div class="text-3xl font-black font-mono"><span id="total">0</span> TK</div>
                         </div>
 
-                        <!-- Print Button -->
                         <button id="save-order-btn" onclick="saveMasterOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3.5 rounded-xl transition shadow-xl text-sm flex items-center justify-center gap-2">
                             <i class="fa-solid fa-print"></i> SAVE & DIRECT USB PRINT
                         </button>
@@ -272,21 +269,16 @@
                         <p class="text-[11px] text-slate-400">যে কোনো নির্দিষ্ট দিনের বা পুরো মাসের পূর্ণাঙ্গ হিসাব</p>
                     </div>
                 </div>
-
                 <div class="flex flex-wrap items-center gap-2">
                     <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
                         <span class="text-xs font-bold text-slate-500">দিন:</span>
                         <input type="date" id="filter-date" onchange="filterHistoryByDate()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
                     </div>
-
                     <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5">
                         <span class="text-xs font-bold text-slate-500">পুরো মাস:</span>
                         <input type="month" id="filter-month" onchange="filterHistoryByMonth()" class="bg-transparent text-xs font-bold text-slate-700 outline-none">
                     </div>
-
-                    <button onclick="resetHistoryToToday()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition">
-                        আজকের দিন
-                    </button>
+                    <button onclick="resetHistoryToToday()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-lg transition">আজকের দিন</button>
                     <button onclick="exportHistoryCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1">
                         <i class="fa-solid fa-file-excel"></i> এক্সেল ডাউনলোড
                     </button>
@@ -478,7 +470,6 @@
                             let a = imgData[idx+3];
                             
                             let lum = 0.299 * r + 0.587 * g + 0.114 * bCol;
-                            // Threshold updated to 245 to catch all light gray text pixels
                             if (a > 20 && lum < 245) {
                                 byte |= (1 << (7 - b));
                             }
@@ -500,7 +491,7 @@
             }
         }
 
-        // ================= MASTER HTML2CANVAS ENGINE (FIXED TABLE LAYOUT) =================
+        // ================= MASTER HTML2CANVAS ENGINE =================
         function generateAndPrintImageReceipt(order) {
             let customerItemsHtml = `<table style="width:100%; border-collapse: collapse; margin-bottom:10px;">`;
             let totalCount = 0;
@@ -532,12 +523,12 @@
 
             const printDate = new Date(order.createdAt);
             
-            // Build HD Receipt HTML using Bulletproof Tables
+            // Build HD Receipt HTML wrapping in an extra div just for safety
             const htmlContent = `
-                <div style="background: white; color: black; padding: 10px 15px 30px 15px; box-sizing: border-box; font-family: sans-serif;">
+                <div style="width: 384px !important; max-width: 384px !important; background: white; color: black; padding: 10px 15px 30px 15px; box-sizing: border-box; font-family: sans-serif;">
                     <!-- HEADER INFO & LOGO -->
                     <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 12px; margin-bottom: 12px;">
-                        <img src="logo.png" style="width: 100px; height: 100px; margin: 0 auto; display: block; border-radius: 50%;" onerror="this.style.display='none'" />
+                        <img src="logo.png" style="width: 100px; height: 100px; margin: 0 auto; display: block; border-radius: 50%;" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='" />
                         <h2 style="font-size: 28px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: 1px; color:#000;">MOMOLOGY</h2>
                         <p style="margin: 2px 0; font-size: 16px; font-weight:900; color:#000;">Authentic Momo Experience</p>
                         <p style="margin: 2px 0; font-size: 15px; font-weight:900; color:#000;">Darul Khadem, Dhanmondi Road-06</p>
@@ -609,7 +600,7 @@
 
                     <!-- LOCAL QR.JPEG & THANK YOU -->
                     <div style="text-align: center;">
-                        <img src="qr.jpeg" style="width: 150px; height: 150px; margin: 0 auto; display: block;" onerror="this.style.display='none'" />
+                        <img src="qr.jpeg" style="width: 150px; height: 150px; margin: 0 auto; display: block;" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='" />
                         <p style="font-size: 18px; margin: 10px 0 4px 0; font-weight: 900; color:#000;">Scan for Deals & Menu</p>
                         <p style="font-size: 17px; font-weight:900; margin: 0; color:#000;">FB: facebook.com/momoloogy</p>
                         <p style="font-size: 22px; font-weight:900; margin-top:20px; margin-bottom:4px; color:#000;">*** THANK YOU ***</p>
@@ -628,11 +619,15 @@
                     scale: 1, 
                     useCORS: true, 
                     allowTaint: true,
-                    width: 384, // strict width
-                    windowWidth: 384
+                    width: 384, // STRICT LOCK
+                    windowWidth: 384,
+                    scrollX: 0, // PREVENT SCROLL BUGS
+                    scrollY: 0, 
+                    x: 0,
+                    y: 0
                 }).then(originalCanvas => {
                     const targetWidth = 384;
-                    const targetHeight = Math.ceil(originalCanvas.height * (targetWidth / originalCanvas.width));
+                    const targetHeight = originalCanvas.height;
                     
                     const canvas = document.createElement('canvas');
                     canvas.width = targetWidth;
@@ -648,9 +643,9 @@
                     printContainer.innerHTML = ""; 
                 }).catch(err => {
                     console.error("Canvas error:", err);
-                    showToast("Receipt generation failed.", "error");
+                    showToast("Receipt generation failed. Ensure logo/qr files are in the same folder.", "error");
                 });
-            }, 400);
+            }, 400); // 400ms delay to let local images load before screenshot
         }
 
         // ================= DIRECT FIREBASE FIRESTORE CONFIG =================
