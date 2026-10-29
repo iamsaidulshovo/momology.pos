@@ -49,16 +49,16 @@
 
         .stat-card { background: white; padding: 16px; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; }
 
-        /* Hidden HD Print Container for Direct Canvas Conversion */
+        /* STRICTLY LOCKED HIDDEN PRINT CONTAINER */
         #hidden-print-container {
             position: absolute;
-            top: -9999px;
-            left: -9999px;
-            width: 384px; /* Exact 58mm printer dot width */
+            top: 0;
+            left: -9999px; /* Push off screen, not -top to avoid clipping */
+            width: 384px !important;
+            min-width: 384px !important;
+            max-width: 384px !important;
             background: white;
             color: black;
-            font-family: monospace, sans-serif;
-            padding: 10px 15px;
             box-sizing: border-box;
             z-index: -100;
         }
@@ -401,7 +401,7 @@
         </div>
     </main>
 
-    <!-- HIDDEN RASTER PRINT CONTAINER (Generates Image to send to USB) -->
+    <!-- HIDDEN RASTER PRINT CONTAINER -->
     <div id="hidden-print-container"></div>
 
     <script>
@@ -464,7 +464,7 @@
             escpos.push(widthBytes & 0xFF, (widthBytes >> 8) & 0xFF);
             escpos.push(height & 0xFF, (height >> 8) & 0xFF);
 
-            // Convert RGBA pixels to Strict Monochrome (Darker Threshold)
+            // SUPER DARK MONOCHROME CONVERSION
             for (let y = 0; y < height; y++) {
                 for (let x = 0; x < widthBytes; x++) {
                     let byte = 0;
@@ -478,8 +478,8 @@
                             let a = imgData[idx+3];
                             
                             let lum = 0.299 * r + 0.587 * g + 0.114 * bCol;
-                            // Threshold updated to 220 for super dark, crisp text
-                            if (a > 128 && lum < 220) {
+                            // Threshold updated to 245 to catch all light gray text pixels
+                            if (a > 20 && lum < 245) {
                                 byte |= (1 << (7 - b));
                             }
                         }
@@ -500,20 +500,19 @@
             }
         }
 
-        // ================= MASTER HTML2CANVAS ENGINE =================
         // ================= MASTER HTML2CANVAS ENGINE (FIXED TABLE LAYOUT) =================
         function generateAndPrintImageReceipt(order) {
-            let customerItemsHtml = `<table style="width:100%; border-collapse: collapse;">`;
+            let customerItemsHtml = `<table style="width:100%; border-collapse: collapse; margin-bottom:10px;">`;
             let totalCount = 0;
 
             order.items.forEach(it => {
                 totalCount += it.qty;
                 customerItemsHtml += `
                     <tr>
-                        <td style="text-align: left; padding: 5px 0; font-size:16px; font-weight:900; color:#000; word-break:break-word;">
+                        <td style="text-align: left; width: 75%; padding: 4px 0; font-size:18px; font-weight:900; color:#000; vertical-align: top;">
                             ${it.name} [${it.type==='Parcel'?'P':'D'}] x${it.qty}
                         </td>
-                        <td style="text-align: right; padding: 5px 0; font-size:16px; font-weight:900; color:#000; white-space:nowrap; vertical-align:top;">
+                        <td style="text-align: right; width: 25%; padding: 4px 0; font-size:18px; font-weight:900; color:#000; white-space:nowrap; vertical-align: top;">
                             ${it.price * it.qty} TK
                         </td>
                     </tr>
@@ -523,21 +522,21 @@
 
             let discountHtml = "";
             if (order.discountAmount > 0) {
-                discountHtml = `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">DISC (${order.discountPercent}%):</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">-${order.discountAmount} TK</td></tr>`;
+                discountHtml = `<tr><td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">DISC (${order.discountPercent}%):</td><td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">-${order.discountAmount} TK</td></tr>`;
             }
 
             let chargesHtml = "";
-            if (order.charges.container > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Container:</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.charges.container} TK</td></tr>`;
-            if (order.charges.delivery > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Delivery:</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.charges.delivery} TK</td></tr>`;
-            if (order.charges.other > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Other:</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.charges.other} TK</td></tr>`;
+            if (order.charges.container > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">Container:</td><td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">${order.charges.container} TK</td></tr>`;
+            if (order.charges.delivery > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">Delivery:</td><td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">${order.charges.delivery} TK</td></tr>`;
+            if (order.charges.other > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">Other:</td><td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">${order.charges.other} TK</td></tr>`;
 
             const printDate = new Date(order.createdAt);
             
             // Build HD Receipt HTML using Bulletproof Tables
             const htmlContent = `
-                <div style="background: white; color: black; padding-bottom: 20px; font-family: sans-serif;">
+                <div style="background: white; color: black; padding: 10px 15px 30px 15px; box-sizing: border-box; font-family: sans-serif;">
                     <!-- HEADER INFO & LOGO -->
-                    <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+                    <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 12px; margin-bottom: 12px;">
                         <img src="logo.png" style="width: 100px; height: 100px; margin: 0 auto; display: block; border-radius: 50%;" onerror="this.style.display='none'" />
                         <h2 style="font-size: 28px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: 1px; color:#000;">MOMOLOGY</h2>
                         <p style="margin: 2px 0; font-size: 16px; font-weight:900; color:#000;">Authentic Momo Experience</p>
@@ -546,75 +545,75 @@
                     </div>
 
                     <!-- HUGE SERIAL NUMBER (RIDER TOKEN) -->
-                    <div style="text-align: center; border: 3px solid #000; padding: 12px; margin-bottom: 15px; border-radius: 8px;">
-                        <p style="font-size: 16px; margin: 0 0 4px 0; font-weight: 900; letter-spacing: 1px; color:#000;">RIDER TOKEN NO.</p>
-                        <h1 style="font-size: 44px; font-weight: 900; margin: 0; color: #000;">${order.ref}</h1>
+                    <div style="text-align: center; border: 4px solid #000; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                        <p style="font-size: 18px; margin: 0 0 5px 0; font-weight: 900; letter-spacing: 1px; color:#000;">RIDER TOKEN NO.</p>
+                        <h1 style="font-size: 50px; font-weight: 900; margin: 0; color: #000;">${order.ref}</h1>
                     </div>
 
                     <!-- CUSTOMER & ORDER INFO -->
-                    <div style="font-size: 16px; font-weight: 900; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px; color:#000;">
-                        <div style="margin-bottom:4px;">Order ID: <b>#${order.id}</b></div>
+                    <div style="margin-bottom: 12px; border-bottom: 2px dashed #000; padding-bottom: 12px;">
+                        <div style="font-size: 18px; font-weight: 900; color:#000; margin-bottom: 6px;">Order ID: <b>#${order.id}</b></div>
                         <table style="width:100%; border-collapse: collapse;">
                             <tr>
-                                <td style="text-align: left; font-size:16px; font-weight:900; color:#000;">${order.customerName}</td>
-                                <td style="text-align: right; font-size:16px; font-weight:900; color:#000;">${maskPhone(order.customerPhone)}</td>
+                                <td style="text-align: left; width: 60%; font-size:18px; font-weight:900; color:#000;">${order.customerName}</td>
+                                <td style="text-align: right; width: 40%; font-size:18px; font-weight:900; color:#000;">${maskPhone(order.customerPhone)}</td>
                             </tr>
                         </table>
-                        <div style="font-size:15px; margin-top:6px;">${printDate.toLocaleDateString()} ${printDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                        <div style="font-size:16px; font-weight:900; color:#000; margin-top:8px;">${printDate.toLocaleDateString()} ${printDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                     </div>
 
                     <!-- ITEMS -->
-                    <div style="margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px;">
-                        <table style="width:100%; border-collapse: collapse; margin-bottom:8px;">
+                    <div style="margin-bottom: 12px; border-bottom: 2px dashed #000; padding-bottom: 12px;">
+                        <table style="width:100%; border-collapse: collapse; margin-bottom:10px;">
                             <tr>
-                                <td style="text-align: left; font-size:17px; font-weight:900; color:#000;">ITEMS (${totalCount})</td>
-                                <td style="text-align: right; font-size:17px; font-weight:900; color:#000;">TK</td>
+                                <td style="text-align: left; width: 75%; font-size:18px; font-weight:900; color:#000;">ITEMS (${totalCount})</td>
+                                <td style="text-align: right; width: 25%; font-size:18px; font-weight:900; color:#000;">TK</td>
                             </tr>
                         </table>
                         ${customerItemsHtml}
                     </div>
 
                     <!-- TOTAL CALCULATION -->
-                    <div style="margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px;">
+                    <div style="margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 15px;">
                         <table style="width:100%; border-collapse: collapse;">
                             <tr>
-                                <td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Subtotal:</td>
-                                <td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.subtotal || order.totalAmount} TK</td>
+                                <td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">Subtotal:</td>
+                                <td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">${order.subtotal || order.totalAmount} TK</td>
                             </tr>
                             ${discountHtml}
                             ${chargesHtml}
                         </table>
-                        <table style="width:100%; border-collapse: collapse; margin-top:8px; border-top:2px dashed #000; padding-top:8px;">
+                        <table style="width:100%; border-collapse: collapse; margin-top:10px; border-top:2px dashed #000; padding-top:10px;">
                             <tr>
-                                <td style="text-align: left; font-size:24px; font-weight:900; color:#000;">TOTAL:</td>
-                                <td style="text-align: right; font-size:24px; font-weight:900; color:#000;">${order.totalAmount} TK</td>
+                                <td style="text-align: left; font-size:26px; font-weight:900; color:#000;">TOTAL:</td>
+                                <td style="text-align: right; font-size:26px; font-weight:900; color:#000;">${order.totalAmount} TK</td>
                             </tr>
                         </table>
-                        <table style="width:100%; border-collapse: collapse; margin-top:8px;">
+                        <table style="width:100%; border-collapse: collapse; margin-top:10px;">
                             <tr>
-                                <td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Cash Paid:</td>
-                                <td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.cashGiven || order.totalAmount} TK</td>
+                                <td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">Cash Paid:</td>
+                                <td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">${order.cashGiven || order.totalAmount} TK</td>
                             </tr>
                             <tr>
-                                <td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Change:</td>
-                                <td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.cashChange || 0} TK</td>
+                                <td style="text-align: left; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">Change:</td>
+                                <td style="text-align: right; padding: 3px 0; font-size:18px; font-weight:900; color:#000;">${order.cashChange || 0} TK</td>
                             </tr>
                         </table>
                     </div>
 
                     <!-- REWARD POINTS -->
-                    <div style="padding: 10px; border: 2px dashed #000; text-align: center; margin-bottom: 15px;">
-                        <div style="font-weight:900; font-size:17px; color:#000;">+${order.rewardPoints} CASHBACK POINTS!</div>
-                        <p style="margin: 3px 0 0 0; font-size: 16px; font-weight:900; color:#000;">Claim: <b>rewards.momology.me</b></p>
+                    <div style="padding: 12px; border: 2px dashed #000; text-align: center; margin-bottom: 20px;">
+                        <div style="font-weight:900; font-size:18px; color:#000;">+${order.rewardPoints} CASHBACK POINTS!</div>
+                        <p style="margin: 4px 0 0 0; font-size: 17px; font-weight:900; color:#000;">Claim: <b>rewards.momology.me</b></p>
                     </div>
 
                     <!-- LOCAL QR.JPEG & THANK YOU -->
                     <div style="text-align: center;">
                         <img src="qr.jpeg" style="width: 150px; height: 150px; margin: 0 auto; display: block;" onerror="this.style.display='none'" />
-                        <p style="font-size: 17px; margin: 8px 0 2px 0; font-weight: 900; color:#000;">Scan for Deals & Menu</p>
-                        <p style="font-size: 16px; font-weight:900; margin: 0; color:#000;">FB: facebook.com/momoloogy</p>
-                        <p style="font-size: 20px; font-weight:900; margin-top:15px; margin-bottom:2px; color:#000;">*** THANK YOU ***</p>
-                        <p style="font-size: 16px; font-weight:900; margin: 0; color:#000;">Thanks for choosing Momology!</p>
+                        <p style="font-size: 18px; margin: 10px 0 4px 0; font-weight: 900; color:#000;">Scan for Deals & Menu</p>
+                        <p style="font-size: 17px; font-weight:900; margin: 0; color:#000;">FB: facebook.com/momoloogy</p>
+                        <p style="font-size: 22px; font-weight:900; margin-top:20px; margin-bottom:4px; color:#000;">*** THANK YOU ***</p>
+                        <p style="font-size: 17px; font-weight:900; margin: 0; color:#000;">Thanks for choosing Momology!</p>
                     </div>
                 </div>
             `;
@@ -629,7 +628,7 @@
                     scale: 1, 
                     useCORS: true, 
                     allowTaint: true,
-                    width: 384, // Force mobile ratio lock exactly at 58mm width
+                    width: 384, // strict width
                     windowWidth: 384
                 }).then(originalCanvas => {
                     const targetWidth = 384;
@@ -653,6 +652,7 @@
                 });
             }, 400);
         }
+
         // ================= DIRECT FIREBASE FIRESTORE CONFIG =================
         const firebaseConfig = {
             apiKey: "AIzaSyD40JCimr2YbXOMDXw_87abCPYG0aS5bOQ",
