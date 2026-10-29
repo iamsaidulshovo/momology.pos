@@ -501,105 +501,120 @@
         }
 
         // ================= MASTER HTML2CANVAS ENGINE =================
+        // ================= MASTER HTML2CANVAS ENGINE (FIXED TABLE LAYOUT) =================
         function generateAndPrintImageReceipt(order) {
-            let customerItemsHtml = "";
+            let customerItemsHtml = `<table style="width:100%; border-collapse: collapse;">`;
             let totalCount = 0;
 
             order.items.forEach(it => {
                 totalCount += it.qty;
                 customerItemsHtml += `
-                    <div style="display:flex; justify-content:space-between; margin: 4px 0; font-size:15px; font-weight:900; color:#000;">
-                        <span style="max-width:240px; word-break:break-word;">${it.name} [${it.type==='Parcel'?'P':'D'}] x${it.qty}</span>
-                        <span>${it.price * it.qty} TK</span>
-                    </div>
+                    <tr>
+                        <td style="text-align: left; padding: 5px 0; font-size:16px; font-weight:900; color:#000; word-break:break-word;">
+                            ${it.name} [${it.type==='Parcel'?'P':'D'}] x${it.qty}
+                        </td>
+                        <td style="text-align: right; padding: 5px 0; font-size:16px; font-weight:900; color:#000; white-space:nowrap; vertical-align:top;">
+                            ${it.price * it.qty} TK
+                        </td>
+                    </tr>
                 `;
             });
+            customerItemsHtml += `</table>`;
 
             let discountHtml = "";
             if (order.discountAmount > 0) {
-                discountHtml = `<div style="display:flex; justify-content:space-between; font-weight:900; font-size:15px; margin:2px 0; color:#000;"><span>DISC (${order.discountPercent}%):</span><span>-${order.discountAmount} TK</span></div>`;
+                discountHtml = `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">DISC (${order.discountPercent}%):</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">-${order.discountAmount} TK</td></tr>`;
             }
 
             let chargesHtml = "";
-            if (order.charges.container > 0) chargesHtml += `<div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800; margin:2px 0; color:#000;"><span>Container:</span><span>${order.charges.container} TK</span></div>`;
-            if (order.charges.delivery > 0) chargesHtml += `<div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800; margin:2px 0; color:#000;"><span>Delivery:</span><span>${order.charges.delivery} TK</span></div>`;
-            if (order.charges.other > 0) chargesHtml += `<div style="display:flex; justify-content:space-between; font-size:15px; font-weight:800; margin:2px 0; color:#000;"><span>Other:</span><span>${order.charges.other} TK</span></div>`;
+            if (order.charges.container > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Container:</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.charges.container} TK</td></tr>`;
+            if (order.charges.delivery > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Delivery:</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.charges.delivery} TK</td></tr>`;
+            if (order.charges.other > 0) chargesHtml += `<tr><td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Other:</td><td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.charges.other} TK</td></tr>`;
 
             const printDate = new Date(order.createdAt);
             
-            // Generate full DOM structure for Image Canvas
+            // Build HD Receipt HTML using Bulletproof Tables
             const htmlContent = `
                 <div style="background: white; color: black; padding-bottom: 20px; font-family: sans-serif;">
                     <!-- HEADER INFO & LOGO -->
                     <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                        <!-- Inline empty image fallback if logo.png not found, prevents CORS crash -->
-                        <img src="logo.png" style="width: 90px; height: 90px; margin: 0 auto; display: block; border-radius: 50%;" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='" />
-                        <h2 style="font-size: 26px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: 1px; color:#000;">MOMOLOGY</h2>
-                        <p style="margin: 2px 0; font-size: 15px; font-weight:900; color:#000;">Authentic Momo Experience</p>
-                        <p style="margin: 2px 0; font-size: 14px; font-weight:800; color:#000;">Darul Khadem, Dhanmondi Road-06</p>
-                        <p style="margin: 2px 0; font-size: 14px; font-weight:800; color:#000;">Racecourse, Cumilla | 01870884845</p>
+                        <img src="logo.png" style="width: 100px; height: 100px; margin: 0 auto; display: block; border-radius: 50%;" onerror="this.style.display='none'" />
+                        <h2 style="font-size: 28px; font-weight: 900; margin: 8px 0 0 0; letter-spacing: 1px; color:#000;">MOMOLOGY</h2>
+                        <p style="margin: 2px 0; font-size: 16px; font-weight:900; color:#000;">Authentic Momo Experience</p>
+                        <p style="margin: 2px 0; font-size: 15px; font-weight:900; color:#000;">Darul Khadem, Dhanmondi Road-06</p>
+                        <p style="margin: 2px 0; font-size: 15px; font-weight:900; color:#000;">Racecourse, Cumilla | 01870884845</p>
                     </div>
 
                     <!-- HUGE SERIAL NUMBER (RIDER TOKEN) -->
                     <div style="text-align: center; border: 3px solid #000; padding: 12px; margin-bottom: 15px; border-radius: 8px;">
-                        <p style="font-size: 15px; margin: 0 0 4px 0; font-weight: 900; letter-spacing: 1px; color:#000;">RIDER TOKEN NO.</p>
-                        <h1 style="font-size: 40px; font-weight: 900; margin: 0; color: #000;">${order.ref}</h1>
+                        <p style="font-size: 16px; margin: 0 0 4px 0; font-weight: 900; letter-spacing: 1px; color:#000;">RIDER TOKEN NO.</p>
+                        <h1 style="font-size: 44px; font-weight: 900; margin: 0; color: #000;">${order.ref}</h1>
                     </div>
 
                     <!-- CUSTOMER & ORDER INFO -->
-                    <div style="font-size: 15px; font-weight: 800; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px; color:#000;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span>Order ID: <b>#${order.id}</b></span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span>${order.customerName}</span>
-                            <span>${maskPhone(order.customerPhone)}</span>
-                        </div>
-                        <div style="font-size:14px; margin-top:2px;">${printDate.toLocaleDateString()} ${printDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    <div style="font-size: 16px; font-weight: 900; margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px; color:#000;">
+                        <div style="margin-bottom:4px;">Order ID: <b>#${order.id}</b></div>
+                        <table style="width:100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="text-align: left; font-size:16px; font-weight:900; color:#000;">${order.customerName}</td>
+                                <td style="text-align: right; font-size:16px; font-weight:900; color:#000;">${maskPhone(order.customerPhone)}</td>
+                            </tr>
+                        </table>
+                        <div style="font-size:15px; margin-top:6px;">${printDate.toLocaleDateString()} ${printDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                     </div>
 
                     <!-- ITEMS -->
                     <div style="margin-bottom: 10px; border-bottom: 2px dashed #000; padding-bottom: 10px;">
-                        <div style="font-size:16px; font-weight:900; margin-bottom:8px; display:flex; justify-content:space-between; color:#000;">
-                            <span>ITEMS (${totalCount})</span>
-                            <span>TK</span>
-                        </div>
+                        <table style="width:100%; border-collapse: collapse; margin-bottom:8px;">
+                            <tr>
+                                <td style="text-align: left; font-size:17px; font-weight:900; color:#000;">ITEMS (${totalCount})</td>
+                                <td style="text-align: right; font-size:17px; font-weight:900; color:#000;">TK</td>
+                            </tr>
+                        </table>
                         ${customerItemsHtml}
                     </div>
 
                     <!-- TOTAL CALCULATION -->
-                    <div style="font-size: 15px; font-weight: 800; margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px; color:#000;">
-                        <div style="display:flex; justify-content:space-between; margin:4px 0;"><span>Subtotal:</span><span>${order.subtotal || order.totalAmount} TK</span></div>
-                        ${discountHtml}
-                        ${chargesHtml}
-                        <div style="display:flex; justify-content:space-between; font-weight:900; font-size:22px; margin-top:8px; border-top:2px dashed #000; padding-top:8px;">
-                            <span>TOTAL:</span>
-                            <span>${order.totalAmount} TK</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-top:6px;">
-                            <span>Cash Paid:</span>
-                            <span>${order.cashGiven || order.totalAmount} TK</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; font-weight:900; margin-top:2px;">
-                            <span>Change:</span>
-                            <span>${order.cashChange || 0} TK</span>
-                        </div>
+                    <div style="margin-bottom: 15px; border-bottom: 2px dashed #000; padding-bottom: 10px;">
+                        <table style="width:100%; border-collapse: collapse;">
+                            <tr>
+                                <td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Subtotal:</td>
+                                <td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.subtotal || order.totalAmount} TK</td>
+                            </tr>
+                            ${discountHtml}
+                            ${chargesHtml}
+                        </table>
+                        <table style="width:100%; border-collapse: collapse; margin-top:8px; border-top:2px dashed #000; padding-top:8px;">
+                            <tr>
+                                <td style="text-align: left; font-size:24px; font-weight:900; color:#000;">TOTAL:</td>
+                                <td style="text-align: right; font-size:24px; font-weight:900; color:#000;">${order.totalAmount} TK</td>
+                            </tr>
+                        </table>
+                        <table style="width:100%; border-collapse: collapse; margin-top:8px;">
+                            <tr>
+                                <td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Cash Paid:</td>
+                                <td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.cashGiven || order.totalAmount} TK</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">Change:</td>
+                                <td style="text-align: right; padding: 3px 0; font-size:16px; font-weight:900; color:#000;">${order.cashChange || 0} TK</td>
+                            </tr>
+                        </table>
                     </div>
 
                     <!-- REWARD POINTS -->
                     <div style="padding: 10px; border: 2px dashed #000; text-align: center; margin-bottom: 15px;">
-                        <div style="font-weight:900; font-size:16px; color:#000;">+${order.rewardPoints} CASHBACK POINTS!</div>
-                        <p style="margin: 3px 0 0 0; font-size: 15px; font-weight:800; color:#000;">Claim: <b>rewards.momology.me</b></p>
+                        <div style="font-weight:900; font-size:17px; color:#000;">+${order.rewardPoints} CASHBACK POINTS!</div>
+                        <p style="margin: 3px 0 0 0; font-size: 16px; font-weight:900; color:#000;">Claim: <b>rewards.momology.me</b></p>
                     </div>
 
                     <!-- LOCAL QR.JPEG & THANK YOU -->
                     <div style="text-align: center;">
-                        <!-- Inline empty image fallback if qr.jpeg not found, prevents CORS crash -->
-                        <img src="qr.jpeg" style="width: 140px; height: 140px; margin: 0 auto; display: block;" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='" />
-                        <p style="font-size: 16px; margin: 8px 0 2px 0; font-weight: 900; color:#000;">Scan for Deals & Menu</p>
-                        <p style="font-size: 15px; font-weight:800; margin: 0; color:#000;">FB: facebook.com/momoloogy</p>
-                        <p style="font-size: 18px; font-weight:900; margin-top:15px; margin-bottom:2px; color:#000;">*** THANK YOU ***</p>
-                        <p style="font-size: 15px; font-weight:900; margin: 0; color:#000;">Thanks for choosing Momology!</p>
+                        <img src="qr.jpeg" style="width: 150px; height: 150px; margin: 0 auto; display: block;" onerror="this.style.display='none'" />
+                        <p style="font-size: 17px; margin: 8px 0 2px 0; font-weight: 900; color:#000;">Scan for Deals & Menu</p>
+                        <p style="font-size: 16px; font-weight:900; margin: 0; color:#000;">FB: facebook.com/momoloogy</p>
+                        <p style="font-size: 20px; font-weight:900; margin-top:15px; margin-bottom:2px; color:#000;">*** THANK YOU ***</p>
+                        <p style="font-size: 16px; font-weight:900; margin: 0; color:#000;">Thanks for choosing Momology!</p>
                     </div>
                 </div>
             `;
@@ -613,7 +628,7 @@
                 html2canvas(printContainer, { 
                     scale: 1, 
                     useCORS: true, 
-                    allowTaint: true, // Fixes local image loading issues
+                    allowTaint: true,
                     width: 384, // Force mobile ratio lock exactly at 58mm width
                     windowWidth: 384
                 }).then(originalCanvas => {
@@ -625,19 +640,19 @@
                     canvas.height = targetHeight;
                     const ctx = canvas.getContext('2d');
                     
+                    ctx.imageSmoothingEnabled = false;
                     ctx.fillStyle = "white";
                     ctx.fillRect(0, 0, targetWidth, targetHeight);
                     ctx.drawImage(originalCanvas, 0, 0, targetWidth, targetHeight);
 
                     sendImageRasterToUSB(canvas);
-                    printContainer.innerHTML = ""; // Clean up memory
+                    printContainer.innerHTML = ""; 
                 }).catch(err => {
                     console.error("Canvas error:", err);
-                    showToast("Receipt generation failed. Ensure logo/qr files are in the same folder.", "error");
+                    showToast("Receipt generation failed.", "error");
                 });
-            }, 400); // 400ms delay to let local images load before screenshot
+            }, 400);
         }
-
         // ================= DIRECT FIREBASE FIRESTORE CONFIG =================
         const firebaseConfig = {
             apiKey: "AIzaSyD40JCimr2YbXOMDXw_87abCPYG0aS5bOQ",
