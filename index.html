@@ -1018,7 +1018,7 @@
             const otherCharge = parseFloat(document.getElementById('charge-other').value || 0);
 
             const now = new Date();
-            const orderId = editingOrderId ? editingOrderId : `MOM-${Math.floor(1000 + Math.random() * 9000)}`;
+            const orderId = editingOrderId ? editingOrderId : `MOMO-${Math.random().toString(36).toUpperCase()}`;
             const rewardPoints = Math.floor(total * 0.10);
 
             const orderRecord = {
