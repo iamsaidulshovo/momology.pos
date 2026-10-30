@@ -312,6 +312,22 @@
                     </div>
                 </div>
 
+                <!-- VISUAL ANALYTICS DASHBOARD -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 my-2">
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                    <h3 class="font-extrabold text-slate-800 text-sm mb-3"><i class="fa-solid fa-chart-column text-momo-500"></i> Sales vs Expense</h3>
+                    <div class="relative h-56 w-full">
+                        <canvas id="salesExpenseChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+                    <h3 class="font-extrabold text-slate-800 text-sm mb-3"><i class="fa-solid fa-chart-pie text-momo-500"></i> Top 5 Selling Items</h3>
+                    <div class="relative h-56 w-full flex justify-center">
+                        <canvas id="topItemsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
                 <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
                     <h3 class="font-extrabold text-slate-800 text-sm mb-3 flex items-center justify-between">
                         <span><i class="fa-solid fa-receipt text-momo-600 mr-1.5"></i> অর্ডার হিস্ট্রি (<span id="hist-order-count">0</span>)</span>
@@ -732,6 +748,8 @@
         let cart = {};
         let editingOrderId = null;
         let pinCode = '12345';
+        let salesChart = null;
+        let itemsChart = null;
 
         function updateSyncStatus(connected) {
             isCloudConnected = connected;
@@ -1405,6 +1423,51 @@
                     </td>
                 `;
                 tbody.appendChild(tr);
+            });
+            // ================= CHART ANALYTICS LOGIC =================
+            const itemCounts = {};
+            filteredOrders.forEach(o => {
+                o.items.forEach(it => {
+                    itemCounts[it.name] = (itemCounts[it.name] || 0) + it.qty;
+                });
+            });
+
+            // Top 5 items ber kora
+            const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const itemLabels = sortedItems.map(i => i[0]);
+            const itemData = sortedItems.map(i => i[1]);
+
+            // Bar Chart (Sales vs Expense)
+            if (salesChart) salesChart.destroy();
+            const ctxSales = document.getElementById('salesExpenseChart').getContext('2d');
+            salesChart = new Chart(ctxSales, {
+                type: 'bar',
+                data: {
+                    labels: ['Sales (৳)', 'Expense (৳)', 'Profit (৳)'],
+                    datasets: [{
+                        label: 'Amount in TK',
+                        data: [totalSales, totalExpense, netProfit],
+                        backgroundColor: ['#10b981', '#f43f5e', '#3b82f6'],
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Doughnut Chart (Top Items)
+            if (itemsChart) itemsChart.destroy();
+            const ctxItems = document.getElementById('topItemsChart').getContext('2d');
+            itemsChart = new Chart(ctxItems, {
+                type: 'doughnut',
+                data: {
+                    labels: itemLabels.length > 0 ? itemLabels : ['No Data'],
+                    datasets: [{
+                        data: itemData.length > 0 ? itemData : [1],
+                        backgroundColor: ['#e67e22', '#d35400', '#f59e0b', '#10b981', '#3b82f6', '#cbd5e1'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
             });
         }
 
